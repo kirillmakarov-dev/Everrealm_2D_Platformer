@@ -25,6 +25,10 @@
 /Everrealm_2D/.agents/
 /Everrealm_2D/.codex/
 
+# Local-only Asset Store package
+/Everrealm_2D/Assets/SoftKitty/
+/Everrealm_2D/Assets/SoftKitty.meta
+
 # Nested repository metadata
 /Everrealm_2D/.git/
 
