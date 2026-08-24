@@ -31,6 +31,8 @@ namespace LetterHunter.UI.Skills
         private Image _assignmentGhost;
         private Canvas _rootCanvas;
         private int _hoveredSlotIndex = -1;
+        private int _dragSourceIndex = -1;
+        private SkillSlotView _dragSourceView;
 
         public event Action<string> AssignmentFeedbackChanged;
         public bool IsAssigningSkill => _pendingAssignment != null;
@@ -106,6 +108,30 @@ namespace LetterHunter.UI.Skills
             return true;
         }
 
+        public bool TryAutoAssignSkill(SkillDefinition skill)
+        {
+            if (skill == null || player == null)
+                return false;
+            Rebuild();
+            if (_runtimeSlots == null)
+                return false;
+
+            foreach (var binding in _runtimeSlots)
+                if (binding?.Skill != null && binding.Skill.SkillId == skill.SkillId)
+                    return true;
+
+            for (var i = 0; i < _runtimeSlots.Count; i++)
+            {
+                if (_runtimeSlots[i].Skill != null)
+                    continue;
+                if (!loadout.TryAssignSkill(i, skill, out _))
+                    return false;
+                Rebuild();
+                return true;
+            }
+            return false;
+        }
+
         private void EnsureViews()
         {
             if (slotPrefab == null)
@@ -128,9 +154,17 @@ namespace LetterHunter.UI.Skills
             view.Clicked -= OnSlotClicked;
             view.PointerEntered -= OnSlotPointerEntered;
             view.PointerExited -= OnSlotPointerExited;
+            view.DragBegan -= OnSlotDragBegan;
+            view.DragMoved -= UpdateSlotDrag;
+            view.DragEnded -= EndSlotDrag;
+            view.Dropped -= DropDraggedSlotOn;
             view.Clicked += OnSlotClicked;
             view.PointerEntered += OnSlotPointerEntered;
             view.PointerExited += OnSlotPointerExited;
+            view.DragBegan += OnSlotDragBegan;
+            view.DragMoved += UpdateSlotDrag;
+            view.DragEnded += EndSlotDrag;
+            view.Dropped += DropDraggedSlotOn;
         }
 
         private void Render()
@@ -262,6 +296,68 @@ namespace LetterHunter.UI.Skills
         {
             if (_hoveredSlotIndex == index)
                 _hoveredSlotIndex = -1;
+        }
+
+        private void OnSlotDragBegan(int index, UnityEngine.EventSystems.PointerEventData eventData)
+        {
+            if (_pendingAssignment != null || _runtimeSlots == null || index < 0 ||
+                index >= _runtimeSlots.Count || _runtimeSlots[index].Skill == null)
+                return;
+
+            _dragSourceIndex = index;
+            _dragSourceView = index < _views.Count ? _views[index] : null;
+            _dragSourceView?.SetDragHidden(true);
+            CreateAssignmentGhost(_runtimeSlots[index].Skill);
+            AssignmentFeedbackChanged?.Invoke(
+                $"Move {_runtimeSlots[index].Skill.DisplayName} to another slot.");
+            UpdateAssignmentGhost();
+        }
+
+        private void UpdateSlotDrag(UnityEngine.EventSystems.PointerEventData eventData)
+        {
+            if (_dragSourceIndex >= 0)
+                UpdateAssignmentGhost();
+        }
+
+        private void DropDraggedSlotOn(int targetIndex)
+        {
+            if (_dragSourceIndex < 0 || _runtimeSlots == null || loadout == null ||
+                targetIndex < 0 || targetIndex >= _runtimeSlots.Count)
+                return;
+
+            var sourceIndex = _dragSourceIndex;
+            var sourceSkill = _runtimeSlots[sourceIndex].Skill;
+            var targetSkill = _runtimeSlots[targetIndex].Skill;
+            if (loadout.TrySwapSlots(sourceIndex, targetIndex, sourceSkill, targetSkill, out var failure))
+            {
+                AssignmentFeedbackChanged?.Invoke(sourceIndex == targetIndex
+                    ? "Skill position unchanged."
+                    : $"Moved {sourceSkill.DisplayName} to slot {targetIndex + 1}.");
+                FinishSlotDrag(true);
+            }
+            else
+            {
+                AssignmentFeedbackChanged?.Invoke(failure ?? "Could not move skill.");
+                FinishSlotDrag(false);
+            }
+        }
+
+        private void EndSlotDrag()
+        {
+            if (_dragSourceIndex >= 0)
+                FinishSlotDrag(false);
+        }
+
+        private void FinishSlotDrag(bool rebuild)
+        {
+            _dragSourceView?.SetDragHidden(false);
+            _dragSourceView = null;
+            _dragSourceIndex = -1;
+            DestroyAssignmentGhost();
+            if (rebuild)
+                Rebuild();
+            else
+                Render();
         }
 
         private void CreateAssignmentGhost(SkillDefinition skill)

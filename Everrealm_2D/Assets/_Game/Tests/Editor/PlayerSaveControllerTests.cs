@@ -26,6 +26,11 @@ namespace LetterHunter.Tests.EditMode
             sourceWallet.AddGold(42);
             sourceInventory.RuntimeInventory.TrySetSlot(1, shard, 3);
             Assert.That(sourceLoadout.TryAssignSkill(2, focus, out _), Is.True);
+            sourceLoadout.SetSlots(new[]
+            {
+                new SkillSlotBinding(2, focus, string.Empty),
+                new SkillSlotBinding(5, null, string.Empty)
+            });
 
             var data = source.Capture();
 
@@ -36,9 +41,11 @@ namespace LetterHunter.Tests.EditMode
             Assert.That(targetWallet.Gold, Is.EqualTo(42));
             Assert.That(targetInventory.RuntimeInventory.Slots[1].Item, Is.EqualTo(shard));
             Assert.That(targetInventory.RuntimeInventory.Slots[1].Amount, Is.EqualTo(3));
-            Assert.That(targetLoadout.Slots.Count, Is.EqualTo(1));
+            Assert.That(targetLoadout.Slots.Count, Is.EqualTo(2));
             Assert.That(targetLoadout.Slots[0].SlotIndex, Is.EqualTo(2));
             Assert.That(targetLoadout.Slots[0].Skill, Is.EqualTo(focus));
+            Assert.That(targetLoadout.Slots[1].SlotIndex, Is.EqualTo(5));
+            Assert.That(targetLoadout.Slots[1].Skill, Is.Null);
 
             Object.DestroyImmediate(source.gameObject);
             Object.DestroyImmediate(target.gameObject);

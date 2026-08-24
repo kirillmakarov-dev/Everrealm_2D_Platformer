@@ -59,6 +59,28 @@ namespace LetterHunter.UI.Skills
             return true;
         }
 
+        public bool TrySwapSlots(int firstIndex, int secondIndex, SkillDefinition firstSkill,
+            SkillDefinition secondSkill, out string failure)
+        {
+            failure = null;
+            if (firstIndex < 0 || secondIndex < 0)
+            {
+                failure = "Invalid slot.";
+                return false;
+            }
+            if (firstIndex == secondIndex)
+                return true;
+
+            slots.RemoveAll(binding => binding != null &&
+                (binding.SlotIndex == firstIndex || binding.SlotIndex == secondIndex));
+            slots.Add(new SkillSlotBinding(firstIndex, secondSkill,
+                ResolveInputLabel(firstIndex, secondSkill, null)));
+            slots.Add(new SkillSlotBinding(secondIndex, firstSkill,
+                ResolveInputLabel(secondIndex, firstSkill, null)));
+            LoadoutChanged?.Invoke();
+            return true;
+        }
+
         public IReadOnlyList<SkillSlotBinding> BuildRuntimeSlots(PlayerClassController player, int maxSlots)
         {
             var result = new List<SkillSlotBinding>(maxSlots);
@@ -75,7 +97,7 @@ namespace LetterHunter.UI.Skills
         public SkillDefinition ResolveSkill(PlayerClassController player, int slotIndex, out string inputLabel)
         {
             var explicitBinding = FindBinding(slotIndex);
-            if (explicitBinding != null && explicitBinding.Skill != null)
+            if (explicitBinding != null)
             {
                 inputLabel = ResolveInputLabel(slotIndex, explicitBinding.Skill, explicitBinding.InputLabel);
                 return explicitBinding.Skill;

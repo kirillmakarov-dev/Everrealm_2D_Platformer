@@ -50,5 +50,6 @@ namespace LetterHunter.Save
     {
         public int slotIndex;
         public string skillId;
+        public bool isExplicitEmpty;
     }
 }

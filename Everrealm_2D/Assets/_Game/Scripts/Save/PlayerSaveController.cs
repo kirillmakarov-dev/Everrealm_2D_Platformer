@@ -200,13 +200,14 @@ namespace LetterHunter.Save
 
             foreach (var slot in skillLoadout.Slots)
             {
-                if (slot == null || slot.Skill == null)
+                if (slot == null)
                     continue;
 
                 data.skillBarSlots.Add(new SkillSlotSaveData
                 {
                     slotIndex = slot.SlotIndex,
-                    skillId = slot.Skill.SkillId
+                    skillId = slot.Skill != null ? slot.Skill.SkillId : string.Empty,
+                    isExplicitEmpty = slot.Skill == null
                 });
             }
         }
@@ -266,7 +267,14 @@ namespace LetterHunter.Save
             var bindings = new List<SkillSlotBinding>();
             foreach (var savedSlot in data.skillBarSlots ?? new List<SkillSlotSaveData>())
             {
-                if (savedSlot == null || string.IsNullOrWhiteSpace(savedSlot.skillId))
+                if (savedSlot == null)
+                    continue;
+                if (savedSlot.isExplicitEmpty)
+                {
+                    bindings.Add(new SkillSlotBinding(savedSlot.slotIndex, null, string.Empty));
+                    continue;
+                }
+                if (string.IsNullOrWhiteSpace(savedSlot.skillId))
                     continue;
                 if (skillDatabase == null || !skillDatabase.TryGetSkill(savedSlot.skillId, out var skill))
                     continue;

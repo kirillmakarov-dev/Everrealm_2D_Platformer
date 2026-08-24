@@ -67,6 +67,46 @@ namespace LetterHunter.Tests.EditMode
             Object.DestroyImmediate(second);
         }
 
+        [Test]
+        public void TrySwapSlots_SwapsSkillsAndPublishesOneChange()
+        {
+            var go = new GameObject("Loadout");
+            var loadout = go.AddComponent<PlayerSkillLoadout>();
+            var first = CreateSkill("first", "First");
+            var second = CreateSkill("second", "Second");
+            Assert.That(loadout.TryAssignSkill(0, first, out _), Is.True);
+            Assert.That(loadout.TryAssignSkill(1, second, out _), Is.True);
+            var changes = 0;
+            loadout.LoadoutChanged += () => changes++;
+
+            Assert.That(loadout.TrySwapSlots(0, 1, first, second, out var failure), Is.True);
+
+            Assert.That(failure, Is.Null);
+            Assert.That(loadout.ResolveSkill(null, 0, out _), Is.EqualTo(second));
+            Assert.That(loadout.ResolveSkill(null, 1, out _), Is.EqualTo(first));
+            Assert.That(changes, Is.EqualTo(1));
+            Object.DestroyImmediate(go);
+            Object.DestroyImmediate(first);
+            Object.DestroyImmediate(second);
+        }
+
+        [Test]
+        public void TrySwapSlots_MovingToEmptySlotKeepsSourceExplicitlyEmpty()
+        {
+            var go = new GameObject("Loadout");
+            var loadout = go.AddComponent<PlayerSkillLoadout>();
+            var skill = CreateSkill("movable", "Movable");
+            Assert.That(loadout.TryAssignSkill(0, skill, out _), Is.True);
+
+            Assert.That(loadout.TrySwapSlots(0, 3, skill, null, out _), Is.True);
+
+            Assert.That(loadout.ResolveSkill(null, 0, out _), Is.Null);
+            Assert.That(loadout.ResolveSkill(null, 3, out _), Is.EqualTo(skill));
+            Assert.That(loadout.Slots.Count, Is.EqualTo(2));
+            Object.DestroyImmediate(go);
+            Object.DestroyImmediate(skill);
+        }
+
         private static SkillDefinition CreateSkill(string id, string displayName)
         {
             var skill = ScriptableObject.CreateInstance<SkillDefinition>();

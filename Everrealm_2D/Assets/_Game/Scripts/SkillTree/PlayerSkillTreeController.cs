@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using LetterHunter.Characters;
+using LetterHunter.Core;
 using LetterHunter.Economy;
 using LetterHunter.Skills;
 using LetterHunter.UI.Skills;
@@ -159,6 +160,8 @@ namespace LetterHunter.SkillTree
         private void GrantAbility(SkillDefinition ability)
         {
             player?.LearnSkill(ability);
+            if (ability != null && ability.SkillType is not SkillType.Passive and not SkillType.AutoAttackUpgrade)
+                skillBar?.TryAutoAssignSkill(ability);
             skillBar?.Rebuild();
         }
 
