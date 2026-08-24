@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LetterHunter.Skills.SkillDefinition
   skillId: warrior_iron_strength
   displayName: Iron Strength
-  icon: {fileID: -397387148720336617, guid: a6edcf42ddf188a4781ea6ccbb12fb6d, type: 3}
+  icon: {fileID: -284758380, guid: 718ddd7eab6c5c140b0a774b60d4a533, type: 3}
   shortName: Iron Stren
   inputLabel: 
   description: Foundation implementation of Iron Strength.

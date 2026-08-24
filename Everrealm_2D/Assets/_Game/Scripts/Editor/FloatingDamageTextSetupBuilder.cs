@@ -13,7 +13,6 @@ namespace LetterHunter.Editor
     {
         private const string PrefabPath = "Assets/_Game/Prefabs/Feedback/FloatingDamageText.prefab";
 
-        [MenuItem("Letter Hunter/Setup Floating Damage Text")]
         public static void SetupCurrentScene()
         {
             EnsureFolder("Assets/_Game/Prefabs/Feedback");

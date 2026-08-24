@@ -18,7 +18,6 @@ namespace LetterHunter.Editor
         public static LayerMask PlayerMask => LayerMask.GetMask(PlayerLayerName);
         public static LayerMask EnemyTargetMask => LayerMask.GetMask(EnemyBodyLayerName, EnemyHurtboxLayerName);
 
-        [MenuItem("Letter Hunter/Setup Physics Layers")]
         public static void SetupPhysicsLayers()
         {
             ConfigureCollisionMatrix();

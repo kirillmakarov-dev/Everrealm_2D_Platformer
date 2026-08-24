@@ -15,7 +15,7 @@ MonoBehaviour:
   itemId: rusty_sword
   displayName: Rusty Sword
   description: A rough practice weapon that can be sold.
-  icon: {fileID: -8378796277860437937, guid: 074f0b779c199cd408be21bf6a325eb9, type: 3}
+  icon: {fileID: -284758380, guid: 718ddd7eab6c5c140b0a774b60d4a533, type: 3}
   itemType: 2
   rarity: 1
   maxStack: 1

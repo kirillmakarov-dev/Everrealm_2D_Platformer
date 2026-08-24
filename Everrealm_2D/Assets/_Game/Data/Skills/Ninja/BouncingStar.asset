@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LetterHunter.Skills.SkillDefinition
   skillId: ninja_bouncing_star
   displayName: Bouncing Star
-  icon: {fileID: -7012710134733120385, guid: af39c4e6fe5230b4bad2acce44a98490, type: 3}
+  icon: {fileID: 485452356, guid: 718ddd7eab6c5c140b0a774b60d4a533, type: 3}
   shortName: Bouncing S
   inputLabel: 
   description: Foundation implementation of Bouncing Star.

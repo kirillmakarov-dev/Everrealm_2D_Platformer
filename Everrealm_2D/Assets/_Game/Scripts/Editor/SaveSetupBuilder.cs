@@ -17,7 +17,6 @@ namespace LetterHunter.Editor
         private const string ItemDatabasePath = DatabaseFolder + "/ItemDatabase.asset";
         private const string SkillDatabasePath = DatabaseFolder + "/SkillDatabase.asset";
 
-        [MenuItem("Letter Hunter/Setup Save Databases")]
         public static void SetupCurrentScene()
         {
             EnsureDatabases(out var itemDatabase, out var skillDatabase);

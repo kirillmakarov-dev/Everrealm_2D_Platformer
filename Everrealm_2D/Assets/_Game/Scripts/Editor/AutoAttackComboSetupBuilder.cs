@@ -12,7 +12,6 @@ namespace LetterHunter.Editor
         private const string ComboFolder = "Assets/_Game/Data/Combat/Combos";
         private const string WarriorComboPath = ComboFolder + "/WarriorBasicCombo.asset";
 
-        [MenuItem("Letter Hunter/Setup Auto Attack Combo")]
         public static void SetupCurrentScene()
         {
             var profiles = AttackImpactSetupBuilder.EnsureDefaultProfiles();

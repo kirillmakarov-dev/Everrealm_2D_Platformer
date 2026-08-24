@@ -17,7 +17,6 @@ namespace LetterHunter.Editor
         private const string ProfileFolder = "Assets/_Game/Data/Feedback/ImpactProfiles";
         private const string EnemyAttackFolder = "Assets/_Game/Data/Enemies/Attacks";
 
-        [MenuItem("Letter Hunter/Setup Attack Impact Feedback")]
         public static void SetupCurrentSceneAndAssets()
         {
             EnsureFolder(ProfileFolder);

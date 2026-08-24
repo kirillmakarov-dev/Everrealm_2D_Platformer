@@ -24,7 +24,6 @@ namespace LetterHunter.Editor
                 EditorApplication.delayCall += Build;
         }
 
-        [MenuItem("Letter Hunter/Build Combat Foundation Sample")]
         public static void Build()
         {
             PhysicsLayerSetupBuilder.ConfigureCollisionMatrix();

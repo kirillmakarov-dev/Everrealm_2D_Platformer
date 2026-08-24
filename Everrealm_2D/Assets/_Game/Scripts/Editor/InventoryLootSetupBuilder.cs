@@ -31,13 +31,11 @@ namespace LetterHunter.Editor
         private const string ItemPickupPath = PrefabFolder + "/ItemPickup.prefab";
         private const string InventorySlotPrefabPath = UiPrefabFolder + "/InventorySlot.prefab";
 
-        [MenuItem("Letter Hunter/Setup Inventory Loot Economy")]
         public static void SetupCurrentScene()
         {
             SetupScene(SceneManager.GetActiveScene());
         }
 
-        [MenuItem("Letter Hunter/Setup Inventory UI Only")]
         public static void SetupInventoryUiOnly()
         {
             var scene = SceneManager.GetActiveScene();
@@ -54,7 +52,6 @@ namespace LetterHunter.Editor
             Debug.Log("Inventory UI setup complete. Existing inventory window layout is preserved if one is already present.");
         }
 
-        [MenuItem("Letter Hunter/Build Inventory Loot Playtest Scene")]
         public static void BuildPlaytestScene()
         {
             const string sourceScenePath = "Assets/_Game/Scenes/CharacterFrameworkDebug.unity";

@@ -19,7 +19,6 @@ namespace LetterHunter.Editor
     {
         private const string PrefabPath = "Assets/_Game/Prefabs/UI/PlayerStatsPanel.prefab";
 
-        [MenuItem("Letter Hunter/Setup Player Stats UI")]
         public static void SetupCurrentScene()
         {
             var scene = SceneManager.GetActiveScene();
@@ -50,7 +49,6 @@ namespace LetterHunter.Editor
             Debug.Log("Player Stats UI setup complete. Press P in Play Mode to toggle it.");
         }
 
-        [MenuItem("Letter Hunter/Rebuild Default Player Stats UI Prefab")]
         public static void RebuildPrefab()
         {
             BuildPrefab();

@@ -49,13 +49,11 @@ namespace LetterHunter.Editor
             public int FirstAppliedRank { get; }
         }
 
-        [MenuItem("Letter Hunter/Setup Skill Tree")]
         public static void SetupCurrentScene()
         {
             SetupScene(SceneManager.GetActiveScene());
         }
 
-        [MenuItem("Letter Hunter/Rebuild Default Skill Tree UI Prefabs")]
         public static void RebuildDefaultUiPrefabs()
         {
             EnsureFolders();
@@ -66,7 +64,6 @@ namespace LetterHunter.Editor
             Debug.Log("Default skill tree UI prefabs rebuilt. Run Letter Hunter/Setup Skill Tree to wire them into the scene.");
         }
 
-        [MenuItem("Letter Hunter/Validate Skill Trees")]
         public static void ValidateSkillTrees()
         {
             var errorCount = 0;
@@ -90,7 +87,6 @@ namespace LetterHunter.Editor
                 Debug.LogError($"Skill tree validation found {errorCount} error(s). See previous console entries.");
         }
 
-        [MenuItem("Letter Hunter/Rebuild Demo Warrior Skill Tree Data")]
         public static void RebuildDemoWarriorSkillTreeData()
         {
             EnsureFolders();
@@ -102,7 +98,6 @@ namespace LetterHunter.Editor
             Debug.Log("Demo Warrior Skill Tree rebuilt with seven validated nodes.");
         }
 
-        [MenuItem("Letter Hunter/Build Skill Tree Playtest Scene")]
         public static void BuildPlaytestScene()
         {
             const string sourceScenePath = "Assets/_Game/Scenes/InventoryLootDebug.unity";

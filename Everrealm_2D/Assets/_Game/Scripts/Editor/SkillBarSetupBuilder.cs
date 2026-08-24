@@ -27,7 +27,6 @@ namespace LetterHunter.Editor
         private const string HudSpriteFolder = "Assets/_Game/Data/UI/Hud";
         private static readonly string[] DefaultLabels = { "U", "I", "O", "P" };
 
-        [MenuItem("Letter Hunter/Setup Skill Bar UI")]
         public static void SetupCurrentScene()
         {
             SetupScene(SceneManager.GetActiveScene());

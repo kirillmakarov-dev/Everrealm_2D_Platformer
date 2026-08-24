@@ -22,7 +22,6 @@ namespace LetterHunter.Editor
             if (!System.IO.File.Exists(ScenePath)) EditorApplication.delayCall += Build;
         }
 
-        [MenuItem("Letter Hunter/Build Character Framework Sample")]
         public static void Build()
         {
             PhysicsLayerSetupBuilder.ConfigureCollisionMatrix();

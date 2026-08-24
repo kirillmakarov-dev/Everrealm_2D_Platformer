@@ -16,7 +16,6 @@ namespace LetterHunter.Editor
     {
         private const string RowPrefabPath = "Assets/_Game/Prefabs/UI/ShopItemRow.prefab";
 
-        [MenuItem("Letter Hunter/Setup Shop UI")]
         public static void SetupCurrentScene()
         {
             var scene = SceneManager.GetActiveScene();
