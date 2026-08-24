@@ -8,9 +8,26 @@ namespace LetterHunter.Save
     {
         public int gold;
         public List<InventorySlotSaveData> inventorySlots = new();
+        public SkillTreeSaveBlock skillTree = new();
+        // Legacy fields are retained only for migration of saves created before schema v1.
         public List<string> unlockedSkillTreeNodeIds = new();
         public List<SkillTreeNodeRankSaveData> skillTreeNodeRanks = new();
         public List<SkillSlotSaveData> skillBarSlots = new();
+    }
+
+    [Serializable]
+    public sealed class SkillTreeSaveBlock
+    {
+        public int schemaVersion;
+        public string activeProfessionId;
+        public List<PurchasedSkillNodeSaveData> purchasedNodes = new();
+    }
+
+    [Serializable]
+    public sealed class PurchasedSkillNodeSaveData
+    {
+        public string professionId;
+        public string nodeId;
     }
 
     [Serializable]

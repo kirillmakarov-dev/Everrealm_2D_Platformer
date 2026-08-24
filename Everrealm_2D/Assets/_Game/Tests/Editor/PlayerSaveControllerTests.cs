@@ -67,7 +67,7 @@ namespace LetterHunter.Tests.EditMode
 
             var target = CreatePlayerSaveObject(itemDatabase, skillDatabase, out var targetWallet,
                 out var targetInventory, out var targetLoadout, saveFileName);
-            target.SendMessage("Start");
+            InvokeStart(target);
 
             Assert.That(targetWallet.Gold, Is.EqualTo(77));
             Assert.That(targetInventory.RuntimeInventory.Slots[0].Item, Is.EqualTo(shard));
@@ -122,30 +122,35 @@ namespace LetterHunter.Tests.EditMode
         }
 
         [Test]
-        public void CaptureAndRestore_RoundTripsSkillTreeRanksAndMigratesLegacyUnlocks()
+        public void CaptureAndRestore_RoundTripsProfessionNodesAndMigratesLegacyUnlocks()
         {
             var itemDatabase = CreateItemDatabase(CreateItem("unused", 1));
             var skillDatabase = CreateSkillDatabase(CreateSkill("unused_skill", "Unused"));
-            var tree = CreateRankedTree();
+            var node = CreateSkillNode("focus_slash", 0);
+            var profession = CreateProfession(node);
             var source = CreatePlayerSaveObject(itemDatabase, skillDatabase, out _, out _, out _);
-            var sourceTree = AttachSkillTree(source, tree);
-            sourceTree.Progress.SetRank("ranked_node", 2);
+            var sourceTree = AttachSkillTree(source, profession);
+            var sourcePurchase = sourceTree.Service.TryPurchase(node);
+            Assert.That(sourcePurchase.Success, Is.True, sourcePurchase.Failure.ToString());
 
             var data = source.Capture();
             var target = CreatePlayerSaveObject(itemDatabase, skillDatabase, out _, out _, out _);
-            var targetTree = AttachSkillTree(target, tree);
+            var targetTree = AttachSkillTree(target, profession);
             target.Restore(data);
 
-            Assert.That(targetTree.Progress.GetRank("ranked_node"), Is.EqualTo(2));
+            Assert.That(targetTree.Progress.IsPurchased("warrior", "focus_slash"), Is.True);
+            Assert.That(data.skillTree.schemaVersion, Is.EqualTo(1));
+            Assert.That(data.skillTree.activeProfessionId, Is.EqualTo("warrior"));
 
             var legacyData = new GameSaveData();
-            legacyData.unlockedSkillTreeNodeIds.Add("ranked_node");
+            legacyData.unlockedSkillTreeNodeIds.Add("focus_slash");
             target.Restore(legacyData);
-            Assert.That(targetTree.Progress.GetRank("ranked_node"), Is.EqualTo(1));
+            Assert.That(targetTree.Progress.IsPurchased("warrior", "focus_slash"), Is.True);
 
             Object.DestroyImmediate(source.gameObject);
             Object.DestroyImmediate(target.gameObject);
-            Object.DestroyImmediate(tree);
+            Object.DestroyImmediate(profession);
+            Object.DestroyImmediate(node);
             Object.DestroyImmediate(itemDatabase.Items[0]);
             Object.DestroyImmediate(skillDatabase.Skills[0]);
             Object.DestroyImmediate(itemDatabase);
@@ -164,7 +169,7 @@ namespace LetterHunter.Tests.EditMode
             var save = CreatePlayerSaveObject(itemDatabase, skillDatabase, out _, out _, out var loadout,
                 saveFileName);
 
-            save.SendMessage("Start");
+            InvokeStart(save);
             Assert.That(loadout.TryAssignSkill(1, skill, out _), Is.True);
 
             Assert.That(File.Exists(savePath), Is.True);
@@ -183,60 +188,93 @@ namespace LetterHunter.Tests.EditMode
         }
 
         [Test]
-        public void Start_AutoSavesCommittedSkillTreeRankPurchase()
+        public void Start_AutoSavesCommittedProfessionSkillPurchase()
         {
             var item = CreateItem("unused", 1);
             var skill = CreateSkill("unused_skill", "Unused Skill");
             var itemDatabase = CreateItemDatabase(item);
             var skillDatabase = CreateSkillDatabase(skill);
-            var tree = CreateRankedTree();
+            var node = CreateSkillNode("autosave_node", 0);
+            var profession = CreateProfession(node);
             var saveFileName = $"letter-hunter-tree-autosave-test-{System.Guid.NewGuid():N}.json";
             var savePath = Path.Combine(Application.persistentDataPath, saveFileName);
             var save = CreatePlayerSaveObject(itemDatabase, skillDatabase, out _, out _, out _, saveFileName);
-            var controller = AttachSkillTree(save, tree);
+            var controller = AttachSkillTree(save, profession);
 
-            save.SendMessage("Start");
-            Assert.That(controller.Service.TryUnlock("ranked_node").Success, Is.True);
+            InvokeStart(save);
+            var purchase = controller.Service.TryPurchase(node);
+            Assert.That(purchase.Success, Is.True, purchase.Failure.ToString());
 
             Assert.That(File.Exists(savePath), Is.True);
             var savedData = JsonUtility.FromJson<GameSaveData>(File.ReadAllText(savePath));
-            Assert.That(savedData.skillTreeNodeRanks.Count, Is.EqualTo(1));
-            Assert.That(savedData.skillTreeNodeRanks[0].nodeId, Is.EqualTo("ranked_node"));
-            Assert.That(savedData.skillTreeNodeRanks[0].rank, Is.EqualTo(1));
+            Assert.That(savedData.skillTree.schemaVersion, Is.EqualTo(1));
+            Assert.That(savedData.skillTree.purchasedNodes.Count, Is.EqualTo(1));
+            Assert.That(savedData.skillTree.purchasedNodes[0].professionId, Is.EqualTo("warrior"));
+            Assert.That(savedData.skillTree.purchasedNodes[0].nodeId, Is.EqualTo("autosave_node"));
 
             if (File.Exists(savePath))
                 File.Delete(savePath);
             Object.DestroyImmediate(save.gameObject);
-            Object.DestroyImmediate(tree);
+            Object.DestroyImmediate(profession);
+            Object.DestroyImmediate(node);
             Object.DestroyImmediate(itemDatabase);
             Object.DestroyImmediate(skillDatabase);
             Object.DestroyImmediate(item);
             Object.DestroyImmediate(skill);
         }
 
-        private static PlayerSkillTreeController AttachSkillTree(PlayerSaveController save, SkillTreeDefinition tree)
+        private static PlayerSkillTreeController AttachSkillTree(PlayerSaveController save,
+            ProfessionDefinitionSO profession)
         {
+            save.gameObject.SetActive(false);
             var controller = save.gameObject.AddComponent<PlayerSkillTreeController>();
-            controller.SetSkillTree(tree);
+            var controllerSo = new SerializedObject(controller);
+            controllerSo.FindProperty("startingProfession").objectReferenceValue = profession;
+            controllerSo.FindProperty("wallet").objectReferenceValue = save.GetComponent<CurrencyWallet>();
+            var professions = controllerSo.FindProperty("availableProfessions");
+            professions.arraySize = 1;
+            professions.GetArrayElementAtIndex(0).objectReferenceValue = profession;
+            controllerSo.ApplyModifiedPropertiesWithoutUndo();
             var saveSo = new SerializedObject(save);
             saveSo.FindProperty("skillTree").objectReferenceValue = controller;
             saveSo.ApplyModifiedPropertiesWithoutUndo();
+            save.gameObject.SetActive(true);
+            Assert.That(controller.SetActiveProfession(profession.ProfessionId), Is.True);
             return controller;
         }
 
-        private static SkillTreeDefinition CreateRankedTree()
+        private static void InvokeStart(PlayerSaveController save)
         {
-            var tree = ScriptableObject.CreateInstance<SkillTreeDefinition>();
-            var so = new SerializedObject(tree);
-            var nodes = so.FindProperty("nodes");
-            nodes.arraySize = 1;
-            var node = nodes.GetArrayElementAtIndex(0);
-            node.FindPropertyRelative("nodeId").stringValue = "ranked_node";
-            node.FindPropertyRelative("displayName").stringValue = "Ranked Node";
-            node.FindPropertyRelative("maxRank").intValue = 3;
-            node.FindPropertyRelative("unlockAction").intValue = (int)SkillTreeUnlockAction.None;
+            var method = typeof(PlayerSaveController).GetMethod("Start",
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            Assert.That(method, Is.Not.Null);
+            method.Invoke(save, null);
+        }
+
+        private static SkillNodeDefinitionSO CreateSkillNode(string nodeId, int price)
+        {
+            var node = ScriptableObject.CreateInstance<SkillNodeDefinitionSO>();
+            var so = new SerializedObject(node);
+            so.FindProperty("nodeId").stringValue = nodeId;
+            so.FindProperty("displayName").stringValue = nodeId;
+            so.FindProperty("requiredLevel").intValue = 1;
+            so.FindProperty("price").intValue = price;
             so.ApplyModifiedPropertiesWithoutUndo();
-            return tree;
+            return node;
+        }
+
+        private static ProfessionDefinitionSO CreateProfession(params SkillNodeDefinitionSO[] nodes)
+        {
+            var profession = ScriptableObject.CreateInstance<ProfessionDefinitionSO>();
+            var so = new SerializedObject(profession);
+            so.FindProperty("professionId").stringValue = "warrior";
+            so.FindProperty("displayName").stringValue = "Warrior";
+            var list = so.FindProperty("skillNodes");
+            list.arraySize = nodes.Length;
+            for (var i = 0; i < nodes.Length; i++)
+                list.GetArrayElementAtIndex(i).objectReferenceValue = nodes[i];
+            so.ApplyModifiedPropertiesWithoutUndo();
+            return profession;
         }
 
         private static PlayerSaveController CreatePlayerSaveObject(ItemDatabase itemDatabase, SkillDatabase skillDatabase,

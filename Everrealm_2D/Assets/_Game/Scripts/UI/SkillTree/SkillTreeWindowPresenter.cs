@@ -1,6 +1,7 @@
+using System;
 using System.Collections.Generic;
+using LetterHunter.Characters;
 using LetterHunter.SkillTree;
-using LetterHunter.UI.Skills;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -11,205 +12,120 @@ namespace LetterHunter.UI.SkillTree
     [DisallowMultipleComponent]
     public sealed class SkillTreeWindowPresenter : MonoBehaviour
     {
+        [Header("Domain")]
         [SerializeField] private PlayerSkillTreeController controller;
-        [SerializeField] private CanvasGroup windowGroup;
-        [SerializeField] private Transform nodeRoot;
-        [SerializeField] private Transform connectionRoot;
-        [SerializeField] private RectTransform scrollContent;
-        [Min(1f), SerializeField] private float minimumContentHeight = 270f;
-        [Min(1f), SerializeField] private float minimumContentWidth = 700f;
-        [SerializeField] private List<SkillTreeNodeView> nodeViews = new();
-        [SerializeField] private List<SkillTreeConnectionView> connectionViews = new();
-        [SerializeField] private SkillTreeNodeView nodePrefab;
-        [SerializeField] private SkillTreeConnectionView connectionPrefab;
-        [SerializeField] private SkillBarPresenter skillBar;
-        [SerializeField] private TMP_Text titleText;
-        [SerializeField] private TMP_Text feedbackText;
-        [SerializeField] private GameObject tooltipRoot;
-        [SerializeField] private TMP_Text tooltipText;
         [SerializeField] private Key toggleKey = Key.K;
         [SerializeField] private bool startVisible;
 
+        [Header("Window")]
+        [SerializeField] private CanvasGroup windowGroup;
+        [SerializeField] private Button closeButton;
+        [SerializeField] private TMP_Text titleText;
+        [SerializeField] private TMP_Text levelText;
+        [SerializeField] private TMP_Text coinsText;
+        [SerializeField] private TMP_Text feedbackText;
+
+        [Header("Profession")]
+        [SerializeField] private Image professionIcon;
+        [SerializeField] private TMP_Text professionNameText;
+        [SerializeField] private TMP_Text professionDescriptionText;
+
+        [Header("Tree")]
+        [SerializeField] private RectTransform scrollContent;
+        [SerializeField] private Transform connectionRoot;
+        [SerializeField] private Transform nodeRoot;
+        [SerializeField] private List<SkillTreeNodeView> nodeViews = new();
+        [SerializeField] private List<SkillTreeConnectionView> connectionViews = new();
+
+        [Header("Selected skill")]
+        [SerializeField] private Image detailIcon;
+        [SerializeField] private TMP_Text detailNameText;
+        [SerializeField] private TMP_Text detailDescriptionText;
+        [SerializeField] private TMP_Text detailRequirementsText;
+        [SerializeField] private TMP_Text detailStateText;
+        [SerializeField] private Button buyButton;
+        [SerializeField] private TMP_Text buyButtonText;
+
+        [Header("Modal input")]
+        [SerializeField] private CharacterInputRouter characterInput;
+        [SerializeField] private Behaviour[] additionalInputsToBlock = Array.Empty<Behaviour>();
+
         private readonly Dictionary<string, SkillTreeNodeView> _views = new();
-        private readonly Dictionary<string, SkillTreeConnectionView> _connections = new();
-        private string _pendingRefundNodeId;
-        private float _refundConfirmationExpiresAt;
+        private readonly List<(SkillNodeDefinitionSO parent, SkillNodeDefinitionSO child)> _edges = new();
+        private bool[] _previousInputStates = Array.Empty<bool>();
+        private SkillNodeDefinitionSO _selectedNode;
+        private bool _cursorWasVisible;
+        private CursorLockMode _cursorLockMode;
+        private bool _modalApplied;
+
+        public bool IsVisible => windowGroup == null ? gameObject.activeSelf : windowGroup.alpha > 0.01f;
 
         private void Awake()
         {
-            if (controller == null)
-                controller = FindFirstObjectByType<PlayerSkillTreeController>();
-            if (windowGroup == null)
-                windowGroup = GetComponent<CanvasGroup>();
-            if (skillBar == null)
-                skillBar = FindFirstObjectByType<SkillBarPresenter>();
-            if (scrollContent == null && nodeRoot != null)
-                scrollContent = nodeRoot.parent as RectTransform;
-
+            if (controller == null) controller = FindFirstObjectByType<PlayerSkillTreeController>();
+            if (windowGroup == null) windowGroup = GetComponent<CanvasGroup>();
+            if (characterInput == null) characterInput = FindFirstObjectByType<CharacterInputRouter>();
+            if (closeButton != null) closeButton.onClick.AddListener(Close);
+            if (buyButton != null) buyButton.onClick.AddListener(BuySelected);
             PrepareAuthoredViews();
-
             SetVisible(startVisible);
         }
 
         private void OnEnable()
         {
-            if (controller != null)
-            {
-                controller.Service.Progress.ProgressChanged += Render;
-                if (controller.Wallet != null)
-                    controller.Wallet.GoldChanged += OnGoldChanged;
-                if (controller.Inventory != null)
-                    controller.Inventory.InventoryChanged += Render;
-            }
-            if (skillBar != null)
-                skillBar.AssignmentFeedbackChanged += SetFeedback;
-
-            if (IsVisible)
-                Render();
+            if (controller != null) controller.StateChanged += Render;
+            if (IsVisible) Render();
         }
 
         private void OnDisable()
         {
-            if (controller != null)
-            {
-                controller.Service.Progress.ProgressChanged -= Render;
-                if (controller.Wallet != null)
-                    controller.Wallet.GoldChanged -= OnGoldChanged;
-                if (controller.Inventory != null)
-                    controller.Inventory.InventoryChanged -= Render;
-            }
-            if (skillBar != null)
-                skillBar.AssignmentFeedbackChanged -= SetFeedback;
+            if (controller != null) controller.StateChanged -= Render;
+            if (!_modalApplied) return;
+            characterInput?.SetBlocked(false);
+            RestoreAdditionalInputs();
+            Cursor.visible = _cursorWasVisible;
+            Cursor.lockState = _cursorLockMode;
+            _modalApplied = false;
         }
 
         private void Update()
         {
             var keyboard = Keyboard.current;
-            if (keyboard != null && keyboard[toggleKey]?.wasPressedThisFrame == true)
+            if (keyboard == null) return;
+            if (keyboard[toggleKey]?.wasPressedThisFrame == true)
                 SetVisible(!IsVisible);
-            if (!string.IsNullOrWhiteSpace(_pendingRefundNodeId) &&
-                Time.unscaledTime > _refundConfirmationExpiresAt)
-            {
-                _pendingRefundNodeId = null;
-                Render();
-            }
+            else if (IsVisible && keyboard.escapeKey.wasPressedThisFrame)
+                Close();
         }
+
+        public void Open() => SetVisible(true);
+        public void Close() => SetVisible(false);
 
         public void Render()
         {
-            if (!IsVisible || controller == null || controller.SkillTree == null || nodeRoot == null)
-                return;
-
-            if (titleText != null)
-                titleText.text = controller.SkillTree.DisplayName;
-
-            foreach (var node in controller.SkillTree.Nodes)
+            if (!IsVisible || controller == null || controller.ActiveProfession == null) return;
+            var profession = controller.ActiveProfession;
+            if (titleText != null) titleText.text = "PROFESSION SKILLS";
+            if (levelText != null) levelText.text = $"LEVEL  {controller.CurrentLevel}";
+            if (coinsText != null) coinsText.text = $"COINS  {controller.CurrentCoins}";
+            if (professionIcon != null)
             {
-                if (node == null || string.IsNullOrWhiteSpace(node.NodeId))
-                    continue;
-
-                if (!_views.TryGetValue(node.NodeId, out var view) || view == null)
-                    continue;
-
-                if (nodeRoot.GetComponent<LayoutGroup>() == null && view.transform is RectTransform nodeRect)
-                    nodeRect.anchoredPosition = node.UiPosition;
-
-                controller.Service.CanUnlock(node.NodeId, out var failure);
-                var confirmingRefund = _pendingRefundNodeId == node.NodeId &&
-                                       Time.unscaledTime <= _refundConfirmationExpiresAt;
-                view.Render(node, controller.Service.Progress, failure, confirmingRefund);
+                professionIcon.sprite = profession.Icon;
+                professionIcon.enabled = profession.Icon != null;
             }
+            if (professionNameText != null) professionNameText.text = profession.DisplayName;
+            if (professionDescriptionText != null) professionDescriptionText.text = profession.Description;
 
-            RefreshLayout();
+            if (_selectedNode == null || !profession.Contains(_selectedNode))
+                _selectedNode = FirstNode(profession);
+
+            foreach (var node in profession.SkillNodes)
+                if (node != null && _views.TryGetValue(node.NodeId, out var view))
+                    view.Render(controller.Service.GetState(node), node == _selectedNode);
+
+            ArrangeTree(profession);
             RenderConnections();
-        }
-
-        private void RefreshLayout()
-        {
-            if (nodeRoot is not RectTransform nodeRect)
-                return;
-
-            var graphLayout = nodeRoot.GetComponent<SkillTreeGraphLayoutGroup>();
-            if (graphLayout != null)
-            {
-                var preferredSize = graphLayout.Arrange(controller.SkillTree, _views);
-                var contentWidth = Mathf.Max(minimumContentWidth, preferredSize.x);
-                var contentHeight = Mathf.Max(minimumContentHeight, preferredSize.y);
-                ResizeMapLayers(nodeRect, contentWidth, contentHeight);
-                graphLayout.Arrange(controller.SkillTree, _views);
-                return;
-            }
-
-            if (nodeRoot.GetComponent<LayoutGroup>() == null)
-                return;
-
-            LayoutRebuilder.ForceRebuildLayoutImmediate(nodeRect);
-            var preferredHeight = LayoutUtility.GetPreferredHeight(nodeRect);
-            var listContentHeight = Mathf.Max(minimumContentHeight, preferredHeight);
-
-            if (scrollContent != null)
-                scrollContent.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, listContentHeight);
-            nodeRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, listContentHeight);
-            if (connectionRoot is RectTransform connectionRect)
-                connectionRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, listContentHeight);
-
-            LayoutRebuilder.ForceRebuildLayoutImmediate(nodeRect);
-        }
-
-        private void ResizeMapLayers(RectTransform nodeRect, float width, float height)
-        {
-            if (scrollContent != null)
-            {
-                scrollContent.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
-                scrollContent.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, height);
-            }
-            nodeRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
-            nodeRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, height);
-            if (connectionRoot is RectTransform connectionRect)
-            {
-                connectionRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
-                connectionRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, height);
-            }
-        }
-
-        private void RenderConnections()
-        {
-            if (connectionRoot == null)
-                return;
-
-            var connectionIndex = 0;
-
-            foreach (var node in controller.SkillTree.Nodes)
-            {
-                if (node == null)
-                    continue;
-
-                foreach (var prerequisiteId in node.PrerequisiteNodeIds)
-                {
-                    if (!_views.TryGetValue(prerequisiteId, out var prerequisiteView) ||
-                        !_views.TryGetValue(node.NodeId, out var nodeView))
-                        continue;
-
-                    var connectionId = $"{prerequisiteId}>{node.NodeId}";
-                    if (!_connections.TryGetValue(connectionId, out var connection) || connection == null)
-                    {
-                        if (connectionIndex >= connectionViews.Count)
-                            continue;
-                        connection = connectionViews[connectionIndex];
-                        _connections[connectionId] = connection;
-                    }
-                    connectionIndex++;
-
-                    var prerequisiteRect = (RectTransform)prerequisiteView.transform;
-                    var nodeRect = (RectTransform)nodeView.transform;
-                    var start = prerequisiteRect.anchoredPosition + Vector2.right * prerequisiteRect.rect.width * 0.5f;
-                    var end = nodeRect.anchoredPosition - Vector2.right * nodeRect.rect.width * 0.5f;
-                    connection.Render(start, end, controller.Service.Progress.IsUnlocked(node.NodeId));
-                }
-            }
-
-            for (; connectionIndex < connectionViews.Count; connectionIndex++)
-                connectionViews[connectionIndex]?.gameObject.SetActive(false);
+            RenderDetails();
         }
 
         private void PrepareAuthoredViews()
@@ -217,143 +133,175 @@ namespace LetterHunter.UI.SkillTree
             _views.Clear();
             foreach (var view in nodeViews)
             {
-                if (view == null || string.IsNullOrWhiteSpace(view.ConfiguredNodeId))
-                    continue;
-                view.gameObject.SetActive(true);
-                view.Bind(view.ConfiguredNodeId, TryUnlock, TrySelectSkill, SetNodeHovered, TryRefundRank);
-                _views[view.ConfiguredNodeId] = view;
+                if (view == null || view.ConfiguredNode == null) continue;
+                view.Bind(view.ConfiguredNode, SelectNode, OnNodeHovered);
+                _views[view.ConfiguredNode.NodeId] = view;
             }
-
-            _connections.Clear();
-            foreach (var connection in connectionViews)
-                if (connection != null)
-                    connection.gameObject.SetActive(false);
+            _edges.Clear();
+            var profession = controller != null ? controller.ActiveProfession : null;
+            if (profession == null) return;
+            foreach (var child in profession.SkillNodes)
+                if (child != null)
+                    foreach (var parent in child.ParentNodes)
+                        if (parent != null) _edges.Add((parent, child));
         }
 
-        private void TryUnlock(string nodeId)
+        private void ArrangeTree(ProfessionDefinitionSO profession)
         {
-            if (controller == null)
-                return;
+            if (nodeRoot is not RectTransform nodeRect) return;
+            var layout = nodeRoot.GetComponent<SkillTreeGraphLayoutGroup>();
+            if (layout == null) return;
+            var size = layout.Arrange(profession, _views);
+            if (scrollContent != null) scrollContent.sizeDelta = size;
+            nodeRect.sizeDelta = size;
+            if (connectionRoot is RectTransform connectionRect) connectionRect.sizeDelta = size;
+        }
 
-            var wasUnlocked = controller.Service.Progress.IsUnlocked(nodeId);
-            var result = controller.Service.TryUnlock(nodeId);
-            if (result.Success)
+        private void RenderConnections()
+        {
+            for (var i = 0; i < connectionViews.Count; i++)
+                connectionViews[i]?.gameObject.SetActive(i < _edges.Count);
+            for (var i = 0; i < _edges.Count && i < connectionViews.Count; i++)
             {
-                if (!wasUnlocked && TryBeginSkillAssignment(nodeId))
-                    SetFeedback("Unlocked. Choose a skill bar slot.");
-                else
-                    SetFeedback(wasUnlocked ? "Upgraded" : "Unlocked");
+                var edge = _edges[i];
+                if (!_views.TryGetValue(edge.parent.NodeId, out var parentView) ||
+                    !_views.TryGetValue(edge.child.NodeId, out var childView)) continue;
+                var parentRect = (RectTransform)parentView.transform;
+                var childRect = (RectTransform)childView.transform;
+                var start = parentRect.anchoredPosition + Vector2.right * parentRect.rect.width * 0.5f;
+                var end = childRect.anchoredPosition - Vector2.right * childRect.rect.width * 0.5f;
+                connectionViews[i].Render(start, end, controller.Service.GetState(edge.child));
             }
-            else if (result.Failure == SkillTreeUnlockFailure.AlreadyUnlocked && TryBeginSkillAssignment(nodeId))
-                return;
-            else
-                SetFeedback(result.Failure.ToString());
+        }
 
+        private void RenderDetails()
+        {
+            if (_selectedNode == null) return;
+            var state = controller.Service.GetState(_selectedNode);
+            if (detailIcon != null)
+            {
+                detailIcon.sprite = _selectedNode.Icon;
+                detailIcon.enabled = _selectedNode.Icon != null;
+            }
+            if (detailNameText != null) detailNameText.text = _selectedNode.DisplayName;
+            if (detailDescriptionText != null) detailDescriptionText.text = _selectedNode.Description;
+            if (detailRequirementsText != null) detailRequirementsText.text = BuildRequirements(_selectedNode);
+            if (detailStateText != null) detailStateText.text = StateLabel(state);
+            if (buyButton != null) buyButton.interactable = state == SkillTreeNodeState.Available;
+            if (buyButtonText != null)
+                buyButtonText.text = state == SkillTreeNodeState.Purchased ? "PURCHASED" : $"BUY  {_selectedNode.Price}";
+        }
+
+        private void SelectNode(SkillNodeDefinitionSO node)
+        {
+            _selectedNode = node;
             Render();
         }
 
-        private void TrySelectSkill(string nodeId)
+        private void OnNodeHovered(SkillNodeDefinitionSO node, bool hovered)
         {
-            if (!TryBeginSkillAssignment(nodeId))
-                SetFeedback("This node does not unlock a selectable skill.");
+            if (hovered && node != null && feedbackText != null)
+                feedbackText.text = node.DisplayName;
+            else if (feedbackText != null)
+                feedbackText.text = "K TOGGLE   •   ESC CLOSE";
         }
 
-        private void TryRefundRank(string nodeId)
+        private void BuySelected()
         {
-            if (controller == null)
-                return;
-
-            if (_pendingRefundNodeId != nodeId || Time.unscaledTime > _refundConfirmationExpiresAt)
-            {
-                _pendingRefundNodeId = nodeId;
-                _refundConfirmationExpiresAt = Time.unscaledTime + 3f;
-                SetFeedback("Click Confirm to refund one rank.");
-                Render();
-                return;
-            }
-
-            _pendingRefundNodeId = null;
-            var result = controller.Service.TryRefundRank(nodeId);
-            if (result.Success)
-                SetFeedback($"Rank refunded. +{result.RefundedGold} gold.");
-            else
-                SetFeedback(RespecFailureText(result.Failure));
-            Render();
-        }
-
-        private static string RespecFailureText(SkillTreeRespecFailure failure) => failure switch
-        {
-            SkillTreeRespecFailure.HasUnlockedDependents => "Refund dependent nodes first.",
-            SkillTreeRespecFailure.InventoryFull => "Inventory has no room for refunded materials.",
-            SkillTreeRespecFailure.NotUnlocked => "This node has no purchased ranks.",
-            _ => failure.ToString()
-        };
-
-        private bool TryBeginSkillAssignment(string nodeId)
-        {
-            if (controller == null || controller.SkillTree == null || skillBar == null)
-                return false;
-            if (!controller.SkillTree.TryGetNode(nodeId, out var node) ||
-                node.UnlockAction != SkillTreeUnlockAction.UnlockSkill ||
-                node.SkillToUnlock == null)
-                return false;
-
-            var started = skillBar.BeginAssignSkill(node.SkillToUnlock);
-            if (started)
-                Render();
-            return started;
-        }
-
-        private void SetFeedback(string message)
-        {
+            if (_selectedNode == null || controller == null) return;
+            var result = controller.TryPurchase(_selectedNode);
             if (feedbackText != null)
-                feedbackText.text = message;
-        }
-
-        private void SetNodeHovered(string nodeId, bool hovered)
-        {
-            if (tooltipRoot == null || tooltipText == null)
-                return;
-            if (!hovered || controller == null || controller.SkillTree == null ||
-                !controller.SkillTree.TryGetNode(nodeId, out var node))
-            {
-                tooltipRoot.SetActive(false);
-                return;
-            }
-
-            var rank = controller.Progress.GetRank(nodeId);
-            var effects = SkillTreeNodeView.BuildEffectText(node, rank);
-            tooltipText.text = $"{node.DisplayName}\n{node.NodeType}  Rank {rank}/{node.MaxRank}\n\n" +
-                               $"{node.Description}\n\n{effects}";
-            tooltipRoot.SetActive(true);
-        }
-
-        private void OnGoldChanged(int gold)
-        {
+                feedbackText.text = result.Success ? "SKILL PURCHASED" : FailureLabel(result.Failure);
             Render();
         }
 
         private void SetVisible(bool visible)
         {
-            if (windowGroup == null)
+            if (windowGroup == null) gameObject.SetActive(visible);
+            else
             {
-                gameObject.SetActive(visible);
-                return;
-            }
-
-            windowGroup.alpha = visible ? 1f : 0f;
-            windowGroup.interactable = visible;
-            windowGroup.blocksRaycasts = visible;
-            if (visible)
-            {
-                Cursor.visible = true;
-                Cursor.lockState = CursorLockMode.None;
+                windowGroup.alpha = visible ? 1f : 0f;
+                windowGroup.interactable = visible;
+                windowGroup.blocksRaycasts = visible;
             }
 
             if (visible)
+            {
+                if (!_modalApplied)
+                {
+                    _cursorWasVisible = Cursor.visible;
+                    _cursorLockMode = Cursor.lockState;
+                    Cursor.visible = true;
+                    Cursor.lockState = CursorLockMode.None;
+                    characterInput?.SetBlocked(true);
+                    BlockAdditionalInputs();
+                    _modalApplied = true;
+                }
+                PrepareAuthoredViews();
                 Render();
+            }
+            else if (_modalApplied)
+            {
+                characterInput?.SetBlocked(false);
+                RestoreAdditionalInputs();
+                Cursor.visible = _cursorWasVisible;
+                Cursor.lockState = _cursorLockMode;
+                _modalApplied = false;
+            }
         }
 
-        private bool IsVisible => windowGroup == null ? gameObject.activeSelf : windowGroup.alpha > 0.01f;
+        private void BlockAdditionalInputs()
+        {
+            _previousInputStates = new bool[additionalInputsToBlock?.Length ?? 0];
+            for (var i = 0; i < _previousInputStates.Length; i++)
+            {
+                var input = additionalInputsToBlock[i];
+                if (input == null || input == this) continue;
+                _previousInputStates[i] = input.enabled;
+                input.enabled = false;
+            }
+        }
+
+        private void RestoreAdditionalInputs()
+        {
+            if (additionalInputsToBlock == null) return;
+            for (var i = 0; i < additionalInputsToBlock.Length && i < _previousInputStates.Length; i++)
+                if (additionalInputsToBlock[i] != null && additionalInputsToBlock[i] != this)
+                    additionalInputsToBlock[i].enabled = _previousInputStates[i];
+            _previousInputStates = Array.Empty<bool>();
+        }
+
+        private static SkillNodeDefinitionSO FirstNode(ProfessionDefinitionSO profession)
+        {
+            foreach (var node in profession.SkillNodes) if (node != null) return node;
+            return null;
+        }
+
+        private string BuildRequirements(SkillNodeDefinitionSO node)
+        {
+            var parents = string.Empty;
+            foreach (var parent in node.ParentNodes)
+                if (parent != null) parents += (parents.Length == 0 ? string.Empty : ", ") + parent.DisplayName;
+            var parentLine = parents.Length > 0 ? $"\nRequires: {parents}" : string.Empty;
+            var abilityLine = node.AbilityToGrant != null ? $"\nUnlocks: {node.AbilityToGrant.DisplayName}" : string.Empty;
+            return $"Required level: {node.RequiredLevel}\nPrice: {node.Price} coins{parentLine}{abilityLine}";
+        }
+
+        private static string StateLabel(SkillTreeNodeState state) => state switch
+        {
+            SkillTreeNodeState.Available => "AVAILABLE",
+            SkillTreeNodeState.Purchased => "PURCHASED",
+            SkillTreeNodeState.UnavailableByFunds => "NOT ENOUGH COINS",
+            _ => "LOCKED"
+        };
+
+        private static string FailureLabel(SkillTreePurchaseFailure failure) => failure switch
+        {
+            SkillTreePurchaseFailure.RequiredLevel => "LEVEL REQUIREMENT NOT MET",
+            SkillTreePurchaseFailure.MissingParent => "PURCHASE PARENT SKILLS FIRST",
+            SkillTreePurchaseFailure.NotEnoughCurrency => "NOT ENOUGH COINS",
+            SkillTreePurchaseFailure.AlreadyPurchased => "ALREADY PURCHASED",
+            _ => "PURCHASE FAILED"
+        };
     }
 }

@@ -1,234 +1,183 @@
+using System;
+using System.Collections.Generic;
 using LetterHunter.Characters;
 using LetterHunter.Economy;
-using LetterHunter.Items;
 using LetterHunter.Skills;
 using LetterHunter.UI.Skills;
-using System.Collections.Generic;
 using UnityEngine;
-using System;
+using UnityEngine.Serialization;
 
 namespace LetterHunter.SkillTree
 {
     [DisallowMultipleComponent]
     public sealed class PlayerSkillTreeController : MonoBehaviour
     {
-        [SerializeField] private SkillTreeDefinition skillTree;
+        [Header("Profession domain")]
+        [SerializeField] private ProfessionDefinitionSO startingProfession;
+        [SerializeField] private ProfessionDefinitionSO[] availableProfessions = Array.Empty<ProfessionDefinitionSO>();
+        [FormerlySerializedAs("skillTree"), SerializeField, HideInInspector]
+        private SkillTreeDefinition legacySkillTree;
+
+        [Header("Existing gameplay adapters")]
         [SerializeField] private PlayerClassController player;
-        [SerializeField] private PlayerInventory inventory;
         [SerializeField] private CurrencyWallet wallet;
         [SerializeField] private SkillBarPresenter skillBar;
-        [SerializeField] private PlayerSkillLoadout skillLoadout;
 
-        private SkillTreeService _service;
         private readonly SkillTreeProgress _progress = new();
+        private SkillTreeService _service;
 
         public event Action ProgressionCommitted;
-
-        public SkillTreeDefinition SkillTree => skillTree;
+        public event Action StateChanged;
+        public ProfessionDefinitionSO ActiveProfession => Service.ActiveProfession;
+        public IReadOnlyList<ProfessionDefinitionSO> AvailableProfessions => availableProfessions;
         public SkillTreeProgress Progress => _progress;
-        public PlayerInventory Inventory => inventory;
         public CurrencyWallet Wallet => wallet;
+        public PlayerClassController Player => player;
+        public int CurrentLevel => Service.CurrentLevel;
+        public int CurrentCoins => Service.CurrentCoins;
+        public SkillTreeDefinition SkillTree => legacySkillTree;
+
         public SkillTreeService Service
         {
-            get
-            {
-                EnsureService();
-                return _service;
-            }
+            get { EnsureService(); return _service; }
         }
 
         private void Awake()
         {
-            if (player == null)
-                player = GetComponent<PlayerClassController>();
-            if (inventory == null)
-                inventory = GetComponent<PlayerInventory>();
-            if (wallet == null)
-                wallet = GetComponent<CurrencyWallet>();
-            if (skillBar == null)
-                skillBar = FindFirstObjectByType<SkillBarPresenter>();
-            if (skillLoadout == null)
-                skillLoadout = GetComponent<PlayerSkillLoadout>();
-
+            if (player == null) player = GetComponent<PlayerClassController>();
+            if (wallet == null) wallet = GetComponent<CurrencyWallet>();
+            if (skillBar == null) skillBar = FindFirstObjectByType<SkillBarPresenter>();
             EnsureService();
         }
 
-        public void SetSkillTree(SkillTreeDefinition definition)
+        private void OnEnable()
         {
-            skillTree = definition;
-            _service = null;
-            EnsureService();
+            if (wallet != null) wallet.GoldChanged += OnGoldChanged;
         }
 
-        private void EnsureService()
+        private void OnDisable()
         {
-            if (_service != null)
-                return;
-
-            _service = new SkillTreeService(skillTree, _progress, wallet,
-                inventory != null ? inventory.RuntimeInventory : null, OnSkillUnlocked, OnNodeRankChanged);
+            if (wallet != null) wallet.GoldChanged -= OnGoldChanged;
         }
 
-        public void ApplyUnlockedNodes(System.Collections.Generic.IEnumerable<string> nodeIds)
+        public bool SetActiveProfession(string professionId)
         {
-            _progress.ReplaceUnlocked(nodeIds);
-            RebuildLearnedSkills();
+            if (!TryGetProfession(professionId, out var profession)) return false;
+            Service.SetActiveProfession(profession);
+            StateChanged?.Invoke();
+            return true;
         }
 
-        public void ApplyNodeRanks(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, int>> nodeRanks)
-        {
-            var validRanks = new System.Collections.Generic.List<System.Collections.Generic.KeyValuePair<string, int>>();
-            if (nodeRanks != null && skillTree != null)
-            {
-                foreach (var pair in nodeRanks)
-                {
-                    if (!skillTree.TryGetNode(pair.Key, out var node) || pair.Value <= 0)
-                        continue;
-                    validRanks.Add(new System.Collections.Generic.KeyValuePair<string, int>(
-                        pair.Key, Mathf.Min(pair.Value, node.MaxRank)));
-                }
-            }
+        public SkillTreePurchaseResult TryPurchase(SkillNodeDefinitionSO node) => Service.TryPurchase(node);
 
-            _progress.ReplaceRanks(validRanks);
-            RebuildLearnedSkills();
+        public void RestoreProgress(string activeProfessionId, IEnumerable<PurchasedSkillNode> purchased)
+        {
+            var entries = new List<PurchasedSkillNode>();
+            if (purchased != null)
+                foreach (var entry in purchased)
+                    if (TryGetProfession(entry.ProfessionId, out var profession) && profession.TryGetNode(entry.NodeId, out _))
+                        entries.Add(entry);
+
+            var professionId = activeProfessionId;
+            if (!TryGetProfession(professionId, out var active))
+                active = ResolveStartingProfession();
+            professionId = active != null ? active.ProfessionId : string.Empty;
+            _progress.Replace(professionId, entries);
+            Service.SetActiveProfession(active);
+            RegrantPurchasedAbilities();
+            StateChanged?.Invoke();
         }
 
-        private void RebuildLearnedSkills()
+        public void RestoreLegacyNodes(IEnumerable<string> legacyNodeIds)
         {
-            player?.ResetLearnedSkills();
-
-            if (skillTree == null || player == null)
-                return;
-
-            foreach (var nodeId in _progress.UnlockedNodeIds)
-            {
-                if (!skillTree.TryGetNode(nodeId, out var node))
-                    continue;
-                if (node.UnlockAction == SkillTreeUnlockAction.UnlockSkill && node.SkillToUnlock != null)
-                    player.LearnSkill(node.SkillToUnlock);
-            }
-
-            ApplyRankEffects();
-            skillBar?.Rebuild();
+            var profession = ResolveStartingProfession();
+            var entries = new List<PurchasedSkillNode>();
+            if (profession != null && legacyNodeIds != null)
+                foreach (var nodeId in legacyNodeIds)
+                    if (profession.TryGetNode(nodeId, out _))
+                        entries.Add(new PurchasedSkillNode(profession.ProfessionId, nodeId));
+            RestoreProgress(profession != null ? profession.ProfessionId : string.Empty, entries);
         }
 
         public void ResetProgress()
         {
-            ApplyUnlockedNodes(System.Array.Empty<string>());
-        }
-
-        private void OnSkillUnlocked(SkillDefinition skill)
-        {
-            if (skill == null || player == null)
-                return;
-
-            player.LearnSkill(skill);
+            var profession = ResolveStartingProfession();
+            _progress.Replace(profession != null ? profession.ProfessionId : string.Empty,
+                Array.Empty<PurchasedSkillNode>());
+            Service.SetActiveProfession(profession);
+            player?.ResetLearnedSkills();
             skillBar?.Rebuild();
-        }
-
-        private void OnNodeRankChanged(SkillTreeNodeDefinition node, int rank)
-        {
-            if (rank == 0 && node != null && node.UnlockAction == SkillTreeUnlockAction.UnlockSkill &&
-                node.SkillToUnlock != null)
-            {
-                skillLoadout?.RemoveSkill(node.SkillToUnlock.SkillId, false);
-                RebuildLearnedSkills();
-            }
-            else
-            {
-                ApplyRankEffects();
-            }
+            StateChanged?.Invoke();
             ProgressionCommitted?.Invoke();
         }
 
-        private void ApplyRankEffects()
+        public bool TryGetProfession(string professionId, out ProfessionDefinitionSO profession)
         {
-            if (player == null || player.Stats == null || skillTree == null)
-                return;
-
-            player.Stats.RemoveModifiers(this);
-            player.SkillService?.ClearProgressionModifiers();
-
-            var attackPower = 0f;
-            var defense = 0f;
-            var attackSpeed = 0f;
-            var moveSpeed = 0f;
-            var jumpHeight = 0f;
-            var skillModifiers = new Dictionary<string, Vector3>();
-
-            foreach (var nodeId in _progress.UnlockedNodeIds)
-            {
-                if (!skillTree.TryGetNode(nodeId, out var node))
-                    continue;
-
-                var rank = _progress.GetRank(nodeId);
-                foreach (var effect in node.RankEffects)
-                {
-                    if (effect == null || !effect.IsValid)
-                        continue;
-
-                    var appliedRanks = Mathf.Max(0, rank - effect.FirstAppliedRank + 1);
-                    var amount = effect.AmountPerRank * appliedRanks;
-                    if (amount == 0f)
-                        continue;
-                    switch (effect.EffectType)
-                    {
-                        case SkillTreeRankEffectType.AttackPower:
-                            attackPower += amount;
-                            break;
-                        case SkillTreeRankEffectType.Defense:
-                            defense += amount;
-                            break;
-                        case SkillTreeRankEffectType.AttackSpeed:
-                            attackSpeed += amount;
-                            break;
-                        case SkillTreeRankEffectType.MoveSpeed:
-                            moveSpeed += amount;
-                            break;
-                        case SkillTreeRankEffectType.JumpHeight:
-                            jumpHeight += amount;
-                            break;
-                        default:
-                            AddSkillModifier(skillModifiers, effect, amount);
-                            break;
-                    }
-                }
-            }
-
-            player.Stats.SetAttackPowerModifier(this, attackPower);
-            player.Stats.SetDefenseModifier(this, defense);
-            player.Stats.SetAttackSpeedModifier(this, attackSpeed);
-            player.Stats.SetMoveSpeedModifier(this, moveSpeed);
-            player.Stats.SetJumpHeightModifier(this, jumpHeight);
-
-            foreach (var pair in skillModifiers)
-            {
-                player.SkillService?.SetProgressionModifiers(pair.Key,
-                    new SkillRuntimeModifiers(pair.Value.x, pair.Value.y, pair.Value.z));
-            }
+            profession = null;
+            if (string.IsNullOrWhiteSpace(professionId)) return false;
+            if (startingProfession != null && startingProfession.ProfessionId == professionId)
+            { profession = startingProfession; return true; }
+            foreach (var candidate in availableProfessions ?? Array.Empty<ProfessionDefinitionSO>())
+                if (candidate != null && candidate.ProfessionId == professionId)
+                { profession = candidate; return true; }
+            return false;
         }
 
-        private static void AddSkillModifier(Dictionary<string, Vector3> modifiers,
-            SkillTreeRankEffectDefinition effect, float amount)
+        private void EnsureService()
         {
-            if (effect.TargetSkill == null)
-                return;
-
-            modifiers.TryGetValue(effect.TargetSkill.SkillId, out var values);
-            switch (effect.EffectType)
+            if (_service != null) return;
+            _service = new SkillTreeService(_progress, wallet, ResolveLevel, OwnsAbility, GrantAbility);
+            _service.Changed += OnServiceChanged;
+            _service.NodePurchased += OnNodePurchased;
+            var profession = ResolveStartingProfession();
+            if (!string.IsNullOrWhiteSpace(_progress.ActiveProfessionId))
             {
-                case SkillTreeRankEffectType.SkillDamagePercent:
-                    values.x += amount;
-                    break;
-                case SkillTreeRankEffectType.SkillCooldownReductionPercent:
-                    values.y += amount;
-                    break;
-                case SkillTreeRankEffectType.SkillManaCostReductionPercent:
-                    values.z += amount;
-                    break;
+                if (TryGetProfession(_progress.ActiveProfessionId, out var restoredProfession))
+                    profession = restoredProfession;
             }
-
-            modifiers[effect.TargetSkill.SkillId] = values;
+            _service.SetActiveProfession(profession);
         }
+
+        private ProfessionDefinitionSO ResolveStartingProfession()
+        {
+            if (startingProfession != null) return startingProfession;
+            foreach (var profession in availableProfessions ?? Array.Empty<ProfessionDefinitionSO>())
+                if (profession != null) return profession;
+            return null;
+        }
+
+        private int ResolveLevel() => player != null && player.Stats != null ? player.Stats.Level : 1;
+
+        private bool OwnsAbility(SkillDefinition ability)
+        {
+            if (ability == null || player == null || player.SkillService == null) return false;
+            foreach (var known in player.SkillService.Definitions)
+                if (known != null && known.SkillId == ability.SkillId) return true;
+            return false;
+        }
+
+        private void GrantAbility(SkillDefinition ability)
+        {
+            player?.LearnSkill(ability);
+            skillBar?.Rebuild();
+        }
+
+        private void RegrantPurchasedAbilities()
+        {
+            foreach (var entry in _progress.EnumeratePurchased())
+            {
+                if (!TryGetProfession(entry.ProfessionId, out var profession) ||
+                    !profession.TryGetNode(entry.NodeId, out var node) || node.AbilityToGrant == null) continue;
+                if (!OwnsAbility(node.AbilityToGrant)) GrantAbility(node.AbilityToGrant);
+            }
+            skillBar?.Rebuild();
+        }
+
+        private void OnServiceChanged() => StateChanged?.Invoke();
+        private void OnNodePurchased(ProfessionDefinitionSO profession, SkillNodeDefinitionSO node)
+        {
+            ProgressionCommitted?.Invoke();
+        }
+        private void OnGoldChanged(int _) => Service.NotifyExternalStateChanged();
     }
 }

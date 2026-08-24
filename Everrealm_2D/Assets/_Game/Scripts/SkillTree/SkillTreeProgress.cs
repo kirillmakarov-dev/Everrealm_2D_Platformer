@@ -3,73 +3,74 @@ using System.Collections.Generic;
 
 namespace LetterHunter.SkillTree
 {
+    public readonly struct PurchasedSkillNode
+    {
+        public PurchasedSkillNode(string professionId, string nodeId)
+        { ProfessionId = professionId; NodeId = nodeId; }
+        public string ProfessionId { get; }
+        public string NodeId { get; }
+    }
+
     public sealed class SkillTreeProgress
     {
-        private readonly Dictionary<string, int> _nodeRanks = new();
-
+        private readonly HashSet<string> _purchased = new(StringComparer.Ordinal);
+        public string ActiveProfessionId { get; private set; } = string.Empty;
         public event Action ProgressChanged;
-        public IReadOnlyCollection<string> UnlockedNodeIds => _nodeRanks.Keys;
-        public IReadOnlyDictionary<string, int> NodeRanks => _nodeRanks;
 
-        public bool IsUnlocked(string nodeId) =>
-            GetRank(nodeId) > 0;
+        public bool IsPurchased(string professionId, string nodeId) =>
+            !string.IsNullOrWhiteSpace(professionId) && !string.IsNullOrWhiteSpace(nodeId) &&
+            _purchased.Contains(Key(professionId, nodeId));
 
-        public int GetRank(string nodeId) =>
-            !string.IsNullOrWhiteSpace(nodeId) && _nodeRanks.TryGetValue(nodeId, out var rank) ? rank : 0;
-
-        public bool MarkUnlocked(string nodeId)
+        public void SetActiveProfession(string professionId, bool notify = true)
         {
-            if (string.IsNullOrWhiteSpace(nodeId) || IsUnlocked(nodeId))
-                return false;
+            var safeId = professionId ?? string.Empty;
+            if (ActiveProfessionId == safeId) return;
+            ActiveProfessionId = safeId;
+            if (notify) ProgressChanged?.Invoke();
+        }
 
-            _nodeRanks[nodeId] = 1;
-            ProgressChanged?.Invoke();
+        public bool MarkPurchased(string professionId, string nodeId, bool notify = true)
+        {
+            if (string.IsNullOrWhiteSpace(professionId) || string.IsNullOrWhiteSpace(nodeId) ||
+                !_purchased.Add(Key(professionId, nodeId))) return false;
+            if (notify) ProgressChanged?.Invoke();
             return true;
         }
 
-        public bool SetRank(string nodeId, int rank)
+        public bool RemovePurchased(string professionId, string nodeId, bool notify = true)
         {
-            if (string.IsNullOrWhiteSpace(nodeId))
-                return false;
-
-            var safeRank = Math.Max(0, rank);
-            var currentRank = GetRank(nodeId);
-            if (currentRank == safeRank)
-                return false;
-
-            if (safeRank == 0)
-                _nodeRanks.Remove(nodeId);
-            else
-                _nodeRanks[nodeId] = safeRank;
-
-            ProgressChanged?.Invoke();
-            return true;
+            var removed = _purchased.Remove(Key(professionId, nodeId));
+            if (removed && notify) ProgressChanged?.Invoke();
+            return removed;
         }
 
-        public void ReplaceUnlocked(IEnumerable<string> nodeIds)
+        public IEnumerable<PurchasedSkillNode> EnumeratePurchased()
         {
-            _nodeRanks.Clear();
-            if (nodeIds != null)
+            foreach (var key in _purchased)
             {
-                foreach (var nodeId in nodeIds)
-                    if (!string.IsNullOrWhiteSpace(nodeId))
-                        _nodeRanks[nodeId] = 1;
+                var separator = key.IndexOf('\u001f');
+                if (separator > 0)
+                    yield return new PurchasedSkillNode(key.Substring(0, separator), key.Substring(separator + 1));
             }
-
-            ProgressChanged?.Invoke();
         }
 
-        public void ReplaceRanks(IEnumerable<KeyValuePair<string, int>> nodeRanks)
+        public void Replace(string activeProfessionId, IEnumerable<PurchasedSkillNode> purchased)
         {
-            _nodeRanks.Clear();
-            if (nodeRanks != null)
-            {
-                foreach (var pair in nodeRanks)
-                    if (!string.IsNullOrWhiteSpace(pair.Key) && pair.Value > 0)
-                        _nodeRanks[pair.Key] = pair.Value;
-            }
-
+            _purchased.Clear();
+            ActiveProfessionId = activeProfessionId ?? string.Empty;
+            if (purchased != null)
+                foreach (var entry in purchased)
+                    if (!string.IsNullOrWhiteSpace(entry.ProfessionId) && !string.IsNullOrWhiteSpace(entry.NodeId))
+                        _purchased.Add(Key(entry.ProfessionId, entry.NodeId));
             ProgressChanged?.Invoke();
         }
+
+        public void Clear()
+        {
+            _purchased.Clear();
+            ProgressChanged?.Invoke();
+        }
+
+        private static string Key(string professionId, string nodeId) => $"{professionId}\u001f{nodeId}";
     }
 }

@@ -10,227 +10,94 @@ namespace LetterHunter.UI.SkillTree
     [DisallowMultipleComponent]
     public sealed class SkillTreeNodeView : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
-        [SerializeField] private string configuredNodeId;
-        [SerializeField] private Button upgradeButton;
-        [SerializeField] private Button selectButton;
-        [SerializeField] private Button refundButton;
+        [SerializeField] private SkillNodeDefinitionSO configuredNode;
+        [SerializeField] private Button button;
         [SerializeField] private Image background;
-        [SerializeField] private Image iconImage;
+        [SerializeField] private Image frame;
+        [SerializeField] private Image icon;
+        [SerializeField] private GameObject lockedOverlay;
+        [SerializeField] private GameObject purchasedGlow;
+        [SerializeField] private GameObject selectedFrame;
         [SerializeField] private TMP_Text titleText;
-        [SerializeField] private TMP_Text typeText;
-        [SerializeField] private TMP_Text descriptionText;
-        [SerializeField] private TMP_Text effectText;
-        [SerializeField] private TMP_Text costText;
         [SerializeField] private TMP_Text stateText;
-        [SerializeField] private TMP_Text rankText;
-        [SerializeField] private TMP_Text upgradeButtonText;
-        [SerializeField] private TMP_Text selectButtonText;
-        [SerializeField] private TMP_Text refundButtonText;
-        [SerializeField] private Color unlockedColor = new(0.15f, 0.45f, 0.22f, 0.95f);
-        [SerializeField] private Color availableColor = new(0.18f, 0.25f, 0.42f, 0.95f);
-        [SerializeField] private Color lockedColor = new(0.12f, 0.12f, 0.14f, 0.9f);
+        [SerializeField] private Color lockedColor = new(0.16f, 0.16f, 0.18f, 0.82f);
+        [SerializeField] private Color availableColor = new(0.15f, 0.32f, 0.38f, 1f);
+        [SerializeField] private Color insufficientColor = new(0.34f, 0.2f, 0.16f, 0.95f);
+        [SerializeField] private Color purchasedColor = new(0.17f, 0.42f, 0.28f, 1f);
 
-        private string _nodeId;
-        private Action<string> _unlockClicked;
-        private Action<string> _selectClicked;
-        private Action<string, bool> _hoverChanged;
-        private Action<string> _refundClicked;
+        private Action<SkillNodeDefinitionSO> _selected;
+        private Action<SkillNodeDefinitionSO, bool> _hovered;
+        public SkillNodeDefinitionSO ConfiguredNode => configuredNode;
 
-        public string ConfiguredNodeId => configuredNodeId;
+        private void Awake() => WireButton();
 
-        private void Awake()
+        public void Bind(SkillNodeDefinitionSO node, Action<SkillNodeDefinitionSO> selected,
+            Action<SkillNodeDefinitionSO, bool> hovered)
         {
-            WireButtons();
+            configuredNode = node;
+            _selected = selected;
+            _hovered = hovered;
+            WireButton();
         }
 
-        private void WireButtons()
+        public void Render(SkillTreeNodeState state, bool selected)
         {
-            if (upgradeButton != null)
+            if (configuredNode == null) return;
+            if (titleText != null) titleText.text = configuredNode.DisplayName;
+            if (icon != null)
             {
-                upgradeButton.onClick.RemoveListener(OnUpgradeClicked);
-                upgradeButton.onClick.AddListener(OnUpgradeClicked);
+                icon.sprite = configuredNode.Icon;
+                icon.enabled = configuredNode.Icon != null;
+                icon.color = state == SkillTreeNodeState.Locked
+                    ? new Color(0.38f, 0.4f, 0.42f, 0.72f)
+                    : Color.white;
             }
-
-            if (selectButton != null)
-            {
-                selectButton.onClick.RemoveListener(OnSelectClicked);
-                selectButton.onClick.AddListener(OnSelectClicked);
-            }
-
-            if (refundButton != null)
-            {
-                refundButton.onClick.RemoveListener(OnRefundClicked);
-                refundButton.onClick.AddListener(OnRefundClicked);
-            }
-        }
-
-        public void Bind(string nodeId, Action<string> unlockClicked, Action<string> selectClicked,
-            Action<string, bool> hoverChanged = null, Action<string> refundClicked = null)
-        {
-            _nodeId = nodeId;
-            _unlockClicked = unlockClicked;
-            _selectClicked = selectClicked;
-            _hoverChanged = hoverChanged;
-            _refundClicked = refundClicked;
-            WireButtons();
-        }
-
-        public void Render(SkillTreeNodeDefinition node, SkillTreeProgress progress, SkillTreeUnlockFailure failure,
-            bool refundConfirmation = false)
-        {
-            var rank = progress != null ? progress.GetRank(node.NodeId) : 0;
-            var unlocked = rank > 0;
-            var available = failure == SkillTreeUnlockFailure.None;
-            var canAssignUnlockedSkill = unlocked &&
-                                         node.UnlockAction == SkillTreeUnlockAction.UnlockSkill &&
-                                         node.SkillToUnlock != null;
-
-            if (titleText != null)
-                titleText.text = node.DisplayName;
-            if (typeText != null)
-                typeText.text = node.NodeType.ToString().ToUpperInvariant();
-            if (iconImage != null)
-            {
-                iconImage.sprite = node.Icon;
-                iconImage.enabled = node.Icon != null;
-            }
-            if (descriptionText != null)
-                descriptionText.text = node.Description;
-            if (effectText != null)
-                effectText.text = BuildEffectText(node, rank);
-            if (costText != null)
-                costText.text = BuildCostText(node);
-            if (stateText != null)
-                stateText.text = failure == SkillTreeUnlockFailure.MaxRankReached ||
-                                 failure == SkillTreeUnlockFailure.AlreadyUnlocked
-                    ? "Max"
-                    : available ? string.Empty
-                    : FailureText(failure);
-            if (rankText != null)
-                rankText.text = $"Rank {rank}/{node.MaxRank}";
             if (background != null)
-                background.color = unlocked ? unlockedColor : available ? availableColor : lockedColor;
-            var maxed = failure is SkillTreeUnlockFailure.AlreadyUnlocked or
-                SkillTreeUnlockFailure.MaxRankReached;
-            if (upgradeButton != null)
-                upgradeButton.interactable = !maxed;
-            if (upgradeButtonText != null)
-                upgradeButtonText.text = failure is SkillTreeUnlockFailure.AlreadyUnlocked or
-                    SkillTreeUnlockFailure.MaxRankReached ? "Max" : unlocked ? "Upgrade" : "Unlock";
-            if (selectButton != null)
-            {
-                selectButton.gameObject.SetActive(canAssignUnlockedSkill);
-                selectButton.interactable = canAssignUnlockedSkill;
-            }
-            if (selectButtonText != null)
-                selectButtonText.text = "Select";
-            if (refundButton != null)
-            {
-                refundButton.gameObject.SetActive(unlocked);
-                refundButton.interactable = unlocked;
-            }
-            if (refundButtonText != null)
-                refundButtonText.text = refundConfirmation ? "Confirm" : "Refund";
-        }
-
-        private void OnUpgradeClicked()
-        {
-            if (!string.IsNullOrWhiteSpace(_nodeId))
-                _unlockClicked?.Invoke(_nodeId);
-        }
-
-        private void OnSelectClicked()
-        {
-            if (!string.IsNullOrWhiteSpace(_nodeId))
-                _selectClicked?.Invoke(_nodeId);
-        }
-
-        private void OnRefundClicked()
-        {
-            if (!string.IsNullOrWhiteSpace(_nodeId))
-                _refundClicked?.Invoke(_nodeId);
+                background.color = state switch
+                {
+                    SkillTreeNodeState.Available => availableColor,
+                    SkillTreeNodeState.Purchased => purchasedColor,
+                    SkillTreeNodeState.UnavailableByFunds => insufficientColor,
+                    _ => lockedColor
+                };
+            if (stateText != null)
+                stateText.text = state switch
+                {
+                    SkillTreeNodeState.Available => "AVAILABLE",
+                    SkillTreeNodeState.Purchased => "PURCHASED",
+                    SkillTreeNodeState.UnavailableByFunds => "NEED COINS",
+                    _ => $"LEVEL {configuredNode.RequiredLevel}"
+                };
+            if (lockedOverlay != null) lockedOverlay.SetActive(state == SkillTreeNodeState.Locked);
+            if (purchasedGlow != null) purchasedGlow.SetActive(state == SkillTreeNodeState.Purchased);
+            if (selectedFrame != null) selectedFrame.SetActive(selected);
+            if (frame != null) frame.color = selected ? new Color(1f, 0.66f, 0.19f, 1f) : Color.white;
+            if (button != null) button.interactable = true;
         }
 
         public void OnPointerEnter(PointerEventData eventData)
         {
-            if (!string.IsNullOrWhiteSpace(_nodeId))
-                _hoverChanged?.Invoke(_nodeId, true);
+            transform.localScale = Vector3.one * 1.045f;
+            _hovered?.Invoke(configuredNode, true);
         }
 
         public void OnPointerExit(PointerEventData eventData)
         {
-            if (!string.IsNullOrWhiteSpace(_nodeId))
-                _hoverChanged?.Invoke(_nodeId, false);
+            transform.localScale = Vector3.one;
+            _hovered?.Invoke(configuredNode, false);
         }
 
-        private static string BuildCostText(SkillTreeNodeDefinition node)
+        private void WireButton()
         {
-            var text = node.GoldCost > 0 ? $"{node.GoldCost} gold" : "Free";
-            foreach (var cost in node.MaterialCosts)
-            {
-                if (!cost.IsValid)
-                    continue;
-                text += $"  {cost.Item.DisplayName} x{cost.Amount}";
-            }
-
-            return text;
+            if (button == null) button = GetComponent<Button>();
+            if (button == null) return;
+            button.onClick.RemoveListener(OnClicked);
+            button.onClick.AddListener(OnClicked);
         }
 
-        public static string BuildEffectText(SkillTreeNodeDefinition node, int currentRank)
+        private void OnClicked()
         {
-            var text = string.Empty;
-            foreach (var effect in node.RankEffects)
-            {
-                if (effect == null || !effect.IsValid)
-                    continue;
-
-                if (text.Length > 0)
-                    text += "  ";
-
-                var isPercent = effect.EffectType is SkillTreeRankEffectType.SkillDamagePercent or
-                    SkillTreeRankEffectType.SkillCooldownReductionPercent or
-                    SkillTreeRankEffectType.SkillManaCostReductionPercent;
-                var target = effect.TargetSkill != null ? $" {effect.TargetSkill.ShortName}" : string.Empty;
-                var label = effect.EffectType switch
-                {
-                    SkillTreeRankEffectType.AttackPower => "Attack",
-                    SkillTreeRankEffectType.Defense => "Defense",
-                    SkillTreeRankEffectType.AttackSpeed => "Attack Speed",
-                    SkillTreeRankEffectType.MoveSpeed => "Move Speed",
-                    SkillTreeRankEffectType.JumpHeight => "Jump Height",
-                    SkillTreeRankEffectType.SkillDamagePercent => $"{target} Damage",
-                    SkillTreeRankEffectType.SkillCooldownReductionPercent => $"{target} Cooldown Reduction",
-                    SkillTreeRankEffectType.SkillManaCostReductionPercent => $"{target} Mana Reduction",
-                    _ => "Upgrade"
-                };
-                var nextRank = Mathf.Min(node.MaxRank, currentRank + 1);
-                var appliedRanks = Mathf.Max(0, currentRank - effect.FirstAppliedRank + 1);
-                var nextAppliedRanks = Mathf.Max(0, nextRank - effect.FirstAppliedRank + 1);
-                var currentAmount = effect.AmountPerRank * appliedRanks;
-                var nextAmount = effect.AmountPerRank * nextAppliedRanks;
-
-                if (currentRank < effect.FirstAppliedRank && nextAppliedRanks == appliedRanks)
-                    text += $"{label}: starts at rank {effect.FirstAppliedRank}";
-                else if (currentRank >= node.MaxRank)
-                    text += $"{label}: +{FormatEffectAmount(currentAmount, isPercent)} (Max)";
-                else
-                    text += $"{label}: +{FormatEffectAmount(currentAmount, isPercent)} -> +{FormatEffectAmount(nextAmount, isPercent)}";
-            }
-
-            return text;
+            if (configuredNode != null) _selected?.Invoke(configuredNode);
         }
-
-        private static string FormatEffectAmount(float amount, bool isPercent) =>
-            isPercent ? $"{amount * 100f:0.#}%" : $"{amount:0.##}";
-
-        private static string FailureText(SkillTreeUnlockFailure failure) => failure switch
-        {
-            SkillTreeUnlockFailure.MissingPrerequisite => "Requires previous node",
-            SkillTreeUnlockFailure.NotEnoughGold => "Need gold",
-            SkillTreeUnlockFailure.NotEnoughMaterials => "Need materials",
-            SkillTreeUnlockFailure.AlreadyUnlocked => "Unlocked",
-            SkillTreeUnlockFailure.MaxRankReached => "Max",
-            _ => "Locked"
-        };
     }
 }

@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fbeea87a9e246718452b4fa14bc9910, type: 3}
+  m_Name: WarriorProfession
+  m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.SkillTree.ProfessionDefinitionSO
+  professionId: warrior
+  displayName: Warrior
+  description: A disciplined melee profession built around decisive attacks, defense
+    and battlefield control.
+  icon: {fileID: 21300000, guid: 0f71cd7655d89ab428c2e7e2cbb11558, type: 3}
+  skillNodes:
+  - {fileID: 11400000, guid: 071679cb849bcee44869dac308aa9ddd, type: 2}
+  - {fileID: 11400000, guid: 91f610095e5d3214fba4f6d2fe669936, type: 2}
+  - {fileID: 11400000, guid: 3ec651d6964a6dc44b9c010ccd4ea6be, type: 2}
+  - {fileID: 11400000, guid: 5ce5ebe7c1f01ba44ba839a532c58d7b, type: 2}
+  - {fileID: 11400000, guid: 2c89fff890c95eb48827fe8d9ad521f4, type: 2}
+  - {fileID: 11400000, guid: 0e68560751f389e4fb0e85f1db7933c9, type: 2}

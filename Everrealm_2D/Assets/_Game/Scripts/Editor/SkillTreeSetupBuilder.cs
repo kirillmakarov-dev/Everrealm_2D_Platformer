@@ -1,11 +1,9 @@
 #if UNITY_EDITOR
-using System.IO;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using LetterHunter.Characters;
-using LetterHunter.Combat;
-using LetterHunter.Core;
-using LetterHunter.Economy;
-using LetterHunter.Effects;
-using LetterHunter.Items;
+using LetterHunter.Debugging;
 using LetterHunter.SkillTree;
 using LetterHunter.Skills;
 using LetterHunter.UI.SkillTree;
@@ -13,825 +11,513 @@ using TMPro;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-#if ENABLE_INPUT_SYSTEM
-using UnityEngine.InputSystem.UI;
-#endif
-
-namespace LetterHunter.Editor
+namespace LetterHunter.EditorTools
 {
     public static class SkillTreeSetupBuilder
     {
-        private const string TreeFolder = "Assets/_Game/Data/SkillTrees";
-        private const string SkillFolder = "Assets/_Game/Data/Skills/SkillTree";
-        private const string EffectFolder = "Assets/_Game/Data/Effects/SkillTree";
-        private const string UiPrefabFolder = "Assets/_Game/Prefabs/UI";
-        private const string NodePrefabPath = UiPrefabFolder + "/SkillTreeNode.prefab";
-        private const string ConnectionPrefabPath = UiPrefabFolder + "/SkillTreeConnection.prefab";
+        private const string ScenePath = "Assets/_Game/Scenes/InventoryLootDebug.unity";
+        private const string DataFolder = "Assets/_Game/Data/Professions/Warrior";
+        private const string PrefabFolder = "Assets/_Game/Prefabs/UI/SkillTree";
+        private const string ProfessionPath = DataFolder + "/WarriorProfession.asset";
+        private const string NodePrefabPath = PrefabFolder + "/SkillTreeNode.prefab";
+        private const string ConnectionPrefabPath = PrefabFolder + "/SkillTreeConnection.prefab";
+        private const string WindowPrefabPath = PrefabFolder + "/SkillTreeWindow.prefab";
+        private const string AtlasPath = "Assets/SoftKitty/InventoryEngine/Textures/Sprites/Main.png";
+        private const string IconFolder = "Assets/SoftKitty/InventoryEngine/Textures/SkillIcon";
 
-        private readonly struct RankEffectSpec
+        private static Dictionary<string, Sprite> _atlas;
+
+        private readonly struct NodeSpec
         {
-            public RankEffectSpec(SkillTreeRankEffectType type, float amountPerRank,
-                SkillDefinition targetSkill = null, int firstAppliedRank = 1)
+            public NodeSpec(string id, string title, string description, int icon, int level, int price,
+                Vector2 position, string[] parents, string abilityPath = null)
             {
-                Type = type;
-                AmountPerRank = amountPerRank;
-                TargetSkill = targetSkill;
-                FirstAppliedRank = firstAppliedRank;
+                Id = id; Title = title; Description = description; Icon = icon; Level = level; Price = price;
+                Position = position; Parents = parents; AbilityPath = abilityPath;
             }
-
-            public SkillTreeRankEffectType Type { get; }
-            public float AmountPerRank { get; }
-            public SkillDefinition TargetSkill { get; }
-            public int FirstAppliedRank { get; }
+            public string Id { get; }
+            public string Title { get; }
+            public string Description { get; }
+            public int Icon { get; }
+            public int Level { get; }
+            public int Price { get; }
+            public Vector2 Position { get; }
+            public string[] Parents { get; }
+            public string AbilityPath { get; }
         }
 
-        public static void SetupCurrentScene()
+        private static readonly NodeSpec[] Specs =
         {
-            SetupScene(SceneManager.GetActiveScene());
-        }
+            new("training_roots", "Warrior Foundation", "Master the discipline required to enter the warrior profession.",
+                7, 1, 0, new Vector2(0f, 185f), Array.Empty<string>()),
+            new("focus_slash", "Focus Slash", "Unlock a precise two-hit slash through the existing combat skill system.",
+                1, 1, 15, new Vector2(280f, 55f), new[] { "training_roots" },
+                "Assets/_Game/Data/Skills/SkillTree/TreeFocusSlash.asset"),
+            new("defense_mastery", "Fortress Training", "Advance the defensive branch and prepare for Battle Mastery.",
+                10, 2, 18, new Vector2(280f, 245f), new[] { "training_roots" }),
+            new("rapid_assault", "Rapid Assault", "Advance the speed branch and prepare for Battle Mastery.",
+                8, 2, 18, new Vector2(280f, 435f), new[] { "training_roots" }),
+            new("focused_flow", "Focused Flow", "Deepen your control of Focus Slash and unlock the final tier.",
+                9, 2, 20, new Vector2(570f, 55f), new[] { "focus_slash" }),
+            new("battle_mastery", "Battle Mastery", "Capstone training available after all three branches are completed.",
+                12, 4, 35, new Vector2(860f, 245f), new[] { "focused_flow", "defense_mastery", "rapid_assault" })
+        };
 
-        public static void RebuildDefaultUiPrefabs()
+        [MenuItem("Letter Hunter/Build Profession Skill Tree", priority = 2)]
+        public static void Build()
         {
-            EnsureFolders();
-            BuildNodePrefab();
-            BuildConnectionPrefab();
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-            Debug.Log("Default skill tree UI prefabs rebuilt. Run Letter Hunter/Setup Skill Tree to wire them into the scene.");
-        }
-
-        public static void ValidateSkillTrees()
-        {
-            var errorCount = 0;
-            foreach (var guid in AssetDatabase.FindAssets("t:SkillTreeDefinition"))
+            if (EditorApplication.isPlayingOrWillChangePlaymode) return;
+            var scene = SceneManager.GetActiveScene();
+            if (!scene.IsValid() || scene.path != ScenePath)
             {
-                var path = AssetDatabase.GUIDToAssetPath(guid);
-                var tree = AssetDatabase.LoadAssetAtPath<SkillTreeDefinition>(path);
-                if (tree == null)
-                    continue;
-
-                foreach (var error in tree.ValidateDefinition())
-                {
-                    errorCount++;
-                    Debug.LogError($"[Skill Tree Validation] {path}: {error}", tree);
-                }
-            }
-
-            if (errorCount == 0)
-                Debug.Log("Skill tree validation passed. No errors found.");
-            else
-                Debug.LogError($"Skill tree validation found {errorCount} error(s). See previous console entries.");
-        }
-
-        public static void RebuildDemoWarriorSkillTreeData()
-        {
-            EnsureFolders();
-            var shard = AssetDatabase.LoadAssetAtPath<ItemDefinition>("Assets/_Game/Data/Items/TrainingShard.asset");
-            var demoSkill = EnsureTreeSkill();
-            EnsureSkillTree(shard, demoSkill, true);
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-            Debug.Log("Demo Warrior Skill Tree rebuilt with seven validated nodes.");
-        }
-
-        public static void BuildPlaytestScene()
-        {
-            const string sourceScenePath = "Assets/_Game/Scenes/InventoryLootDebug.unity";
-            const string targetScenePath = "Assets/_Game/Scenes/SkillTreeDebug.unity";
-
-            if (!File.Exists(sourceScenePath))
-            {
-                Debug.LogError($"Cannot build skill tree playtest scene. Missing source scene: {sourceScenePath}. Run Letter Hunter/Build Inventory Loot Playtest Scene first.");
+                Debug.LogError($"Open {ScenePath} before building the profession Skill Tree.");
                 return;
             }
-
-            if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
-                return;
-
-            var scene = EditorSceneManager.OpenScene(sourceScenePath, OpenSceneMode.Single);
-            SetupScene(scene);
-            EditorSceneManager.SaveScene(scene, targetScenePath);
-            Debug.Log($"Skill tree playtest scene created at {targetScenePath}.");
-        }
-
-        public static void SetupScene(Scene scene)
-        {
-            EnsureFolders();
-
-            var shard = AssetDatabase.LoadAssetAtPath<ItemDefinition>("Assets/_Game/Data/Items/TrainingShard.asset");
-            var demoSkill = EnsureTreeSkill();
-            var tree = EnsureSkillTree(shard, demoSkill, false);
-
-            SetupPlayers(scene, tree);
-            EnsureSkillTreeWindow(scene, tree);
-
+            EnsureFolder(DataFolder);
+            EnsureFolder(PrefabFolder);
+            LoadAtlas();
+            RegisterSoftKittySettings();
+            var profession = BuildData();
+            var nodePrefab = BuildNodePrefab();
+            var connectionPrefab = BuildConnectionPrefab();
+            var windowPrefab = BuildWindowPrefab(profession, nodePrefab, connectionPrefab);
+            IntegrateScene(scene, profession, windowPrefab);
+            AssetDatabase.SaveAssets();
             EditorSceneManager.MarkSceneDirty(scene);
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-            Debug.Log("Skill tree setup complete. Press Play and use K to open the skill tree.");
+            EditorSceneManager.SaveScene(scene);
+            Debug.Log("Profession Skill Tree data, prefabs and scene integration built successfully.");
         }
 
-        private static SkillDefinition EnsureTreeSkill()
+        public static void BuildFromBatchMode()
         {
-            var effect = LoadOrCreate<DamageSkillEffectDefinition>($"{EffectFolder}/Warrior_TreeFocusSlash.asset");
-            var effectSo = new SerializedObject(effect);
-            SetShape(effectSo, "attackShape", AttackShapeType.DirectionalBox, new Vector2(2.6f, 1.2f), 0f, 1.1f);
-            Set(effectSo, "damageTags", (int)(DamageTag.Skill | DamageTag.Melee));
-            effectSo.ApplyModifiedPropertiesWithoutUndo();
-            EditorUtility.SetDirty(effect);
-
-            var skill = LoadOrCreate<SkillDefinition>($"{SkillFolder}/TreeFocusSlash.asset");
-            var so = new SerializedObject(skill);
-            Set(so, "skillId", "tree_focus_slash");
-            Set(so, "displayName", "Focus Slash");
-            Set(so, "shortName", "Focus");
-            Set(so, "inputLabel", "Tree");
-            Set(so, "description", "A skill unlocked from the first test skill tree.");
-            Set(so, "classType", (int)CharacterClassType.Warrior);
-            Set(so, "skillType", (int)SkillType.Active);
-            Set(so, "manaCost", 8f);
-            Set(so, "cooldown", 4f);
-            Set(so, "duration", 0f);
-            Set(so, "baseDamageMultiplier", 1.25f);
-            Set(so, "damageLines", 2);
-            Set(so, "maxTargets", 2);
-            Set(so, "rank", 1);
-            so.FindProperty("effect").objectReferenceValue = effect;
-            so.ApplyModifiedPropertiesWithoutUndo();
-            EditorUtility.SetDirty(skill);
-            return skill;
+            EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+            Build();
         }
 
-        private static SkillTreeDefinition EnsureSkillTree(ItemDefinition shard, SkillDefinition demoSkill, bool overwriteNodes)
+        private static ProfessionDefinitionSO BuildData()
         {
-            var tree = LoadOrCreate<SkillTreeDefinition>($"{TreeFolder}/WarriorSkillTree.asset");
-            var so = new SerializedObject(tree);
-            Set(so, "treeId", "warrior_skill_tree");
-            Set(so, "displayName", "Warrior Skill Tree");
-
-            var focusIcon = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Game/Data/UI/SkillIcons/Icon_Focus.png");
-            var ironIcon = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Game/Data/UI/SkillIcons/Icon_Iron.png");
-            var speedIcon = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Game/Data/UI/SkillIcons/Icon_Speed.png");
-            var starIcon = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Game/Data/UI/SkillIcons/Icon_Star.png");
-
-            var nodes = so.FindProperty("nodes");
-            if (!overwriteNodes && nodes.arraySize > 0)
+            var nodesById = new Dictionary<string, SkillNodeDefinitionSO>();
+            foreach (var spec in Specs)
             {
+                var path = $"{DataFolder}/{spec.Id}.asset";
+                var node = LoadOrCreate<SkillNodeDefinitionSO>(path);
+                nodesById[spec.Id] = node;
+                PrepareIcon(spec.Icon);
+                var so = new SerializedObject(node);
+                so.FindProperty("nodeId").stringValue = spec.Id;
+                so.FindProperty("displayName").stringValue = spec.Title;
+                so.FindProperty("description").stringValue = spec.Description;
+                so.FindProperty("icon").objectReferenceValue = LoadIcon(spec.Icon);
+                so.FindProperty("abilityToGrant").objectReferenceValue = string.IsNullOrWhiteSpace(spec.AbilityPath)
+                    ? null : AssetDatabase.LoadAssetAtPath<SkillDefinition>(spec.AbilityPath);
+                so.FindProperty("requiredLevel").intValue = spec.Level;
+                so.FindProperty("price").intValue = spec.Price;
+                so.FindProperty("uiPosition").vector2Value = spec.Position;
                 so.ApplyModifiedPropertiesWithoutUndo();
-                EditorUtility.SetDirty(tree);
-                return tree;
+                EditorUtility.SetDirty(node);
             }
 
-            so.FindProperty("goldRefundRate").floatValue = 0.75f;
-            so.FindProperty("refundMaterials").boolValue = false;
-            nodes.arraySize = 11;
-            ConfigureNode(nodes.GetArrayElementAtIndex(0), "training_roots", "Attack Basics",
-                "Basic attack training and the start of the offensive branch.", 10, null, null,
-                SkillTreeUnlockAction.None, null, SkillTreeNodeType.Passive, starIcon, 3,
-                new RankEffectSpec(SkillTreeRankEffectType.AttackPower, 2f));
-            ConfigureNode(nodes.GetArrayElementAtIndex(1), "defense_basics", "Defense Basics",
-                "Basic armor training and the start of the defensive branch.", 10, null, null,
-                SkillTreeUnlockAction.None, null, SkillTreeNodeType.Passive, ironIcon, 3,
-                new RankEffectSpec(SkillTreeRankEffectType.Defense, 1f));
-            ConfigureNode(nodes.GetArrayElementAtIndex(2), "speed_basics", "Attack Speed Basics",
-                "Basic speed training and the start of the rapid attack branch.", 10, null, null,
-                SkillTreeUnlockAction.None, null, SkillTreeNodeType.Passive, speedIcon, 3,
-                new RankEffectSpec(SkillTreeRankEffectType.AttackSpeed, 0.05f));
-            ConfigureNode(nodes.GetArrayElementAtIndex(3), "focus_slash", "Focus Slash",
-                "Unlocks a new active skill. Requires Training Roots and one Training Shard.", 15,
-                shard != null ? new[] { new SkillTreeMaterialCost(shard, 1) } : null,
-                new[] { "training_roots" }, SkillTreeUnlockAction.UnlockSkill, demoSkill,
-                SkillTreeNodeType.Skill, focusIcon, 2,
-                new RankEffectSpec(SkillTreeRankEffectType.SkillDamagePercent, 0.15f, demoSkill, 2));
-            ConfigureNode(nodes.GetArrayElementAtIndex(4), "iron_discipline", "Iron Discipline",
-                "A defensive branch for surviving stronger monsters.", 12, null,
-                new[] { "defense_basics" }, SkillTreeUnlockAction.None, null,
-                SkillTreeNodeType.Passive, ironIcon, 3,
-                new RankEffectSpec(SkillTreeRankEffectType.Defense, 1.5f));
-            ConfigureNode(nodes.GetArrayElementAtIndex(5), "swift_training", "Swift Training",
-                "A speed branch for faster basic attacks.", 12, null,
-                new[] { "speed_basics" }, SkillTreeUnlockAction.None, null,
-                SkillTreeNodeType.Passive, speedIcon, 3,
-                new RankEffectSpec(SkillTreeRankEffectType.AttackSpeed, 0.08f),
-                new RankEffectSpec(SkillTreeRankEffectType.MoveSpeed, 0.3f));
-            ConfigureNode(nodes.GetArrayElementAtIndex(6), "sharpen_focus", "Sharpen Focus",
-                "Increase Focus Slash damage with every rank.", 18, null,
-                new[] { "focus_slash" }, SkillTreeUnlockAction.None, null,
-                SkillTreeNodeType.Upgrade, focusIcon, 3,
-                new RankEffectSpec(SkillTreeRankEffectType.SkillDamagePercent, 0.1f, demoSkill));
-            ConfigureNode(nodes.GetArrayElementAtIndex(7), "focused_flow", "Focused Flow",
-                "Reduce both the cooldown and mana cost of Focus Slash.", 18, null,
-                new[] { "focus_slash" }, SkillTreeUnlockAction.None, null,
-                SkillTreeNodeType.Upgrade, focusIcon, 3,
-                new RankEffectSpec(SkillTreeRankEffectType.SkillCooldownReductionPercent, 0.08f, demoSkill),
-                new RankEffectSpec(SkillTreeRankEffectType.SkillManaCostReductionPercent, 0.08f, demoSkill));
-            ConfigureNode(nodes.GetArrayElementAtIndex(8), "defense_mastery", "Fortress Training",
-                "Advance the defensive branch with stronger armor training.", 18, null,
-                new[] { "iron_discipline" }, SkillTreeUnlockAction.None, null,
-                SkillTreeNodeType.Upgrade, ironIcon, 3,
-                new RankEffectSpec(SkillTreeRankEffectType.Defense, 2.5f));
-            ConfigureNode(nodes.GetArrayElementAtIndex(9), "rapid_assault", "Rapid Assault",
-                "Advance the speed branch with increasingly rapid attacks.", 18, null,
-                new[] { "swift_training" }, SkillTreeUnlockAction.None, null,
-                SkillTreeNodeType.Upgrade, speedIcon, 3,
-                new RankEffectSpec(SkillTreeRankEffectType.AttackSpeed, 0.12f),
-                new RankEffectSpec(SkillTreeRankEffectType.JumpHeight, 0.15f));
-            ConfigureNode(nodes.GetArrayElementAtIndex(10), "battle_mastery", "Battle Mastery",
-                "A capstone unlocked after completing all three branches.", 30, null,
-                new[] { "sharpen_focus", "focused_flow", "defense_mastery", "rapid_assault" },
-                SkillTreeUnlockAction.None, null, SkillTreeNodeType.Passive, starIcon, 1,
-                new RankEffectSpec(SkillTreeRankEffectType.AttackPower, 5f),
-                new RankEffectSpec(SkillTreeRankEffectType.Defense, 3f));
+            foreach (var spec in Specs)
+            {
+                var so = new SerializedObject(nodesById[spec.Id]);
+                var parents = so.FindProperty("parentNodes");
+                parents.arraySize = spec.Parents.Length;
+                for (var i = 0; i < spec.Parents.Length; i++)
+                    parents.GetArrayElementAtIndex(i).objectReferenceValue = nodesById[spec.Parents[i]];
+                so.ApplyModifiedPropertiesWithoutUndo();
+            }
 
-            so.ApplyModifiedPropertiesWithoutUndo();
-            EditorUtility.SetDirty(tree);
-            return tree;
-        }
-
-        private static SkillTreeNodeView EnsureNodePrefab()
-        {
-            var existing = AssetDatabase.LoadAssetAtPath<SkillTreeNodeView>(NodePrefabPath);
-            if (existing != null)
-                return existing;
-
-            return BuildNodePrefab();
+            var profession = LoadOrCreate<ProfessionDefinitionSO>(ProfessionPath);
+            var professionSo = new SerializedObject(profession);
+            professionSo.FindProperty("professionId").stringValue = "warrior";
+            professionSo.FindProperty("displayName").stringValue = "Warrior";
+            professionSo.FindProperty("description").stringValue =
+                "A disciplined melee profession built around decisive attacks, defense and battlefield control.";
+            professionSo.FindProperty("icon").objectReferenceValue = LoadIcon(7);
+            var nodes = professionSo.FindProperty("skillNodes");
+            nodes.arraySize = Specs.Length;
+            for (var i = 0; i < Specs.Length; i++)
+                nodes.GetArrayElementAtIndex(i).objectReferenceValue = nodesById[Specs[i].Id];
+            professionSo.ApplyModifiedPropertiesWithoutUndo();
+            EditorUtility.SetDirty(profession);
+            return profession;
         }
 
         private static SkillTreeNodeView BuildNodePrefab()
         {
-            var root = CreateUIObject("SkillTreeNode", new Vector2(350f, 160f));
+            var root = RectObject("SkillTreeNode", null, new Vector2(190f, 150f), Vector2.zero);
             var background = root.AddComponent<Image>();
-            background.color = new Color(0.12f, 0.13f, 0.16f, 0.95f);
-            background.raycastTarget = false;
+            SetImage(background, "item", new Color(0.16f, 0.2f, 0.22f, 1f), true);
+            var button = root.AddComponent<Button>();
+            button.targetGraphic = background;
 
-            var iconObject = CreateUIObject("Icon", new Vector2(42f, 42f));
-            iconObject.transform.SetParent(root.transform, false);
-            ((RectTransform)iconObject.transform).anchoredPosition = new Vector2(-145f, 52f);
-            var icon = iconObject.AddComponent<Image>();
+            var frame = ImageChild(root.transform, "Frame", new Vector2(190f, 150f), Vector2.zero,
+                "item_frame", Color.white, true);
+            var glow = ImageChild(root.transform, "PurchasedGlow", new Vector2(196f, 156f), Vector2.zero,
+                "item_frame", new Color(1f, 0.58f, 0.12f, 0.9f), true);
+            var selected = ImageChild(root.transform, "SelectedFrame", new Vector2(202f, 162f), Vector2.zero,
+                "item_frame", new Color(0.3f, 0.8f, 1f, 1f), true);
+            var iconBack = ImageChild(root.transform, "IconBack", new Vector2(82f, 82f), new Vector2(0f, 17f),
+                "item", new Color(0.08f, 0.09f, 0.1f, 1f), true);
+            var icon = ImageChild(iconBack.transform, "Icon", new Vector2(70f, 70f), Vector2.zero,
+                null, Color.white, false);
             icon.preserveAspect = true;
-            icon.raycastTarget = false;
-
-            var title = CreateChildText(root.transform, "Title", new Vector2(190f, 28f), new Vector2(-20f, 60f), "Node", 20f);
-            title.alignment = TextAlignmentOptions.Center;
-            title.fontStyle = FontStyles.Bold;
-            title.color = Color.white;
-
-            var rank = CreateChildText(root.transform, "Rank", new Vector2(90f, 24f), new Vector2(120f, 60f), "Rank 0/1", 14f);
-            rank.alignment = TextAlignmentOptions.Right;
-            rank.fontStyle = FontStyles.Bold;
-            rank.color = new Color(0.65f, 0.85f, 1f);
-
-            var type = CreateChildText(root.transform, "Type", new Vector2(110f, 20f), new Vector2(-72f, 39f), "PASSIVE", 11f);
-            type.alignment = TextAlignmentOptions.Left;
-            type.fontStyle = FontStyles.Bold;
-            type.color = new Color(0.55f, 0.7f, 0.9f);
-
-            var description = CreateChildText(root.transform, "Description", new Vector2(240f, 24f), new Vector2(-18f, 20f), "Description", 13f);
-            description.alignment = TextAlignmentOptions.Center;
-            description.color = new Color(0.82f, 0.88f, 0.96f);
-
-            var effect = CreateChildText(root.transform, "Effect", new Vector2(220f, 24f),
-                new Vector2(-28f, -6f), "Upgrade effect", 13f);
-            effect.alignment = TextAlignmentOptions.Center;
-            effect.fontStyle = FontStyles.Bold;
-            effect.color = new Color(0.45f, 0.9f, 0.55f);
-
-            var cost = CreateChildText(root.transform, "Cost", new Vector2(160f, 22f), new Vector2(-80f, -28f), "Cost", 14f);
-            cost.alignment = TextAlignmentOptions.Left;
-            cost.color = new Color(1f, 0.88f, 0.42f);
-
-            var state = CreateChildText(root.transform, "State", new Vector2(90f, 22f), new Vector2(34f, -28f), "Locked", 14f);
-            state.alignment = TextAlignmentOptions.Right;
-            state.fontStyle = FontStyles.Bold;
-            state.color = Color.white;
-
-            var selectButton = CreateButton(root.transform, "SelectButton", new Vector2(82f, 28f),
-                new Vector2(124f, -28f), "Select");
-            var selectText = selectButton.GetComponentInChildren<TextMeshProUGUI>();
-            var upgradeButton = CreateButton(root.transform, "UpgradeButton", new Vector2(82f, 28f),
-                new Vector2(124f, 8f), "Unlock");
-            var upgradeText = upgradeButton.GetComponentInChildren<TextMeshProUGUI>();
-            var refundButton = CreateButton(root.transform, "RefundButton", new Vector2(82f, 24f),
-                new Vector2(124f, -61f), "Refund");
-            var refundText = refundButton.GetComponentInChildren<TextMeshProUGUI>();
+            var locked = ImageChild(root.transform, "LockedOverlay", new Vector2(184f, 144f), Vector2.zero,
+                null, new Color(0f, 0f, 0f, 0.5f), false);
+            var title = TextChild(root.transform, "Title", new Vector2(170f, 26f), new Vector2(0f, -48f),
+                "SKILL", 18f, TextAlignmentOptions.Center);
+            var state = TextChild(root.transform, "State", new Vector2(170f, 22f), new Vector2(0f, -70f),
+                "LOCKED", 13f, TextAlignmentOptions.Center);
+            state.color = new Color(1f, 0.67f, 0.2f, 1f);
+            glow.gameObject.SetActive(false);
+            selected.gameObject.SetActive(false);
 
             var view = root.AddComponent<SkillTreeNodeView>();
             var so = new SerializedObject(view);
-            so.FindProperty("upgradeButton").objectReferenceValue = upgradeButton;
+            so.FindProperty("button").objectReferenceValue = button;
             so.FindProperty("background").objectReferenceValue = background;
-            so.FindProperty("iconImage").objectReferenceValue = icon;
+            so.FindProperty("frame").objectReferenceValue = frame;
+            so.FindProperty("icon").objectReferenceValue = icon;
+            so.FindProperty("lockedOverlay").objectReferenceValue = locked.gameObject;
+            so.FindProperty("purchasedGlow").objectReferenceValue = glow.gameObject;
+            so.FindProperty("selectedFrame").objectReferenceValue = selected.gameObject;
             so.FindProperty("titleText").objectReferenceValue = title;
-            so.FindProperty("typeText").objectReferenceValue = type;
-            so.FindProperty("descriptionText").objectReferenceValue = description;
-            so.FindProperty("effectText").objectReferenceValue = effect;
-            so.FindProperty("costText").objectReferenceValue = cost;
             so.FindProperty("stateText").objectReferenceValue = state;
-            so.FindProperty("rankText").objectReferenceValue = rank;
-            so.FindProperty("upgradeButtonText").objectReferenceValue = upgradeText;
-            so.FindProperty("selectButton").objectReferenceValue = selectButton;
-            so.FindProperty("refundButton").objectReferenceValue = refundButton;
-            so.FindProperty("selectButtonText").objectReferenceValue = selectText;
-            so.FindProperty("refundButtonText").objectReferenceValue = refundText;
             so.ApplyModifiedPropertiesWithoutUndo();
-
             var prefab = PrefabUtility.SaveAsPrefabAsset(root, NodePrefabPath);
-            Object.DestroyImmediate(root);
+            UnityEngine.Object.DestroyImmediate(root);
             return prefab.GetComponent<SkillTreeNodeView>();
-        }
-
-        private static SkillTreeConnectionView EnsureConnectionPrefab()
-        {
-            var existing = AssetDatabase.LoadAssetAtPath<SkillTreeConnectionView>(ConnectionPrefabPath);
-            return existing != null ? existing : BuildConnectionPrefab();
         }
 
         private static SkillTreeConnectionView BuildConnectionPrefab()
         {
-            var root = CreateUIObject("SkillTreeConnection", new Vector2(100f, 6f));
-            var image = root.AddComponent<Image>();
-            image.raycastTarget = false;
-            image.color = new Color(0.25f, 0.27f, 0.32f, 0.9f);
+            var root = RectObject("SkillTreeConnection", null, new Vector2(100f, 18f), Vector2.zero);
+            var shadow = ImageChild(root.transform, "Shadow", new Vector2(100f, 15f), Vector2.zero,
+                "line4", Color.black, true);
+            var foreground = ImageChild(root.transform, "Foreground", new Vector2(100f, 9f), Vector2.zero,
+                "line4", new Color(0.25f, 0.65f, 0.8f), true);
+            var marker = ImageChild(root.transform, "DirectionMarker", new Vector2(14f, 14f), new Vector2(42f, 0f),
+                "star", new Color(0.25f, 0.65f, 0.8f), false);
             var view = root.AddComponent<SkillTreeConnectionView>();
             var so = new SerializedObject(view);
-            so.FindProperty("line").objectReferenceValue = root.transform;
-            so.FindProperty("image").objectReferenceValue = image;
+            so.FindProperty("lineRoot").objectReferenceValue = root.transform;
+            so.FindProperty("shadow").objectReferenceValue = shadow;
+            so.FindProperty("foreground").objectReferenceValue = foreground;
+            so.FindProperty("directionMarker").objectReferenceValue = marker;
             so.ApplyModifiedPropertiesWithoutUndo();
             var prefab = PrefabUtility.SaveAsPrefabAsset(root, ConnectionPrefabPath);
-            Object.DestroyImmediate(root);
+            UnityEngine.Object.DestroyImmediate(root);
             return prefab.GetComponent<SkillTreeConnectionView>();
         }
 
-        private static void SetupPlayers(Scene scene, SkillTreeDefinition tree)
-        {
-            foreach (var player in FindAllInScene<PlayerClassController>(scene))
-            {
-                var controller = player.GetComponent<PlayerSkillTreeController>();
-                if (controller == null)
-                    controller = player.gameObject.AddComponent<PlayerSkillTreeController>();
-
-                var so = new SerializedObject(controller);
-                so.FindProperty("skillTree").objectReferenceValue = tree;
-                so.FindProperty("player").objectReferenceValue = player;
-                so.FindProperty("inventory").objectReferenceValue = player.GetComponent<PlayerInventory>();
-                so.FindProperty("wallet").objectReferenceValue = player.GetComponent<CurrencyWallet>();
-                so.FindProperty("skillBar").objectReferenceValue = FindInScene<LetterHunter.UI.Skills.SkillBarPresenter>(scene);
-                so.FindProperty("skillLoadout").objectReferenceValue =
-                    player.GetComponent<LetterHunter.UI.Skills.PlayerSkillLoadout>();
-                so.ApplyModifiedPropertiesWithoutUndo();
-                EditorUtility.SetDirty(controller);
-            }
-        }
-
-        private static void EnsureSkillTreeWindow(Scene scene, SkillTreeDefinition tree)
-        {
-            var canvas = EnsureCanvas(scene);
-            var nodePrefab = EnsureNodePrefab();
-            var connectionPrefab = EnsureConnectionPrefab();
-            var existing = FindInScene<SkillTreeWindowPresenter>(scene);
-            if (existing != null)
-            {
-                if (existing.transform.parent != canvas.transform)
-                    existing.transform.SetParent(canvas.transform, false);
-                AssignWindow(existing, scene, nodePrefab, connectionPrefab);
-                return;
-            }
-
-            var window = CreateUIObject("SkillTreeWindow", new Vector2(440f, 430f));
-            window.transform.SetParent(canvas.transform, false);
-            var rect = (RectTransform)window.transform;
-            ConfigureSkillTreeWindowRect(rect);
-
-            var background = window.AddComponent<Image>();
-            background.color = new Color(0.035f, 0.04f, 0.055f, 0.95f);
-            var group = window.AddComponent<CanvasGroup>();
-
-            var title = CreateChildText(window.transform, "Title", new Vector2(390f, 42f), new Vector2(0f, 170f), tree.DisplayName, 28f);
-            title.alignment = TextAlignmentOptions.Center;
-            title.fontStyle = FontStyles.Bold;
-            title.color = Color.white;
-
-            Transform nodeRoot = null;
-            Transform connectionRoot = null;
-            EnsureScrollableTree(window.transform, ref nodeRoot, ref connectionRoot);
-
-            var feedback = CreateChildText(window.transform, "Feedback", new Vector2(380f, 28f), new Vector2(0f, -175f), "Press K to close.", 15f);
-            feedback.alignment = TextAlignmentOptions.Center;
-            feedback.color = new Color(0.78f, 0.84f, 0.92f);
-            var tooltipRoot = EnsureTooltip(window.transform, out var tooltipText);
-
-            var presenter = window.AddComponent<SkillTreeWindowPresenter>();
-            var so = new SerializedObject(presenter);
-            so.FindProperty("windowGroup").objectReferenceValue = group;
-            so.FindProperty("nodeRoot").objectReferenceValue = nodeRoot.transform;
-            so.FindProperty("connectionRoot").objectReferenceValue = connectionRoot.transform;
-            so.FindProperty("scrollContent").objectReferenceValue = nodeRoot.parent;
-            so.FindProperty("nodePrefab").objectReferenceValue = nodePrefab;
-            so.FindProperty("connectionPrefab").objectReferenceValue = connectionPrefab;
-            so.FindProperty("skillBar").objectReferenceValue = FindInScene<LetterHunter.UI.Skills.SkillBarPresenter>(scene);
-            so.FindProperty("titleText").objectReferenceValue = title;
-            so.FindProperty("feedbackText").objectReferenceValue = feedback;
-            so.FindProperty("tooltipRoot").objectReferenceValue = tooltipRoot;
-            so.FindProperty("tooltipText").objectReferenceValue = tooltipText;
-            so.FindProperty("startVisible").boolValue = false;
-            so.ApplyModifiedPropertiesWithoutUndo();
-            AssignWindow(presenter, scene, nodePrefab, connectionPrefab);
-        }
-
-        private static void AssignWindow(SkillTreeWindowPresenter presenter, Scene scene, SkillTreeNodeView nodePrefab,
+        private static GameObject BuildWindowPrefab(ProfessionDefinitionSO profession, SkillTreeNodeView nodePrefab,
             SkillTreeConnectionView connectionPrefab)
         {
-            ConfigureSkillTreeWindowRect((RectTransform)presenter.transform);
-            var so = new SerializedObject(presenter);
-            var nodeRoot = so.FindProperty("nodeRoot").objectReferenceValue as Transform;
-            if (nodeRoot == null)
-                nodeRoot = presenter.transform.Find("Nodes") ?? presenter.transform.Find("NodeList");
-            if (nodeRoot != null)
+            var root = RectObject("SkillTreeWindow", null, new Vector2(1920f, 1080f), Vector2.zero);
+            var overlay = root.AddComponent<Image>();
+            overlay.color = new Color(0.015f, 0.02f, 0.025f, 0.76f);
+            var group = root.AddComponent<CanvasGroup>();
+
+            var panel = ImageChild(root.transform, "Panel", new Vector2(1320f, 760f), Vector2.zero,
+                "bg2", new Color(0.12f, 0.14f, 0.15f, 1f), true);
+            AddShadow(panel.gameObject, new Vector2(12f, -12f), new Color(0f, 0f, 0f, 0.78f));
+            var header = ImageChild(panel.transform, "Header", new Vector2(1280f, 74f), new Vector2(0f, 323f),
+                "bar2", new Color(0.08f, 0.27f, 0.34f, 1f), true);
+            var title = TextChild(header.transform, "Title", new Vector2(480f, 50f), new Vector2(-370f, 0f),
+                "PROFESSION SKILLS", 31f, TextAlignmentOptions.MidlineLeft);
+            var level = TextChild(header.transform, "Level", new Vector2(180f, 40f), new Vector2(275f, 0f),
+                "LEVEL  1", 19f, TextAlignmentOptions.Center);
+            var coins = TextChild(header.transform, "Coins", new Vector2(190f, 40f), new Vector2(455f, 0f),
+                "COINS  0", 19f, TextAlignmentOptions.Center);
+            var close = ButtonChild(header.transform, "CloseButton", new Vector2(56f, 48f), new Vector2(600f, 0f),
+                "X", 24f);
+
+            var left = ImageChild(panel.transform, "ProfessionPanel", new Vector2(245f, 620f), new Vector2(-510f, -38f),
+                "bg2", new Color(0.08f, 0.1f, 0.11f, 0.98f), true);
+            var professionIcon = ImageChild(left.transform, "ProfessionIcon", new Vector2(112f, 112f), new Vector2(0f, 190f),
+                "item", Color.white, true);
+            professionIcon.preserveAspect = true;
+            var professionName = TextChild(left.transform, "ProfessionName", new Vector2(210f, 44f), new Vector2(0f, 105f),
+                "WARRIOR", 27f, TextAlignmentOptions.Center);
+            var professionDescription = TextChild(left.transform, "ProfessionDescription", new Vector2(205f, 270f),
+                new Vector2(0f, -70f), "Profession description", 17f, TextAlignmentOptions.TopLeft);
+            professionDescription.textWrappingMode = TextWrappingModes.Normal;
+
+            var center = ImageChild(panel.transform, "TreePanel", new Vector2(710f, 620f), new Vector2(-15f, -38f),
+                "bg2", new Color(0.065f, 0.075f, 0.08f, 0.98f), true);
+            var viewport = ImageChild(center.transform, "Viewport", new Vector2(674f, 552f), new Vector2(0f, 18f),
+                null, new Color(0f, 0f, 0f, 0.16f), false);
+            viewport.gameObject.AddComponent<RectMask2D>();
+            var content = RectObject("Content", viewport.transform, new Vector2(1200f, 540f), Vector2.zero);
+            content.GetComponent<RectTransform>().anchorMin = content.GetComponent<RectTransform>().anchorMax = new Vector2(0f, 1f);
+            content.GetComponent<RectTransform>().pivot = new Vector2(0f, 1f);
+            content.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
+            var connections = RectObject("Connections", content.transform, content.GetComponent<RectTransform>().sizeDelta, Vector2.zero);
+            var nodesRoot = RectObject("Nodes", content.transform, content.GetComponent<RectTransform>().sizeDelta, Vector2.zero);
+            ConfigureTopLeftLayer(connections.GetComponent<RectTransform>());
+            ConfigureTopLeftLayer(nodesRoot.GetComponent<RectTransform>());
+            nodesRoot.AddComponent<SkillTreeGraphLayoutGroup>();
+
+            var scrollbarBack = ImageChild(center.transform, "HorizontalScrollbar", new Vector2(650f, 16f),
+                new Vector2(0f, -286f), "bar2", new Color(0.1f, 0.12f, 0.13f, 1f), true);
+            var slidingArea = RectObject("SlidingArea", scrollbarBack.transform, new Vector2(626f, 12f), Vector2.zero);
+            var handle = ImageChild(slidingArea.transform, "Handle", new Vector2(180f, 12f), Vector2.zero,
+                "button", new Color(0.92f, 0.55f, 0.12f, 1f), true);
+            var scrollbar = scrollbarBack.gameObject.AddComponent<Scrollbar>();
+            scrollbar.handleRect = handle.rectTransform;
+            scrollbar.targetGraphic = handle;
+            scrollbar.direction = Scrollbar.Direction.LeftToRight;
+            var scroll = center.gameObject.AddComponent<ScrollRect>();
+            scroll.viewport = viewport.rectTransform;
+            scroll.content = content.GetComponent<RectTransform>();
+            scroll.horizontal = true;
+            scroll.vertical = false;
+            scroll.movementType = ScrollRect.MovementType.Clamped;
+            scroll.horizontalScrollbar = scrollbar;
+            scroll.scrollSensitivity = 36f;
+
+            var right = ImageChild(panel.transform, "DetailsPanel", new Vector2(285f, 620f), new Vector2(500f, -38f),
+                "bg2", new Color(0.08f, 0.1f, 0.11f, 0.98f), true);
+            TextChild(right.transform, "DetailsHeader", new Vector2(240f, 30f), new Vector2(0f, 270f),
+                "SKILL DETAILS", 16f, TextAlignmentOptions.Center).color = new Color(1f, 0.62f, 0.16f);
+            var detailIcon = ImageChild(right.transform, "DetailIcon", new Vector2(104f, 104f), new Vector2(0f, 195f),
+                "item", Color.white, true);
+            detailIcon.preserveAspect = true;
+            var detailName = TextChild(right.transform, "DetailName", new Vector2(250f, 38f), new Vector2(0f, 120f),
+                "SKILL", 24f, TextAlignmentOptions.Center);
+            var detailDescription = TextChild(right.transform, "DetailDescription", new Vector2(245f, 145f),
+                new Vector2(0f, 22f), "Description", 16f, TextAlignmentOptions.TopLeft);
+            detailDescription.textWrappingMode = TextWrappingModes.Normal;
+            var requirements = TextChild(right.transform, "Requirements", new Vector2(245f, 130f),
+                new Vector2(0f, -125f), "Requirements", 15f, TextAlignmentOptions.TopLeft);
+            requirements.textWrappingMode = TextWrappingModes.Normal;
+            var detailState = TextChild(right.transform, "State", new Vector2(240f, 28f), new Vector2(0f, -220f),
+                "LOCKED", 17f, TextAlignmentOptions.Center);
+            detailState.color = new Color(1f, 0.62f, 0.16f);
+            var buy = ButtonChild(right.transform, "BuyButton", new Vector2(220f, 52f), new Vector2(0f, -270f),
+                "BUY", 19f);
+            var feedback = TextChild(panel.transform, "Feedback", new Vector2(650f, 28f), new Vector2(-15f, -354f),
+                "K TOGGLE   •   ESC CLOSE", 14f, TextAlignmentOptions.Center);
+
+            var nodeViews = new List<SkillTreeNodeView>();
+            foreach (var node in profession.SkillNodes)
             {
-                nodeRoot.name = "Nodes";
+                if (node == null) continue;
+                var instance = PrefabUtility.InstantiatePrefab(nodePrefab.gameObject, nodesRoot.transform) as GameObject;
+                instance.name = $"Node_{node.NodeId}";
+                var view = instance.GetComponent<SkillTreeNodeView>();
+                var viewSo = new SerializedObject(view);
+                viewSo.FindProperty("configuredNode").objectReferenceValue = node;
+                viewSo.ApplyModifiedPropertiesWithoutUndo();
+                nodeViews.Add(view);
+            }
+            var edgeCount = profession.SkillNodes.Where(node => node != null).Sum(node => node.ParentNodes.Count);
+            var connectionViews = new List<SkillTreeConnectionView>();
+            for (var i = 0; i < edgeCount; i++)
+            {
+                var instance = PrefabUtility.InstantiatePrefab(connectionPrefab.gameObject, connections.transform) as GameObject;
+                instance.name = $"Connection_{i + 1:00}";
+                connectionViews.Add(instance.GetComponent<SkillTreeConnectionView>());
             }
 
-            var connectionRoot = so.FindProperty("connectionRoot").objectReferenceValue as Transform;
-            if (connectionRoot == null)
-                connectionRoot = presenter.transform.Find("Connections");
+            var presenter = root.AddComponent<SkillTreeWindowPresenter>();
+            var presenterSo = new SerializedObject(presenter);
+            presenterSo.FindProperty("windowGroup").objectReferenceValue = group;
+            presenterSo.FindProperty("closeButton").objectReferenceValue = close;
+            presenterSo.FindProperty("titleText").objectReferenceValue = title;
+            presenterSo.FindProperty("levelText").objectReferenceValue = level;
+            presenterSo.FindProperty("coinsText").objectReferenceValue = coins;
+            presenterSo.FindProperty("feedbackText").objectReferenceValue = feedback;
+            presenterSo.FindProperty("professionIcon").objectReferenceValue = professionIcon;
+            presenterSo.FindProperty("professionNameText").objectReferenceValue = professionName;
+            presenterSo.FindProperty("professionDescriptionText").objectReferenceValue = professionDescription;
+            presenterSo.FindProperty("scrollContent").objectReferenceValue = content.GetComponent<RectTransform>();
+            presenterSo.FindProperty("connectionRoot").objectReferenceValue = connections.transform;
+            presenterSo.FindProperty("nodeRoot").objectReferenceValue = nodesRoot.transform;
+            SetObjectList(presenterSo.FindProperty("nodeViews"), nodeViews);
+            SetObjectList(presenterSo.FindProperty("connectionViews"), connectionViews);
+            presenterSo.FindProperty("detailIcon").objectReferenceValue = detailIcon;
+            presenterSo.FindProperty("detailNameText").objectReferenceValue = detailName;
+            presenterSo.FindProperty("detailDescriptionText").objectReferenceValue = detailDescription;
+            presenterSo.FindProperty("detailRequirementsText").objectReferenceValue = requirements;
+            presenterSo.FindProperty("detailStateText").objectReferenceValue = detailState;
+            presenterSo.FindProperty("buyButton").objectReferenceValue = buy;
+            presenterSo.FindProperty("buyButtonText").objectReferenceValue = buy.GetComponentInChildren<TextMeshProUGUI>();
+            presenterSo.ApplyModifiedPropertiesWithoutUndo();
 
-            EnsureScrollableTree(presenter.transform, ref nodeRoot, ref connectionRoot);
-            var tooltipRoot = EnsureTooltip(presenter.transform, out var tooltipText);
-            ConfigureWindowChrome(presenter.transform);
-
-            if (nodeRoot != null)
-            {
-                connectionRoot.SetAsFirstSibling();
-                nodeRoot.SetAsLastSibling();
-            }
-
-            so.FindProperty("controller").objectReferenceValue = FindInScene<PlayerSkillTreeController>(scene);
-            so.FindProperty("nodeRoot").objectReferenceValue = nodeRoot;
-            so.FindProperty("connectionRoot").objectReferenceValue = connectionRoot;
-            so.FindProperty("scrollContent").objectReferenceValue = nodeRoot != null ? nodeRoot.parent : null;
-            so.FindProperty("nodePrefab").objectReferenceValue = nodePrefab;
-            so.FindProperty("connectionPrefab").objectReferenceValue = connectionPrefab;
-            so.FindProperty("tooltipRoot").objectReferenceValue = tooltipRoot;
-            so.FindProperty("tooltipText").objectReferenceValue = tooltipText;
-            so.FindProperty("skillBar").objectReferenceValue = FindInScene<LetterHunter.UI.Skills.SkillBarPresenter>(scene);
-            so.ApplyModifiedPropertiesWithoutUndo();
-            EditorUtility.SetDirty(presenter);
+            var prefab = PrefabUtility.SaveAsPrefabAsset(root, WindowPrefabPath);
+            UnityEngine.Object.DestroyImmediate(root);
+            return prefab;
         }
 
-        private static GameObject EnsureTooltip(Transform window, out TMP_Text tooltipText)
+        private static void IntegrateScene(Scene scene, ProfessionDefinitionSO profession, GameObject windowPrefab)
         {
-            var existing = window.Find("Tooltip");
-            GameObject root;
-            if (existing == null)
+            var controller = UnityEngine.Object.FindFirstObjectByType<PlayerSkillTreeController>(FindObjectsInactive.Include);
+            var player = UnityEngine.Object.FindFirstObjectByType<PlayerClassController>(FindObjectsInactive.Include);
+            if (controller == null && player != null) controller = player.gameObject.AddComponent<PlayerSkillTreeController>();
+            if (controller == null) throw new InvalidOperationException("PlayerSkillTreeController not found.");
+            var controllerSo = new SerializedObject(controller);
+            controllerSo.FindProperty("startingProfession").objectReferenceValue = profession;
+            var professions = controllerSo.FindProperty("availableProfessions");
+            professions.arraySize = 1;
+            professions.GetArrayElementAtIndex(0).objectReferenceValue = profession;
+            controllerSo.ApplyModifiedPropertiesWithoutUndo();
+
+            var old = UnityEngine.Object.FindFirstObjectByType<SkillTreeWindowPresenter>(FindObjectsInactive.Include);
+            Transform parent = null;
+            if (old != null)
             {
-                root = CreateUIObject("Tooltip", new Vector2(260f, 210f));
-                root.transform.SetParent(window, false);
-                ((RectTransform)root.transform).anchoredPosition = new Vector2(370f, 10f);
-                var image = root.AddComponent<Image>();
-                image.color = new Color(0.055f, 0.065f, 0.085f, 0.98f);
+                parent = old.transform.parent;
+                UnityEngine.Object.DestroyImmediate(old.gameObject);
+            }
+            if (parent == null)
+            {
+                var canvas = UnityEngine.Object.FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None)
+                    .FirstOrDefault(candidate => candidate.name == "SkillTreeCanvas");
+                if (canvas == null) canvas = CreateCanvas(scene);
+                parent = canvas.transform;
             }
 
-            else
-            {
-                root = existing.gameObject;
-            }
-
-            var tooltipRect = (RectTransform)root.transform;
-            tooltipRect.anchorMin = Vector2.one;
-            tooltipRect.anchorMax = Vector2.one;
-            tooltipRect.pivot = Vector2.one;
-            tooltipRect.anchoredPosition = new Vector2(-20f, -78f);
-
-            tooltipText = root.GetComponentInChildren<TextMeshProUGUI>(true);
-            if (tooltipText == null)
-            {
-                tooltipText = CreateChildText(root.transform, "Text", new Vector2(224f, 178f), Vector2.zero,
-                    "Skill tree node details", 14f);
-                tooltipText.alignment = TextAlignmentOptions.TopLeft;
-                tooltipText.textWrappingMode = TextWrappingModes.Normal;
-                tooltipText.overflowMode = TextOverflowModes.Ellipsis;
-                tooltipText.color = new Color(0.9f, 0.93f, 0.98f);
-            }
-
-            root.SetActive(false);
-            return root;
-        }
-
-        private static void EnsureScrollableTree(Transform window, ref Transform nodeRoot, ref Transform connectionRoot)
-        {
-            var scrollTransform = window.Find("TreeScroll");
-            GameObject scrollObject;
-            if (scrollTransform == null)
-            {
-                scrollObject = CreateUIObject("TreeScroll", new Vector2(390f, 270f));
-                scrollObject.transform.SetParent(window, false);
-                ((RectTransform)scrollObject.transform).anchoredPosition = new Vector2(0f, 10f);
-            }
-
-            else
-            {
-                scrollObject = scrollTransform.gameObject;
-            }
-
-            var scrollObjectRect = (RectTransform)scrollObject.transform;
-            scrollObjectRect.anchorMin = Vector2.zero;
-            scrollObjectRect.anchorMax = Vector2.one;
-            scrollObjectRect.offsetMin = new Vector2(20f, 56f);
-            scrollObjectRect.offsetMax = new Vector2(-20f, -72f);
-
-            var scrollRect = scrollObject.GetComponent<ScrollRect>();
-            if (scrollRect == null)
-                scrollRect = scrollObject.AddComponent<ScrollRect>();
-
-            var viewport = scrollObject.transform.Find("Viewport") as RectTransform;
-            if (viewport == null)
-            {
-                var viewportObject = CreateUIObject("Viewport", Vector2.zero);
-                viewportObject.transform.SetParent(scrollObject.transform, false);
-                viewport = (RectTransform)viewportObject.transform;
-                StretchToParent(viewport);
-                var viewportImage = viewportObject.AddComponent<Image>();
-                viewportImage.color = new Color(1f, 1f, 1f, 0.01f);
-                var mask = viewportObject.AddComponent<Mask>();
-                mask.showMaskGraphic = false;
-            }
-
-            var content = viewport.Find("Content") as RectTransform;
-            if (content == null)
-            {
-                var contentObject = CreateUIObject("Content", new Vector2(900f, 500f));
-                contentObject.transform.SetParent(viewport, false);
-                content = (RectTransform)contentObject.transform;
-                content.anchorMin = new Vector2(0.5f, 0.5f);
-                content.anchorMax = new Vector2(0.5f, 0.5f);
-                content.pivot = new Vector2(0.5f, 0.5f);
-            }
-
-            if (connectionRoot == null)
-                connectionRoot = CreateUIObject("Connections", content.sizeDelta).transform;
-            if (nodeRoot == null)
-                nodeRoot = CreateUIObject("Nodes", content.sizeDelta).transform;
-
-            ConfigureTreeLayer(connectionRoot, content);
-            ConfigureTreeLayer(nodeRoot, content);
-            GameObjectUtility.RemoveMonoBehavioursWithMissingScript(nodeRoot.gameObject);
-            var oldLayout = nodeRoot.GetComponent<VerticalLayoutGroup>();
-            if (oldLayout != null)
-                Object.DestroyImmediate(oldLayout);
-            var layout = nodeRoot.GetComponent<SkillTreeGraphLayoutGroup>();
-            if (layout == null)
-            {
-                layout = nodeRoot.gameObject.AddComponent<SkillTreeGraphLayoutGroup>();
-                layout.padding = new RectOffset(40, 40, 40, 40);
-            }
-            connectionRoot.SetAsFirstSibling();
-            nodeRoot.SetAsLastSibling();
-
-            scrollRect.viewport = viewport;
-            scrollRect.content = content;
-            scrollRect.horizontal = true;
-            scrollRect.vertical = true;
-            scrollRect.movementType = ScrollRect.MovementType.Clamped;
-            scrollRect.scrollSensitivity = 32f;
-            scrollRect.verticalNormalizedPosition = 1f;
-            scrollRect.horizontalNormalizedPosition = 0f;
-        }
-
-        private static void ConfigureSkillTreeWindowRect(RectTransform rect)
-        {
-            rect.anchorMin = new Vector2(0.03f, 0.08f);
-            rect.anchorMax = new Vector2(0.55f, 0.92f);
-            rect.pivot = new Vector2(0.5f, 0.5f);
-            rect.offsetMin = Vector2.zero;
-            rect.offsetMax = Vector2.zero;
-        }
-
-        private static void ConfigureWindowChrome(Transform window)
-        {
-            if (window.Find("Title") is RectTransform title)
-            {
-                title.anchorMin = new Vector2(0f, 1f);
-                title.anchorMax = new Vector2(1f, 1f);
-                title.pivot = new Vector2(0.5f, 1f);
-                title.offsetMin = new Vector2(20f, -54f);
-                title.offsetMax = new Vector2(-20f, -10f);
-            }
-
-            if (window.Find("Feedback") is RectTransform feedback)
-            {
-                feedback.anchorMin = new Vector2(0f, 0f);
-                feedback.anchorMax = new Vector2(1f, 0f);
-                feedback.pivot = new Vector2(0.5f, 0f);
-                feedback.offsetMin = new Vector2(20f, 14f);
-                feedback.offsetMax = new Vector2(-20f, 46f);
-            }
-        }
-
-        private static void ConfigureTreeLayer(Transform layer, RectTransform content)
-        {
-            layer.SetParent(content, false);
-            if (layer is not RectTransform rect)
-                return;
-            rect.anchorMin = new Vector2(0.5f, 0.5f);
-            rect.anchorMax = new Vector2(0.5f, 0.5f);
-            rect.pivot = new Vector2(0.5f, 0.5f);
-            rect.anchoredPosition = Vector2.zero;
-            rect.sizeDelta = content.sizeDelta;
-        }
-
-        private static void StretchToParent(RectTransform rect)
-        {
+            var instance = PrefabUtility.InstantiatePrefab(windowPrefab, parent) as GameObject;
+            instance.name = "ProfessionSkillTreeWindow";
+            var rect = (RectTransform)instance.transform;
             rect.anchorMin = Vector2.zero;
             rect.anchorMax = Vector2.one;
             rect.offsetMin = Vector2.zero;
             rect.offsetMax = Vector2.zero;
+            var presenter = instance.GetComponent<SkillTreeWindowPresenter>();
+            var so = new SerializedObject(presenter);
+            so.FindProperty("controller").objectReferenceValue = controller;
+            so.FindProperty("characterInput").objectReferenceValue =
+                UnityEngine.Object.FindFirstObjectByType<CharacterInputRouter>(FindObjectsInactive.Include);
+            var blocked = so.FindProperty("additionalInputsToBlock");
+            var debugInput = UnityEngine.Object.FindFirstObjectByType<PlayerDebugInput2D>(FindObjectsInactive.Include);
+            blocked.arraySize = debugInput != null ? 1 : 0;
+            if (debugInput != null) blocked.GetArrayElementAtIndex(0).objectReferenceValue = debugInput;
+            so.ApplyModifiedPropertiesWithoutUndo();
         }
 
-        private static Canvas EnsureCanvas(Scene scene)
+        private static Canvas CreateCanvas(Scene scene)
         {
-            Canvas canvas = null;
-            foreach (var candidate in FindAllInScene<Canvas>(scene))
-            {
-                if (candidate.name == "SkillTreeCanvas")
-                {
-                    canvas = candidate;
-                    break;
-                }
-            }
-
-            if (canvas != null)
-            {
-                EnsureEventSystem(scene);
-                return canvas;
-            }
-
-            var canvasObject = new GameObject("SkillTreeCanvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
-            if (scene.IsValid())
-                SceneManager.MoveGameObjectToScene(canvasObject, scene);
-            canvas = canvasObject.GetComponent<Canvas>();
+            var go = new GameObject("SkillTreeCanvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+            SceneManager.MoveGameObjectToScene(go, scene);
+            var canvas = go.GetComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.sortingOrder = 80;
-            var scaler = canvasObject.GetComponent<CanvasScaler>();
+            canvas.sortingOrder = 90;
+            var scaler = go.GetComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1920f, 1080f);
-            EnsureEventSystem(scene);
+            scaler.matchWidthOrHeight = 0.5f;
             return canvas;
         }
 
-        private static void EnsureFolders()
+        private static void LoadAtlas()
         {
-            EnsureAssetFolder(TreeFolder);
-            EnsureAssetFolder(SkillFolder);
-            EnsureAssetFolder(EffectFolder);
-            EnsureAssetFolder(UiPrefabFolder);
+            _atlas = AssetDatabase.LoadAllAssetsAtPath(AtlasPath).OfType<Sprite>()
+                .GroupBy(sprite => sprite.name).ToDictionary(group => group.Key, group => group.First());
+        }
+        private static Sprite Skin(string name) => !string.IsNullOrWhiteSpace(name) && _atlas.TryGetValue(name, out var sprite) ? sprite : null;
+        private static Sprite LoadIcon(int number) => AssetDatabase.LoadAssetAtPath<Sprite>($"{IconFolder}/Skill_{number}.png");
+        private static void PrepareIcon(int number)
+        {
+            var path = $"{IconFolder}/Skill_{number}.png";
+            if (AssetImporter.GetAtPath(path) is not TextureImporter importer) return;
+            if (importer.textureType == TextureImporterType.Sprite && importer.spriteImportMode == SpriteImportMode.Single) return;
+            importer.textureType = TextureImporterType.Sprite;
+            importer.spriteImportMode = SpriteImportMode.Single;
+            importer.alphaIsTransparency = true;
+            importer.mipmapEnabled = false;
+            importer.SaveAndReimport();
         }
 
+        private static GameObject RectObject(string name, Transform parent, Vector2 size, Vector2 position)
+        {
+            var go = new GameObject(name, typeof(RectTransform));
+            if (parent != null) go.transform.SetParent(parent, false);
+            var rect = (RectTransform)go.transform;
+            rect.sizeDelta = size;
+            rect.anchoredPosition = position;
+            return go;
+        }
+        private static Image ImageChild(Transform parent, string name, Vector2 size, Vector2 position,
+            string spriteName, Color color, bool sliced)
+        {
+            var go = RectObject(name, parent, size, position);
+            var image = go.AddComponent<Image>();
+            SetImage(image, spriteName, color, sliced);
+            image.raycastTarget = false;
+            return image;
+        }
+        private static void SetImage(Image image, string spriteName, Color color, bool sliced)
+        {
+            image.sprite = Skin(spriteName);
+            image.color = color;
+            if (image.sprite != null && sliced) image.type = Image.Type.Sliced;
+        }
+        private static TextMeshProUGUI TextChild(Transform parent, string name, Vector2 size, Vector2 position,
+            string text, float fontSize, TextAlignmentOptions alignment)
+        {
+            var go = RectObject(name, parent, size, position);
+            var label = go.AddComponent<TextMeshProUGUI>();
+            label.text = text;
+            label.fontSize = fontSize;
+            label.fontStyle = FontStyles.Bold;
+            label.color = new Color(0.92f, 0.9f, 0.82f, 1f);
+            label.alignment = alignment;
+            label.raycastTarget = false;
+            return label;
+        }
+        private static Button ButtonChild(Transform parent, string name, Vector2 size, Vector2 position,
+            string text, float fontSize)
+        {
+            var go = RectObject(name, parent, size, position);
+            var image = go.AddComponent<Image>();
+            SetImage(image, "button", new Color(0.75f, 0.43f, 0.12f, 1f), true);
+            var button = go.AddComponent<Button>();
+            button.targetGraphic = image;
+            TextChild(go.transform, "Text", size, Vector2.zero, text, fontSize, TextAlignmentOptions.Center);
+            return button;
+        }
+        private static void AddShadow(GameObject go, Vector2 distance, Color color)
+        {
+            var shadow = go.AddComponent<Shadow>();
+            shadow.effectDistance = distance;
+            shadow.effectColor = color;
+        }
+        private static void ConfigureTopLeftLayer(RectTransform rect)
+        {
+            rect.anchorMin = rect.anchorMax = new Vector2(0f, 1f);
+            rect.pivot = new Vector2(0f, 1f);
+            rect.anchoredPosition = Vector2.zero;
+        }
+        private static void SetObjectList<T>(SerializedProperty property, IList<T> values) where T : UnityEngine.Object
+        {
+            property.arraySize = values.Count;
+            for (var i = 0; i < values.Count; i++) property.GetArrayElementAtIndex(i).objectReferenceValue = values[i];
+        }
         private static T LoadOrCreate<T>(string path) where T : ScriptableObject
         {
             var asset = AssetDatabase.LoadAssetAtPath<T>(path);
-            if (asset != null)
-                return asset;
-            EnsureAssetFolder(Path.GetDirectoryName(path)?.Replace('\\', '/'));
+            if (asset != null) return asset;
             asset = ScriptableObject.CreateInstance<T>();
             AssetDatabase.CreateAsset(asset, path);
             return asset;
         }
-
-        private static void ConfigureNode(SerializedProperty property, string id, string title, string description,
-            int goldCost, SkillTreeMaterialCost[] materials, string[] prerequisites,
-            SkillTreeUnlockAction action, SkillDefinition skill, SkillTreeNodeType nodeType, Sprite icon,
-            int maxRank, params RankEffectSpec[] effects)
+        private static void EnsureFolder(string path)
         {
-            property.FindPropertyRelative("nodeId").stringValue = id;
-            property.FindPropertyRelative("displayName").stringValue = title;
-            property.FindPropertyRelative("nodeType").intValue = (int)nodeType;
-            property.FindPropertyRelative("icon").objectReferenceValue = icon;
-            property.FindPropertyRelative("description").stringValue = description;
-            property.FindPropertyRelative("goldCost").intValue = goldCost;
-            property.FindPropertyRelative("unlockAction").intValue = (int)action;
-            property.FindPropertyRelative("skillToUnlock").objectReferenceValue = skill;
-            property.FindPropertyRelative("maxRank").intValue = maxRank;
-            property.FindPropertyRelative("uiPosition").vector2Value = Vector2.zero;
-
-            var rankEffects = property.FindPropertyRelative("rankEffects");
-            rankEffects.arraySize = effects?.Length ?? 0;
-            for (var i = 0; i < rankEffects.arraySize; i++)
-            {
-                var rankEffect = rankEffects.GetArrayElementAtIndex(i);
-                rankEffect.FindPropertyRelative("effectType").intValue = (int)effects[i].Type;
-                rankEffect.FindPropertyRelative("targetSkill").objectReferenceValue = effects[i].TargetSkill;
-                rankEffect.FindPropertyRelative("amountPerRank").floatValue = effects[i].AmountPerRank;
-                rankEffect.FindPropertyRelative("firstAppliedRank").intValue = effects[i].FirstAppliedRank;
-            }
-
-            var materialCosts = property.FindPropertyRelative("materialCosts");
-            materialCosts.arraySize = materials != null ? materials.Length : 0;
-            for (var i = 0; i < materialCosts.arraySize; i++)
-            {
-                materialCosts.GetArrayElementAtIndex(i).FindPropertyRelative("item").objectReferenceValue = materials[i].Item;
-                materialCosts.GetArrayElementAtIndex(i).FindPropertyRelative("amount").intValue = materials[i].Amount;
-            }
-
-            var prereq = property.FindPropertyRelative("prerequisiteNodeIds");
-            prereq.arraySize = prerequisites != null ? prerequisites.Length : 0;
-            for (var i = 0; i < prereq.arraySize; i++)
-                prereq.GetArrayElementAtIndex(i).stringValue = prerequisites[i];
+            if (AssetDatabase.IsValidFolder(path)) return;
+            var parent = System.IO.Path.GetDirectoryName(path)?.Replace('\\', '/');
+            EnsureFolder(parent);
+            AssetDatabase.CreateFolder(parent, System.IO.Path.GetFileName(path));
         }
-
-        private static void SetShape(SerializedObject so, string name, AttackShapeType type, Vector2 size, float radius, float offset)
+        private static void RegisterSoftKittySettings()
         {
-            var p = so.FindProperty(name);
-            p.FindPropertyRelative("type").intValue = (int)type;
-            p.FindPropertyRelative("size").vector2Value = size;
-            p.FindPropertyRelative("radius").floatValue = radius;
-            p.FindPropertyRelative("forwardOffset").floatValue = offset;
+            var settings = AssetDatabase.LoadMainAssetAtPath("Assets/SoftKitty/Data/SGD_Settings.asset");
+            if (settings != null) EditorBuildSettings.AddConfigObject("com.SoftKitty.settings", settings, true);
         }
-
-        private static void EnsureAssetFolder(string path)
-        {
-            if (string.IsNullOrEmpty(path) || AssetDatabase.IsValidFolder(path))
-                return;
-            var parent = Path.GetDirectoryName(path)?.Replace('\\', '/');
-            EnsureAssetFolder(parent);
-            AssetDatabase.CreateFolder(parent, Path.GetFileName(path));
-        }
-
-        private static GameObject CreateUIObject(string name, Vector2 size)
-        {
-            var go = new GameObject(name, typeof(RectTransform));
-            ((RectTransform)go.transform).sizeDelta = size;
-            return go;
-        }
-
-        private static TMP_Text CreateChildText(Transform parent, string name, Vector2 size, Vector2 position, string text, float fontSize)
-        {
-            var go = CreateUIObject(name, size);
-            go.transform.SetParent(parent, false);
-            ((RectTransform)go.transform).anchoredPosition = position;
-            var tmp = go.AddComponent<TextMeshProUGUI>();
-            tmp.text = text;
-            tmp.fontSize = fontSize;
-            tmp.raycastTarget = false;
-            tmp.textWrappingMode = TextWrappingModes.NoWrap;
-            tmp.overflowMode = TextOverflowModes.Ellipsis;
-            return tmp;
-        }
-
-        private static Button CreateButton(Transform parent, string name, Vector2 size, Vector2 position, string text)
-        {
-            var go = CreateUIObject(name, size);
-            go.transform.SetParent(parent, false);
-            ((RectTransform)go.transform).anchoredPosition = position;
-            var image = go.AddComponent<Image>();
-            image.color = new Color(0.95f, 0.78f, 0.25f, 0.95f);
-            var button = go.AddComponent<Button>();
-            button.targetGraphic = image;
-            var label = CreateChildText(go.transform, "Text", size, Vector2.zero, text, 13f);
-            label.alignment = TextAlignmentOptions.Center;
-            label.fontStyle = FontStyles.Bold;
-            label.color = Color.black;
-            return button;
-        }
-
-        private static void EnsureEventSystem(Scene scene)
-        {
-            if (FindInScene<EventSystem>(scene) != null)
-                return;
-            var eventObject = new GameObject("EventSystem", typeof(EventSystem));
-            if (scene.IsValid())
-                SceneManager.MoveGameObjectToScene(eventObject, scene);
-#if ENABLE_INPUT_SYSTEM
-            eventObject.AddComponent<InputSystemUIInputModule>();
-#else
-            eventObject.AddComponent<StandaloneInputModule>();
-#endif
-        }
-
-        private static T FindInScene<T>(Scene scene) where T : Object
-        {
-            foreach (var item in FindAllInScene<T>(scene))
-                return item;
-            return null;
-        }
-
-        private static T[] FindAllInScene<T>(Scene scene) where T : Object
-        {
-            var all = Object.FindObjectsByType<T>(FindObjectsSortMode.None);
-            if (!scene.IsValid())
-                return all;
-            var list = new System.Collections.Generic.List<T>();
-            foreach (var item in all)
-                if (item is Component component && component.gameObject.scene == scene)
-                    list.Add(item);
-            return list.ToArray();
-        }
-
-        private static void Set(SerializedObject so, string name, int value) => so.FindProperty(name).intValue = value;
-        private static void Set(SerializedObject so, string name, float value) => so.FindProperty(name).floatValue = value;
-        private static void Set(SerializedObject so, string name, string value) => so.FindProperty(name).stringValue = value;
     }
 }
 #endif

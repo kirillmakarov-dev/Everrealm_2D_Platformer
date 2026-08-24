@@ -20,9 +20,19 @@ namespace LetterHunter.Characters
         public event Action JumpRequested;
         public event Action AttackRequested;
         public event Action<int> SkillRequested;
+        public bool IsBlocked { get; private set; }
+
+        public void SetBlocked(bool blocked)
+        {
+            IsBlocked = blocked;
+            if (blocked)
+                MoveRequested?.Invoke(Vector2.zero);
+        }
 
         private void Update()
         {
+            if (IsBlocked)
+                return;
             var keyboard = Keyboard.current;
             if (keyboard == null) return;
             var move = Vector2.zero;

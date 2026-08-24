@@ -176,15 +176,19 @@ namespace LetterHunter.Save
             if (skillTree == null)
                 return;
 
-            foreach (var nodeId in skillTree.Progress.UnlockedNodeIds)
-                data.unlockedSkillTreeNodeIds.Add(nodeId);
-
-            foreach (var pair in skillTree.Progress.NodeRanks)
+            data.skillTree = new SkillTreeSaveBlock
             {
-                data.skillTreeNodeRanks.Add(new SkillTreeNodeRankSaveData
+                schemaVersion = 1,
+                activeProfessionId = skillTree.ActiveProfession != null
+                    ? skillTree.ActiveProfession.ProfessionId
+                    : string.Empty
+            };
+            foreach (var purchased in skillTree.Progress.EnumeratePurchased())
+            {
+                data.skillTree.purchasedNodes.Add(new PurchasedSkillNodeSaveData
                 {
-                    nodeId = pair.Key,
-                    rank = pair.Value
+                    professionId = purchased.ProfessionId,
+                    nodeId = purchased.NodeId
                 });
             }
         }
@@ -230,22 +234,28 @@ namespace LetterHunter.Save
             if (skillTree == null)
                 return;
 
-            if (data.skillTreeNodeRanks != null && data.skillTreeNodeRanks.Count > 0)
+            if (data.skillTree != null && data.skillTree.schemaVersion >= 1)
             {
-                var ranks = new List<KeyValuePair<string, int>>();
-                foreach (var savedRank in data.skillTreeNodeRanks)
+                var purchased = new List<PurchasedSkillNode>();
+                foreach (var savedNode in data.skillTree.purchasedNodes ?? new List<PurchasedSkillNodeSaveData>())
                 {
-                    if (savedRank == null || string.IsNullOrWhiteSpace(savedRank.nodeId) || savedRank.rank <= 0)
+                    if (savedNode == null || string.IsNullOrWhiteSpace(savedNode.professionId) ||
+                        string.IsNullOrWhiteSpace(savedNode.nodeId))
                         continue;
-                    ranks.Add(new KeyValuePair<string, int>(savedRank.nodeId, savedRank.rank));
+                    purchased.Add(new PurchasedSkillNode(savedNode.professionId, savedNode.nodeId));
                 }
-
-                skillTree.ApplyNodeRanks(ranks);
+                skillTree.RestoreProgress(data.skillTree.activeProfessionId, purchased);
                 return;
             }
 
-            // Saves created before node ranks existed are migrated as rank-one unlocks.
-            skillTree.ApplyUnlockedNodes(data.unlockedSkillTreeNodeIds);
+            var legacyIds = new List<string>();
+            if (data.skillTreeNodeRanks != null)
+                foreach (var savedRank in data.skillTreeNodeRanks)
+                    if (savedRank != null && savedRank.rank > 0 && !string.IsNullOrWhiteSpace(savedRank.nodeId))
+                        legacyIds.Add(savedRank.nodeId);
+            if (legacyIds.Count == 0 && data.unlockedSkillTreeNodeIds != null)
+                legacyIds.AddRange(data.unlockedSkillTreeNodeIds);
+            skillTree.RestoreLegacyNodes(legacyIds);
         }
 
         private void RestoreSkillLoadout(GameSaveData data)
