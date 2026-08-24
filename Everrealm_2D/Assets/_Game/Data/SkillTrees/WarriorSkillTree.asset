@@ -1,0 +1,258 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 728ea55e2cbb4889a5a19b1628c3ad9c, type: 3}
+  m_Name: WarriorSkillTree
+  m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.SkillTree.SkillTreeDefinition
+  treeId: warrior_skill_tree
+  displayName: Warrior Skill Tree
+  nodes:
+  - nodeId: training_roots
+    displayName: Attack Basics
+    nodeType: 1
+    icon: {fileID: -7012710134733120385, guid: af39c4e6fe5230b4bad2acce44a98490, type: 3}
+    description: Basic attack training and the start of the offensive branch.
+    goldCost: 10
+    materialCosts: []
+    prerequisiteNodeIds: []
+    unlockAction: 0
+    skillToUnlock: {fileID: 0}
+    uiPosition: {x: 0, y: 0}
+    maxRank: 3
+    rankEffects:
+    - effectType: 0
+      targetSkill: {fileID: 0}
+      amountPerRank: 2
+      firstAppliedRank: 1
+  - nodeId: defense_basics
+    displayName: Defense Basics
+    nodeType: 1
+    icon: {fileID: -397387148720336617, guid: a6edcf42ddf188a4781ea6ccbb12fb6d, type: 3}
+    description: Basic armor training and the start of the defensive branch.
+    goldCost: 10
+    materialCosts: []
+    prerequisiteNodeIds: []
+    unlockAction: 0
+    skillToUnlock: {fileID: 0}
+    uiPosition: {x: 0, y: 0}
+    maxRank: 3
+    rankEffects:
+    - effectType: 1
+      targetSkill: {fileID: 0}
+      amountPerRank: 1
+      firstAppliedRank: 1
+  - nodeId: speed_basics
+    displayName: Attack Speed Basics
+    nodeType: 1
+    icon: {fileID: -7628329032337963036, guid: d6e18d256a6875a4e8c06ac5803d00b9, type: 3}
+    description: Basic speed training and the start of the rapid attack branch.
+    goldCost: 10
+    materialCosts: []
+    prerequisiteNodeIds: []
+    unlockAction: 0
+    skillToUnlock: {fileID: 0}
+    uiPosition: {x: 0, y: 0}
+    maxRank: 3
+    rankEffects:
+    - effectType: 2
+      targetSkill: {fileID: 0}
+      amountPerRank: 0.05
+      firstAppliedRank: 1
+  - nodeId: focus_slash
+    displayName: Focus Slash
+    nodeType: 0
+    icon: {fileID: 2023298230162494188, guid: 7d6b31d1500c6054c9d1c4cdbbc8f7ba, type: 3}
+    description: Unlocks a new active skill. Requires Training Roots and one Training
+      Shard.
+    goldCost: 15
+    materialCosts:
+    - item: {fileID: 11400000, guid: d0cf508e098ccda4b9ba91270d384417, type: 2}
+      amount: 1
+    prerequisiteNodeIds:
+    - training_roots
+    unlockAction: 1
+    skillToUnlock: {fileID: 11400000, guid: e0d3a0f1a09ffef47ad11cf6269368ff, type: 2}
+    uiPosition: {x: 0, y: 0}
+    maxRank: 2
+    rankEffects:
+    - effectType: 3
+      targetSkill: {fileID: 11400000, guid: e0d3a0f1a09ffef47ad11cf6269368ff, type: 2}
+      amountPerRank: 0.15
+      firstAppliedRank: 2
+  - nodeId: iron_discipline
+    displayName: Iron Discipline
+    nodeType: 1
+    icon: {fileID: -397387148720336617, guid: a6edcf42ddf188a4781ea6ccbb12fb6d, type: 3}
+    description: A defensive branch for surviving stronger monsters.
+    goldCost: 12
+    materialCosts: []
+    prerequisiteNodeIds:
+    - defense_basics
+    unlockAction: 0
+    skillToUnlock: {fileID: 0}
+    uiPosition: {x: 0, y: 0}
+    maxRank: 3
+    rankEffects:
+    - effectType: 1
+      targetSkill: {fileID: 0}
+      amountPerRank: 1.5
+      firstAppliedRank: 1
+  - nodeId: swift_training
+    displayName: Swift Training
+    nodeType: 1
+    icon: {fileID: -7628329032337963036, guid: d6e18d256a6875a4e8c06ac5803d00b9, type: 3}
+    description: A speed branch for faster basic attacks.
+    goldCost: 12
+    materialCosts: []
+    prerequisiteNodeIds:
+    - speed_basics
+    unlockAction: 0
+    skillToUnlock: {fileID: 0}
+    uiPosition: {x: 0, y: 0}
+    maxRank: 3
+    rankEffects:
+    - effectType: 2
+      targetSkill: {fileID: 0}
+      amountPerRank: 0.08
+      firstAppliedRank: 1
+    - effectType: 6
+      targetSkill: {fileID: 0}
+      amountPerRank: 0.3
+      firstAppliedRank: 1
+  - nodeId: sharpen_focus
+    displayName: Sharpen Focus
+    nodeType: 2
+    icon: {fileID: 2023298230162494188, guid: 7d6b31d1500c6054c9d1c4cdbbc8f7ba, type: 3}
+    description: Increase Focus Slash damage with every rank.
+    goldCost: 18
+    materialCosts: []
+    prerequisiteNodeIds:
+    - focus_slash
+    unlockAction: 0
+    skillToUnlock: {fileID: 0}
+    uiPosition: {x: 0, y: 0}
+    maxRank: 3
+    rankEffects:
+    - effectType: 3
+      targetSkill: {fileID: 11400000, guid: e0d3a0f1a09ffef47ad11cf6269368ff, type: 2}
+      amountPerRank: 0.1
+      firstAppliedRank: 1
+  - nodeId: focused_flow
+    displayName: Focused Flow
+    nodeType: 2
+    icon: {fileID: 2023298230162494188, guid: 7d6b31d1500c6054c9d1c4cdbbc8f7ba, type: 3}
+    description: Reduce both the cooldown and mana cost of Focus Slash.
+    goldCost: 18
+    materialCosts: []
+    prerequisiteNodeIds:
+    - focus_slash
+    unlockAction: 0
+    skillToUnlock: {fileID: 0}
+    uiPosition: {x: 0, y: 0}
+    maxRank: 3
+    rankEffects:
+    - effectType: 4
+      targetSkill: {fileID: 11400000, guid: e0d3a0f1a09ffef47ad11cf6269368ff, type: 2}
+      amountPerRank: 0.08
+      firstAppliedRank: 1
+    - effectType: 5
+      targetSkill: {fileID: 11400000, guid: e0d3a0f1a09ffef47ad11cf6269368ff, type: 2}
+      amountPerRank: 0.08
+      firstAppliedRank: 1
+  - nodeId: defense_mastery
+    displayName: Fortress Training
+    nodeType: 2
+    icon: {fileID: -397387148720336617, guid: a6edcf42ddf188a4781ea6ccbb12fb6d, type: 3}
+    description: Advance the defensive branch with stronger armor training.
+    goldCost: 18
+    materialCosts: []
+    prerequisiteNodeIds:
+    - iron_discipline
+    unlockAction: 0
+    skillToUnlock: {fileID: 0}
+    uiPosition: {x: 0, y: 0}
+    maxRank: 3
+    rankEffects:
+    - effectType: 1
+      targetSkill: {fileID: 0}
+      amountPerRank: 2.5
+      firstAppliedRank: 1
+  - nodeId: rapid_assault
+    displayName: Rapid Assault
+    nodeType: 2
+    icon: {fileID: -7628329032337963036, guid: d6e18d256a6875a4e8c06ac5803d00b9, type: 3}
+    description: Advance the speed branch with increasingly rapid attacks.
+    goldCost: 18
+    materialCosts: []
+    prerequisiteNodeIds:
+    - swift_training
+    unlockAction: 0
+    skillToUnlock: {fileID: 0}
+    uiPosition: {x: 0, y: 0}
+    maxRank: 3
+    rankEffects:
+    - effectType: 2
+      targetSkill: {fileID: 0}
+      amountPerRank: 0.12
+      firstAppliedRank: 1
+    - effectType: 7
+      targetSkill: {fileID: 0}
+      amountPerRank: 0.15
+      firstAppliedRank: 1
+  - nodeId: battle_mastery
+    displayName: Battle Mastery
+    nodeType: 1
+    icon: {fileID: -7012710134733120385, guid: af39c4e6fe5230b4bad2acce44a98490, type: 3}
+    description: A capstone unlocked after completing all three branches.
+    goldCost: 30
+    materialCosts: []
+    prerequisiteNodeIds:
+    - sharpen_focus
+    - focused_flow
+    - defense_mastery
+    - rapid_assault
+    unlockAction: 0
+    skillToUnlock: {fileID: 0}
+    uiPosition: {x: 0, y: 0}
+    maxRank: 1
+    rankEffects:
+    - effectType: 0
+      targetSkill: {fileID: 0}
+      amountPerRank: 5
+      firstAppliedRank: 1
+    - effectType: 1
+      targetSkill: {fileID: 0}
+      amountPerRank: 3
+      firstAppliedRank: 1
+  - nodeId: GOLD
+    displayName: Gold
+    nodeType: 2
+    icon: {fileID: -7012710134733120385, guid: af39c4e6fe5230b4bad2acce44a98490, type: 3}
+    description: God mode
+    goldCost: 30
+    materialCosts: []
+    prerequisiteNodeIds:
+    - battle_mastery
+    unlockAction: 0
+    skillToUnlock: {fileID: 0}
+    uiPosition: {x: 0, y: 0}
+    maxRank: 1
+    rankEffects:
+    - effectType: 6
+      targetSkill: {fileID: 0}
+      amountPerRank: 5
+      firstAppliedRank: 1
+    - effectType: 7
+      targetSkill: {fileID: 0}
+      amountPerRank: 3
+      firstAppliedRank: 1
+  goldRefundRate: 0.75
+  refundMaterials: 0

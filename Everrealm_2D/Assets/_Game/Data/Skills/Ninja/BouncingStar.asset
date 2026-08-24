@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4094386abf475c5498ed80aac3337e8e, type: 3}
+  m_Name: BouncingStar
+  m_EditorClassIdentifier: Assembly-CSharp::LetterHunter.Skills.SkillDefinition
+  skillId: ninja_bouncing_star
+  displayName: Bouncing Star
+  icon: {fileID: -7012710134733120385, guid: af39c4e6fe5230b4bad2acce44a98490, type: 3}
+  shortName: Bouncing S
+  inputLabel: 
+  description: Foundation implementation of Bouncing Star.
+  classType: 1
+  skillType: 0
+  manaCost: 10
+  cooldown: 3
+  duration: 0
+  baseDamageMultiplier: 0.8
+  damageLines: 1
+  maxTargets: 3
+  rank: 1
+  tags: []
+  effect: {fileID: 11400000, guid: 36b26f904833c5947a4db0fc8c781d05, type: 2}
+  impactProfile: {fileID: 11400000, guid: 1812bd41de27591409f2df2c7a108c41, type: 2}

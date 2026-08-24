@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6383499a92c61b148bacc899ba67dc2f, type: 3}
+  m_Name: WarriorBasicCombo
+  m_EditorClassIdentifier: Assembly-CSharp::LetterHunter.Combat.AutoAttackComboDefinition
+  comboId: warrior_basic_combo
+  resetTime: 0.85
+  steps:
+  - displayName: Hit 1
+    damageMultiplier: 1
+    criticalChance: 0
+    criticalDamageMultiplier: 1.5
+    impactProfile: {fileID: 11400000, guid: 7af14e6c391737d498d66b75a4f12379, type: 2}
+  - displayName: Hit 2
+    damageMultiplier: 1
+    criticalChance: 0
+    criticalDamageMultiplier: 1.5
+    impactProfile: {fileID: 11400000, guid: 7af14e6c391737d498d66b75a4f12379, type: 2}
+  - displayName: Finisher
+    damageMultiplier: 1
+    criticalChance: 0.35
+    criticalDamageMultiplier: 1.6
+    impactProfile: {fileID: 11400000, guid: cec19981dfcc97545a69ddb80d6853c4, type: 2}

@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 843b87552bed6ab45a509112d72fdefe, type: 3}
+  m_Name: Ninja
+  m_EditorClassIdentifier: Assembly-CSharp::LetterHunter.Classes.ClassDefinition
+  classType: 1
+  displayName: Ninja
+  baseStats:
+    maxHealth: 100
+    maxMana: 90
+    attackPower: 15
+    defense: 3
+    attackSpeed: 1.5
+    moveSpeed: 6.5
+  startingSkills:
+  - {fileID: 11400000, guid: 467050b4babc2104e94b7bf9afa0cfef, type: 2}
+  - {fileID: 11400000, guid: 3df4dae38b5e58c47a7e87b5314ad977, type: 2}
+  - {fileID: 11400000, guid: c5250763b5f6395498f990feb2f0c446, type: 2}
+  - {fileID: 11400000, guid: b151ed95959c7034fb05dc02549cae63, type: 2}
+  - {fileID: 11400000, guid: 53bffec0e7738f444906dacc3f56e6a7, type: 2}

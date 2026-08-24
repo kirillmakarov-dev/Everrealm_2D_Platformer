@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4094386abf475c5498ed80aac3337e8e, type: 3}
+  m_Name: IronStrength
+  m_EditorClassIdentifier: Assembly-CSharp::LetterHunter.Skills.SkillDefinition
+  skillId: warrior_iron_strength
+  displayName: Iron Strength
+  icon: {fileID: -397387148720336617, guid: a6edcf42ddf188a4781ea6ccbb12fb6d, type: 3}
+  shortName: Iron Stren
+  inputLabel: 
+  description: Foundation implementation of Iron Strength.
+  classType: 0
+  skillType: 3
+  manaCost: 8
+  cooldown: 4
+  duration: 0
+  baseDamageMultiplier: 1
+  damageLines: 3
+  maxTargets: 1
+  rank: 1
+  tags: []
+  effect: {fileID: 11400000, guid: ae120d7d17e073f47b6b7d70073aa974, type: 2}
+  impactProfile: {fileID: 11400000, guid: cec19981dfcc97545a69ddb80d6853c4, type: 2}
