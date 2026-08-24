@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LetterHunter.Skills.SkillDefinition
   skillId: ninja_sixth_sense
   displayName: Sixth Sense
-  icon: {fileID: 21300000, guid: 15d4ab8f510170543ba598cd5e63d02a, type: 3}
+  icon: {fileID: 342498100, guid: 718ddd7eab6c5c140b0a774b60d4a533, type: 3}
   shortName: Sixth Sens
   inputLabel: 
   description: Foundation implementation of Sixth Sense.

@@ -95,8 +95,6 @@ namespace LetterHunter.UI.SkillTree
             }
         }
 
-        public void Close() => SetVisible(false);
-
         public void Render()
         {
             if (!IsVisible || controller == null || controller.SkillTree == null || nodeRoot == null)

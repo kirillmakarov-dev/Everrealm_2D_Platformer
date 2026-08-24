@@ -136,6 +136,7 @@ namespace LetterHunter.UI.Skills
         {
             if (!string.IsNullOrWhiteSpace(overrideLabel)) return overrideLabel;
             if (skill != null && !string.IsNullOrWhiteSpace(skill.InputLabel)) return skill.InputLabel;
+            if (index == 9) return "0";
             return index >= 0 && index < defaultInputLabels.Length ? defaultInputLabels[index] : (index + 1).ToString();
         }
     }
