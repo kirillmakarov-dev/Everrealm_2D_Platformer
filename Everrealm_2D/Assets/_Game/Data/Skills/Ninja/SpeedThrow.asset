@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LetterHunter.Skills.SkillDefinition
   skillId: ninja_speed_throw
   displayName: Speed Throw
-  icon: {fileID: 1066272784, guid: 718ddd7eab6c5c140b0a774b60d4a533, type: 3}
+  icon: {fileID: 21300000, guid: caf614f1372980b4fa1811c8997dbad6, type: 3}
   shortName: Speed Thro
   inputLabel: 
   description: Foundation implementation of Speed Throw.

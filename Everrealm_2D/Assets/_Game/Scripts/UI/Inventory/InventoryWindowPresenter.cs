@@ -78,6 +78,8 @@ namespace LetterHunter.UI.Inventory
                 SetVisible(windowGroup == null || windowGroup.alpha <= 0.01f);
         }
 
+        public void Close() => SetVisible(false);
+
         public void BeginSlotDrag(int index, InventorySlotView sourceView, UnityEngine.EventSystems.PointerEventData eventData)
         {
             if (inventory == null || inventory.Inventory == null || !inventory.Inventory.IsValidIndex(index))

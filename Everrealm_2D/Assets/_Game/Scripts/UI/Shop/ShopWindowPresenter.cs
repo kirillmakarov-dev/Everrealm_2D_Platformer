@@ -88,6 +88,8 @@ namespace LetterHunter.UI.Shop
             }
         }
 
+        public void Close() => SetVisible(false);
+
         private void Render()
         {
             RenderGold(wallet != null ? wallet.Gold : 0);

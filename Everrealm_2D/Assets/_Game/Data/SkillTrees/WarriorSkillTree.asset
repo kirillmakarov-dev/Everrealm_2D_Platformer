@@ -18,7 +18,7 @@ MonoBehaviour:
   - nodeId: training_roots
     displayName: Attack Basics
     nodeType: 1
-    icon: {fileID: 694597326, guid: 718ddd7eab6c5c140b0a774b60d4a533, type: 3}
+    icon: {fileID: 21300000, guid: 358adc923ae38af41b1423425131092b, type: 3}
     description: Basic attack training and the start of the offensive branch.
     goldCost: 10
     materialCosts: []
@@ -35,7 +35,7 @@ MonoBehaviour:
   - nodeId: defense_basics
     displayName: Defense Basics
     nodeType: 1
-    icon: {fileID: -284758380, guid: 718ddd7eab6c5c140b0a774b60d4a533, type: 3}
+    icon: {fileID: 21300000, guid: eb098d3ba4c2df84b9d82e5bed6af83c, type: 3}
     description: Basic armor training and the start of the defensive branch.
     goldCost: 10
     materialCosts: []
@@ -52,7 +52,7 @@ MonoBehaviour:
   - nodeId: speed_basics
     displayName: Attack Speed Basics
     nodeType: 1
-    icon: {fileID: 342498100, guid: 718ddd7eab6c5c140b0a774b60d4a533, type: 3}
+    icon: {fileID: 21300000, guid: f3278d1974a653443a5b5b34240c5aa6, type: 3}
     description: Basic speed training and the start of the rapid attack branch.
     goldCost: 10
     materialCosts: []
@@ -69,7 +69,7 @@ MonoBehaviour:
   - nodeId: focus_slash
     displayName: Focus Slash
     nodeType: 0
-    icon: {fileID: -1666875081, guid: 718ddd7eab6c5c140b0a774b60d4a533, type: 3}
+    icon: {fileID: 21300000, guid: 15d4ab8f510170543ba598cd5e63d02a, type: 3}
     description: Unlocks a new active skill. Requires Training Roots and one Training
       Shard.
     goldCost: 15
@@ -90,7 +90,7 @@ MonoBehaviour:
   - nodeId: iron_discipline
     displayName: Iron Discipline
     nodeType: 1
-    icon: {fileID: -1662147152, guid: 718ddd7eab6c5c140b0a774b60d4a533, type: 3}
+    icon: {fileID: 21300000, guid: caf614f1372980b4fa1811c8997dbad6, type: 3}
     description: A defensive branch for surviving stronger monsters.
     goldCost: 12
     materialCosts: []
@@ -108,7 +108,7 @@ MonoBehaviour:
   - nodeId: swift_training
     displayName: Swift Training
     nodeType: 1
-    icon: {fileID: 1066272784, guid: 718ddd7eab6c5c140b0a774b60d4a533, type: 3}
+    icon: {fileID: 21300000, guid: a61c35fcc4d7e424fac6acc73b9a2ce0, type: 3}
     description: A speed branch for faster basic attacks.
     goldCost: 12
     materialCosts: []
@@ -130,7 +130,7 @@ MonoBehaviour:
   - nodeId: sharpen_focus
     displayName: Sharpen Focus
     nodeType: 2
-    icon: {fileID: 485452356, guid: 718ddd7eab6c5c140b0a774b60d4a533, type: 3}
+    icon: {fileID: 21300000, guid: 0f71cd7655d89ab428c2e7e2cbb11558, type: 3}
     description: Increase Focus Slash damage with every rank.
     goldCost: 18
     materialCosts: []
@@ -148,7 +148,7 @@ MonoBehaviour:
   - nodeId: focused_flow
     displayName: Focused Flow
     nodeType: 2
-    icon: {fileID: -1173533673, guid: 718ddd7eab6c5c140b0a774b60d4a533, type: 3}
+    icon: {fileID: 21300000, guid: 8b92adf5062c5f649b28071e5ab7e825, type: 3}
     description: Reduce both the cooldown and mana cost of Focus Slash.
     goldCost: 18
     materialCosts: []
@@ -170,7 +170,7 @@ MonoBehaviour:
   - nodeId: defense_mastery
     displayName: Fortress Training
     nodeType: 2
-    icon: {fileID: 1742118481, guid: 718ddd7eab6c5c140b0a774b60d4a533, type: 3}
+    icon: {fileID: 21300000, guid: 5d8451e34e268624bb3ad16e9d53a07a, type: 3}
     description: Advance the defensive branch with stronger armor training.
     goldCost: 18
     materialCosts: []
@@ -188,7 +188,7 @@ MonoBehaviour:
   - nodeId: rapid_assault
     displayName: Rapid Assault
     nodeType: 2
-    icon: {fileID: 342498100, guid: 718ddd7eab6c5c140b0a774b60d4a533, type: 3}
+    icon: {fileID: 21300000, guid: 4c189ee2ac5f64c43a65d0787aa97bab, type: 3}
     description: Advance the speed branch with increasingly rapid attacks.
     goldCost: 18
     materialCosts: []
@@ -210,7 +210,7 @@ MonoBehaviour:
   - nodeId: battle_mastery
     displayName: Battle Mastery
     nodeType: 1
-    icon: {fileID: 485452356, guid: 718ddd7eab6c5c140b0a774b60d4a533, type: 3}
+    icon: {fileID: 21300000, guid: d17bcc64ae8db344f98c00be712c9a5b, type: 3}
     description: A capstone unlocked after completing all three branches.
     goldCost: 30
     materialCosts: []
@@ -235,7 +235,7 @@ MonoBehaviour:
   - nodeId: GOLD
     displayName: Gold
     nodeType: 2
-    icon: {fileID: 1020701860, guid: 718ddd7eab6c5c140b0a774b60d4a533, type: 3}
+    icon: {fileID: 21300000, guid: 3755acb606a5d7f44927ee243fbf1ee1, type: 3}
     description: God mode
     goldCost: 30
     materialCosts: []

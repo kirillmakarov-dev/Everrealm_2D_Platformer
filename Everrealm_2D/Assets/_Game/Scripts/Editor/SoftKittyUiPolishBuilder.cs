@@ -31,36 +31,6 @@ namespace LetterHunter.EditorTools
         private static readonly Color Steel = new(0.72f, 0.76f, 0.78f, 1f);
         private static Dictionary<string, Sprite> sprites;
 
-        [InitializeOnLoadMethod]
-        private static void QueueBuildForAuthoredScene()
-        {
-            EditorApplication.delayCall += TryBuildAuthoredSceneOnce;
-            EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
-            EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
-        }
-
-        private static void OnPlayModeStateChanged(PlayModeStateChange state)
-        {
-            if (state == PlayModeStateChange.EnteredEditMode)
-                EditorApplication.delayCall += TryBuildAuthoredSceneOnce;
-        }
-
-        private static void TryBuildAuthoredSceneOnce()
-        {
-            if (EditorApplication.isPlayingOrWillChangePlaymode)
-                return;
-            var scene = SceneManager.GetActiveScene();
-            if (!scene.IsValid() || !scene.path.EndsWith("InventoryLootDebug.unity", StringComparison.Ordinal))
-                return;
-            var inventory = UnityEngine.Object.FindFirstObjectByType<InventoryWindowPresenter>(FindObjectsInactive.Include);
-            var currentSprite = inventory != null ? inventory.GetComponent<Image>()?.sprite : null;
-            if (currentSprite != null && AssetDatabase.GetAssetPath(currentSprite) == AtlasPath &&
-                inventory.transform.Find("SoftKittyFrame") != null)
-                return;
-            Build();
-        }
-
-        [MenuItem("Letter Hunter/Build SoftKitty UI", priority = 1)]
         public static void Build()
         {
             var scene = SceneManager.GetActiveScene();

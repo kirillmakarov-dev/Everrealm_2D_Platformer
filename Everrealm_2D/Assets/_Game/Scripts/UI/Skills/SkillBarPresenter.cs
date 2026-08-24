@@ -207,6 +207,18 @@ namespace LetterHunter.UI.Skills
                 AssignPendingSkillToSlot(2);
             else if (keyboard.digit4Key.wasPressedThisFrame || keyboard.numpad4Key.wasPressedThisFrame)
                 AssignPendingSkillToSlot(3);
+            else if (keyboard.digit5Key.wasPressedThisFrame || keyboard.numpad5Key.wasPressedThisFrame)
+                AssignPendingSkillToSlot(4);
+            else if (keyboard.digit6Key.wasPressedThisFrame || keyboard.numpad6Key.wasPressedThisFrame)
+                AssignPendingSkillToSlot(5);
+            else if (keyboard.digit7Key.wasPressedThisFrame || keyboard.numpad7Key.wasPressedThisFrame)
+                AssignPendingSkillToSlot(6);
+            else if (keyboard.digit8Key.wasPressedThisFrame || keyboard.numpad8Key.wasPressedThisFrame)
+                AssignPendingSkillToSlot(7);
+            else if (keyboard.digit9Key.wasPressedThisFrame || keyboard.numpad9Key.wasPressedThisFrame)
+                AssignPendingSkillToSlot(8);
+            else if (keyboard.digit0Key.wasPressedThisFrame || keyboard.numpad0Key.wasPressedThisFrame)
+                AssignPendingSkillToSlot(9);
         }
 
         private void HandlePendingAssignmentPointerDrop()
