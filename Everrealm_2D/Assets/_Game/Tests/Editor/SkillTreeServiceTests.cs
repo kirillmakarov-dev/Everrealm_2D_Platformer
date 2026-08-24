@@ -6,6 +6,7 @@ using LetterHunter.UI.SkillTree;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace LetterHunter.Tests.EditMode
 {
@@ -106,6 +107,22 @@ namespace LetterHunter.Tests.EditMode
             Assert.That(size.x, Is.GreaterThan(childNode.UiPosition.x));
 
             Destroy(root, profession, rootNode, childNode);
+        }
+
+        [Test]
+        public void SkillTreeWindowPrefab_HasTwoAxisScrollingAndAuthoredConnections()
+        {
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(
+                "Assets/_Game/Prefabs/UI/SkillTree/SkillTreeWindow.prefab");
+
+            Assert.That(prefab, Is.Not.Null);
+            var scroll = prefab.GetComponentInChildren<ScrollRect>(true);
+            Assert.That(scroll, Is.Not.Null);
+            Assert.That(scroll.horizontal, Is.True);
+            Assert.That(scroll.vertical, Is.True);
+            Assert.That(scroll.horizontalScrollbar, Is.Not.Null);
+            Assert.That(scroll.verticalScrollbar, Is.Not.Null);
+            Assert.That(prefab.GetComponentsInChildren<SkillTreeConnectionView>(true).Length, Is.EqualTo(7));
         }
 
         private static SkillTreeNodeView CreateView(Transform parent, string name)

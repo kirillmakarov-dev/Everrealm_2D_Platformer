@@ -11,9 +11,9 @@ namespace LetterHunter.UI.SkillTree
         [SerializeField] private Image shadow;
         [SerializeField] private Image foreground;
         [SerializeField] private Image directionMarker;
-        [Min(3f), SerializeField] private float thickness = 9f;
-        [SerializeField] private Color lockedColor = new(0.22f, 0.23f, 0.25f, 0.9f);
-        [SerializeField] private Color availableColor = new(0.25f, 0.65f, 0.8f, 1f);
+        [Min(3f), SerializeField] private float thickness = 12f;
+        [SerializeField] private Color lockedColor = new(0.38f, 0.4f, 0.42f, 1f);
+        [SerializeField] private Color availableColor = new(0.18f, 0.72f, 0.92f, 1f);
         [SerializeField] private Color purchasedColor = new(0.95f, 0.62f, 0.18f, 1f);
 
         public void Render(Vector2 start, Vector2 end, SkillTreeNodeState state)
@@ -21,6 +21,8 @@ namespace LetterHunter.UI.SkillTree
             if (lineRoot == null) lineRoot = transform as RectTransform;
             if (lineRoot == null) return;
             gameObject.SetActive(true);
+            lineRoot.anchorMin = lineRoot.anchorMax = new Vector2(0f, 1f);
+            lineRoot.pivot = new Vector2(0.5f, 0.5f);
             var direction = end - start;
             var angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
             lineRoot.anchoredPosition = (start + end) * 0.5f;

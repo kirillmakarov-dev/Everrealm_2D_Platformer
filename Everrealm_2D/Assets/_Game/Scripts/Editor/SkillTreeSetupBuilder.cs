@@ -195,6 +195,8 @@ namespace LetterHunter.EditorTools
         private static SkillTreeConnectionView BuildConnectionPrefab()
         {
             var root = RectObject("SkillTreeConnection", null, new Vector2(100f, 18f), Vector2.zero);
+            ConfigureTopLeftLayer(root.GetComponent<RectTransform>());
+            root.GetComponent<RectTransform>().pivot = new Vector2(0.5f, 0.5f);
             var shadow = ImageChild(root.transform, "Shadow", new Vector2(100f, 15f), Vector2.zero,
                 "line4", Color.black, true);
             var foreground = ImageChild(root.transform, "Foreground", new Vector2(100f, 9f), Vector2.zero,
@@ -248,7 +250,7 @@ namespace LetterHunter.EditorTools
 
             var center = ImageChild(panel.transform, "TreePanel", new Vector2(710f, 620f), new Vector2(-15f, -38f),
                 "bg2", new Color(0.065f, 0.075f, 0.08f, 0.98f), true);
-            var viewport = ImageChild(center.transform, "Viewport", new Vector2(674f, 552f), new Vector2(0f, 18f),
+            var viewport = ImageChild(center.transform, "Viewport", new Vector2(646f, 540f), new Vector2(-8f, 18f),
                 null, new Color(0f, 0f, 0f, 0.16f), false);
             viewport.gameObject.AddComponent<RectMask2D>();
             var content = RectObject("Content", viewport.transform, new Vector2(1200f, 540f), Vector2.zero);
@@ -261,22 +263,41 @@ namespace LetterHunter.EditorTools
             ConfigureTopLeftLayer(nodesRoot.GetComponent<RectTransform>());
             nodesRoot.AddComponent<SkillTreeGraphLayoutGroup>();
 
-            var scrollbarBack = ImageChild(center.transform, "HorizontalScrollbar", new Vector2(650f, 16f),
-                new Vector2(0f, -286f), "bar2", new Color(0.1f, 0.12f, 0.13f, 1f), true);
-            var slidingArea = RectObject("SlidingArea", scrollbarBack.transform, new Vector2(626f, 12f), Vector2.zero);
-            var handle = ImageChild(slidingArea.transform, "Handle", new Vector2(180f, 12f), Vector2.zero,
+            var horizontalScrollbarBack = ImageChild(center.transform, "HorizontalScrollbar", new Vector2(626f, 16f),
+                new Vector2(-10f, -286f), "bar2", new Color(0.1f, 0.12f, 0.13f, 1f), true);
+            var horizontalSlidingArea = RectObject("SlidingArea", horizontalScrollbarBack.transform,
+                new Vector2(602f, 12f), Vector2.zero);
+            var horizontalHandle = ImageChild(horizontalSlidingArea.transform, "Handle", new Vector2(180f, 12f),
+                Vector2.zero,
                 "button", new Color(0.92f, 0.55f, 0.12f, 1f), true);
-            var scrollbar = scrollbarBack.gameObject.AddComponent<Scrollbar>();
-            scrollbar.handleRect = handle.rectTransform;
-            scrollbar.targetGraphic = handle;
-            scrollbar.direction = Scrollbar.Direction.LeftToRight;
+            var horizontalScrollbar = horizontalScrollbarBack.gameObject.AddComponent<Scrollbar>();
+            horizontalScrollbar.handleRect = horizontalHandle.rectTransform;
+            horizontalScrollbar.targetGraphic = horizontalHandle;
+            horizontalScrollbar.direction = Scrollbar.Direction.LeftToRight;
+
+            var verticalScrollbarBack = ImageChild(center.transform, "VerticalScrollbar", new Vector2(16f, 526f),
+                new Vector2(332f, 18f), "bar2", new Color(0.1f, 0.12f, 0.13f, 1f), true);
+            var verticalSlidingArea = RectObject("SlidingArea", verticalScrollbarBack.transform,
+                new Vector2(12f, 502f), Vector2.zero);
+            var verticalHandle = ImageChild(verticalSlidingArea.transform, "Handle", new Vector2(12f, 150f),
+                Vector2.zero, "button", new Color(0.92f, 0.55f, 0.12f, 1f), true);
+            var verticalScrollbar = verticalScrollbarBack.gameObject.AddComponent<Scrollbar>();
+            verticalScrollbar.handleRect = verticalHandle.rectTransform;
+            verticalScrollbar.targetGraphic = verticalHandle;
+            verticalScrollbar.direction = Scrollbar.Direction.BottomToTop;
+
             var scroll = center.gameObject.AddComponent<ScrollRect>();
             scroll.viewport = viewport.rectTransform;
             scroll.content = content.GetComponent<RectTransform>();
             scroll.horizontal = true;
-            scroll.vertical = false;
+            scroll.vertical = true;
             scroll.movementType = ScrollRect.MovementType.Clamped;
-            scroll.horizontalScrollbar = scrollbar;
+            scroll.horizontalScrollbar = horizontalScrollbar;
+            scroll.verticalScrollbar = verticalScrollbar;
+            scroll.horizontalScrollbarVisibility = ScrollRect.ScrollbarVisibility.Permanent;
+            scroll.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.Permanent;
+            scroll.horizontalScrollbarSpacing = 4f;
+            scroll.verticalScrollbarSpacing = 4f;
             scroll.scrollSensitivity = 36f;
 
             var right = ImageChild(panel.transform, "DetailsPanel", new Vector2(285f, 620f), new Vector2(500f, -38f),
