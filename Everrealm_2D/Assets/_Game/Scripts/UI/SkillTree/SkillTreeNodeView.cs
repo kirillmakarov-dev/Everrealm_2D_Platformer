@@ -10,6 +10,7 @@ namespace LetterHunter.UI.SkillTree
     [DisallowMultipleComponent]
     public sealed class SkillTreeNodeView : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
+        [SerializeField] private string configuredNodeId;
         [SerializeField] private Button upgradeButton;
         [SerializeField] private Button selectButton;
         [SerializeField] private Button refundButton;
@@ -34,6 +35,8 @@ namespace LetterHunter.UI.SkillTree
         private Action<string> _selectClicked;
         private Action<string, bool> _hoverChanged;
         private Action<string> _refundClicked;
+
+        public string ConfiguredNodeId => configuredNodeId;
 
         private void Awake()
         {

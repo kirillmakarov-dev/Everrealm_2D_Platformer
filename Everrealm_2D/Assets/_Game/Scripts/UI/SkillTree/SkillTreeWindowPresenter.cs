@@ -18,6 +18,8 @@ namespace LetterHunter.UI.SkillTree
         [SerializeField] private RectTransform scrollContent;
         [Min(1f), SerializeField] private float minimumContentHeight = 270f;
         [Min(1f), SerializeField] private float minimumContentWidth = 700f;
+        [SerializeField] private List<SkillTreeNodeView> nodeViews = new();
+        [SerializeField] private List<SkillTreeConnectionView> connectionViews = new();
         [SerializeField] private SkillTreeNodeView nodePrefab;
         [SerializeField] private SkillTreeConnectionView connectionPrefab;
         [SerializeField] private SkillBarPresenter skillBar;
@@ -43,6 +45,8 @@ namespace LetterHunter.UI.SkillTree
                 skillBar = FindFirstObjectByType<SkillBarPresenter>();
             if (scrollContent == null && nodeRoot != null)
                 scrollContent = nodeRoot.parent as RectTransform;
+
+            PrepareAuthoredViews();
 
             SetVisible(startVisible);
         }
@@ -93,7 +97,7 @@ namespace LetterHunter.UI.SkillTree
 
         public void Render()
         {
-            if (!IsVisible || controller == null || controller.SkillTree == null || nodeRoot == null || nodePrefab == null)
+            if (!IsVisible || controller == null || controller.SkillTree == null || nodeRoot == null)
                 return;
 
             if (titleText != null)
@@ -104,12 +108,8 @@ namespace LetterHunter.UI.SkillTree
                 if (node == null || string.IsNullOrWhiteSpace(node.NodeId))
                     continue;
 
-                if (!_views.TryGetValue(node.NodeId, out var view))
-                {
-                    view = Instantiate(nodePrefab, nodeRoot);
-                    view.Bind(node.NodeId, TryUnlock, TrySelectSkill, SetNodeHovered, TryRefundRank);
-                    _views[node.NodeId] = view;
-                }
+                if (!_views.TryGetValue(node.NodeId, out var view) || view == null)
+                    continue;
 
                 if (nodeRoot.GetComponent<LayoutGroup>() == null && view.transform is RectTransform nodeRect)
                     nodeRect.anchoredPosition = node.UiPosition;
@@ -174,8 +174,10 @@ namespace LetterHunter.UI.SkillTree
 
         private void RenderConnections()
         {
-            if (connectionRoot == null || connectionPrefab == null)
+            if (connectionRoot == null)
                 return;
+
+            var connectionIndex = 0;
 
             foreach (var node in controller.SkillTree.Nodes)
             {
@@ -189,12 +191,14 @@ namespace LetterHunter.UI.SkillTree
                         continue;
 
                     var connectionId = $"{prerequisiteId}>{node.NodeId}";
-                    if (!_connections.TryGetValue(connectionId, out var connection))
+                    if (!_connections.TryGetValue(connectionId, out var connection) || connection == null)
                     {
-                        connection = Instantiate(connectionPrefab, connectionRoot);
-                        connection.name = $"Connection_{prerequisiteId}_{node.NodeId}";
+                        if (connectionIndex >= connectionViews.Count)
+                            continue;
+                        connection = connectionViews[connectionIndex];
                         _connections[connectionId] = connection;
                     }
+                    connectionIndex++;
 
                     var prerequisiteRect = (RectTransform)prerequisiteView.transform;
                     var nodeRect = (RectTransform)nodeView.transform;
@@ -203,6 +207,27 @@ namespace LetterHunter.UI.SkillTree
                     connection.Render(start, end, controller.Service.Progress.IsUnlocked(node.NodeId));
                 }
             }
+
+            for (; connectionIndex < connectionViews.Count; connectionIndex++)
+                connectionViews[connectionIndex]?.gameObject.SetActive(false);
+        }
+
+        private void PrepareAuthoredViews()
+        {
+            _views.Clear();
+            foreach (var view in nodeViews)
+            {
+                if (view == null || string.IsNullOrWhiteSpace(view.ConfiguredNodeId))
+                    continue;
+                view.gameObject.SetActive(true);
+                view.Bind(view.ConfiguredNodeId, TryUnlock, TrySelectSkill, SetNodeHovered, TryRefundRank);
+                _views[view.ConfiguredNodeId] = view;
+            }
+
+            _connections.Clear();
+            foreach (var connection in connectionViews)
+                if (connection != null)
+                    connection.gameObject.SetActive(false);
         }
 
         private void TryUnlock(string nodeId)

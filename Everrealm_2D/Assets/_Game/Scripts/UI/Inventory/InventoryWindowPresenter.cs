@@ -15,13 +15,13 @@ namespace LetterHunter.UI.Inventory
         [SerializeField] private CurrencyWallet wallet;
         [SerializeField] private CanvasGroup windowGroup;
         [SerializeField] private Transform slotRoot;
-        [SerializeField] private InventorySlotView slotPrefab;
+        [SerializeField] private List<InventorySlotView> slotViews = new();
+        [SerializeField] private Image dragGhost;
         [SerializeField] private TMP_Text goldText;
         [SerializeField] private TMP_Text capacityText;
         [SerializeField] private Key toggleKey = Key.B;
         [SerializeField] private bool startVisible;
 
-        private readonly List<InventorySlotView> _slotViews = new();
         private Image _dragGhost;
         private int _dragSourceIndex = -1;
         private InventorySlotView _dragSourceView;
@@ -37,6 +37,15 @@ namespace LetterHunter.UI.Inventory
                 windowGroup = GetComponent<CanvasGroup>();
             if (_rootCanvas == null)
                 _rootCanvas = GetComponentInParent<Canvas>();
+
+            if (dragGhost != null)
+            {
+                dragGhost.enabled = false;
+                dragGhost.raycastTarget = false;
+            }
+
+            for (var i = 0; i < slotViews.Count; i++)
+                slotViews[i]?.Bind(this, i);
 
             SetVisible(startVisible);
         }
@@ -111,7 +120,10 @@ namespace LetterHunter.UI.Inventory
             _dragSourceIndex = -1;
             _dragSourceView = null;
             if (_dragGhost != null)
-                Destroy(_dragGhost.gameObject);
+            {
+                _dragGhost.enabled = false;
+                _dragGhost.sprite = null;
+            }
             _dragGhost = null;
             if (IsVisible)
                 Render();
@@ -141,14 +153,12 @@ namespace LetterHunter.UI.Inventory
                 return;
             }
 
-            BuildSlotViews();
-
             if (inventory == null || inventory.Inventory == null)
                 return;
 
             var slots = inventory.Inventory.Slots;
-            for (var i = 0; i < _slotViews.Count; i++)
-                _slotViews[i].Render(i < slots.Count ? slots[i] : null);
+            for (var i = 0; i < slotViews.Count; i++)
+                slotViews[i]?.Render(i < slots.Count ? slots[i] : null);
 
             if (capacityText != null)
                 capacityText.text = $"{UsedSlots()}/{inventory.Inventory.Capacity}";
@@ -160,21 +170,6 @@ namespace LetterHunter.UI.Inventory
         {
             if (goldText != null)
                 goldText.text = gold.ToString();
-        }
-
-        private void BuildSlotViews()
-        {
-            if (slotRoot == null || slotPrefab == null || inventory == null)
-                return;
-            if (inventory.Inventory == null)
-                return;
-
-            while (_slotViews.Count < inventory.Inventory.Capacity)
-            {
-                var view = Instantiate(slotPrefab, slotRoot);
-                view.Bind(this, _slotViews.Count);
-                _slotViews.Add(view);
-            }
         }
 
         private void SetVisible(bool visible)
@@ -229,22 +224,21 @@ namespace LetterHunter.UI.Inventory
 
         private void CreateDragGhost(Sprite sprite)
         {
-            if (_rootCanvas == null)
-                _rootCanvas = GetComponentInParent<Canvas>();
-            if (_rootCanvas == null)
+            if (dragGhost == null)
                 return;
 
-            var ghost = new GameObject("DraggedItemIcon", typeof(RectTransform), typeof(CanvasGroup), typeof(Image));
-            ghost.transform.SetParent(_rootCanvas.transform, false);
-            _dragGhost = ghost.GetComponent<Image>();
+            _dragGhost = dragGhost;
             _dragGhost.sprite = sprite;
             _dragGhost.raycastTarget = false;
             _dragGhost.preserveAspect = true;
-            _dragGhost.rectTransform.sizeDelta = new Vector2(54f, 54f);
+            _dragGhost.enabled = true;
 
-            var group = ghost.GetComponent<CanvasGroup>();
-            group.blocksRaycasts = false;
-            group.alpha = 0.88f;
+            var group = _dragGhost.GetComponent<CanvasGroup>();
+            if (group != null)
+            {
+                group.blocksRaycasts = false;
+                group.alpha = 0.88f;
+            }
         }
     }
 }

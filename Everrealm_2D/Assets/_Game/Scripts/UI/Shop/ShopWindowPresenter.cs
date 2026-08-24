@@ -17,6 +17,7 @@ namespace LetterHunter.UI.Shop
         [SerializeField] private CanvasGroup windowGroup;
         [SerializeField] private RectTransform rowRoot;
         [SerializeField] private ShopItemRowView rowPrefab;
+        [SerializeField] private List<ShopItemRowView> authoredRows = new();
         [SerializeField] private TMP_Text emptyText;
         [SerializeField] private TMP_Text goldText;
         [SerializeField] private TMP_Text feedbackText;
@@ -93,8 +94,8 @@ namespace LetterHunter.UI.Shop
             if (!IsVisible || rowRoot == null)
                 return;
 
-            ClearRows();
             var sellableItems = BuildSellableItemCounts();
+            ClearRows();
             if (sellableItems.Count == 0)
             {
                 SetEmptyState(true);
@@ -102,8 +103,26 @@ namespace LetterHunter.UI.Shop
             }
 
             SetEmptyState(false);
+            var rowIndex = 0;
             foreach (var pair in sellableItems)
-                CreateSellRow(pair.Key, pair.Value);
+            {
+                if (rowIndex >= authoredRows.Count)
+                    break;
+
+                var row = authoredRows[rowIndex++];
+                if (row == null)
+                    continue;
+
+                row.gameObject.SetActive(true);
+                row.Render(pair.Key, pair.Value, Sell);
+                _rows.Add(row);
+            }
+
+            for (; rowIndex < authoredRows.Count; rowIndex++)
+            {
+                if (authoredRows[rowIndex] != null)
+                    authoredRows[rowIndex].gameObject.SetActive(false);
+            }
         }
 
         private void RenderGold(int gold)
@@ -128,17 +147,6 @@ namespace LetterHunter.UI.Shop
             }
 
             return result;
-        }
-
-        private void CreateSellRow(ItemDefinition item, int amount)
-        {
-            if (rowPrefab == null || rowRoot == null)
-                return;
-
-            var row = Instantiate(rowPrefab, rowRoot);
-            row.name = $"{item.DisplayName}Row";
-            row.Render(item, amount, Sell);
-            _rows.Add(row);
         }
 
         private void Sell(ItemDefinition item, int amount)
@@ -168,7 +176,7 @@ namespace LetterHunter.UI.Shop
         {
             foreach (var row in _rows)
                 if (row != null)
-                    Destroy(row.gameObject);
+                    row.gameObject.SetActive(false);
             _rows.Clear();
         }
 

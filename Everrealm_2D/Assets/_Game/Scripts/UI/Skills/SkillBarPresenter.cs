@@ -17,6 +17,8 @@ namespace LetterHunter.UI.Skills
 
         [Header("View")]
         [SerializeField] private SkillSlotView slotPrefab;
+        [SerializeField] private List<SkillSlotView> authoredSlots = new();
+        [SerializeField] private Image assignmentGhost;
         [SerializeField] private Transform slotRoot;
         [Min(1), SerializeField] private int maxSlots = 4;
 
@@ -43,6 +45,15 @@ namespace LetterHunter.UI.Skills
                 slotRoot = transform;
             if (_rootCanvas == null)
                 _rootCanvas = GetComponentInParent<Canvas>();
+
+            if (assignmentGhost != null)
+            {
+                assignmentGhost.enabled = false;
+                assignmentGhost.raycastTarget = false;
+            }
+
+            foreach (var view in authoredSlots)
+                WireView(view);
         }
 
         private void Start()
@@ -103,18 +114,23 @@ namespace LetterHunter.UI.Skills
                 return;
             }
 
-            while (_views.Count < maxSlots)
-            {
-                var view = Instantiate(slotPrefab, slotRoot);
-                view.name = $"SkillSlot_{_views.Count + 1}";
-                view.Clicked += OnSlotClicked;
-                view.PointerEntered += OnSlotPointerEntered;
-                view.PointerExited += OnSlotPointerExited;
-                _views.Add(view);
-            }
+            _views.Clear();
+            _views.AddRange(authoredSlots);
 
             for (var i = 0; i < _views.Count; i++)
                 _views[i].gameObject.SetActive(i < maxSlots);
+        }
+
+        private void WireView(SkillSlotView view)
+        {
+            if (view == null)
+                return;
+            view.Clicked -= OnSlotClicked;
+            view.PointerEntered -= OnSlotPointerEntered;
+            view.PointerExited -= OnSlotPointerExited;
+            view.Clicked += OnSlotClicked;
+            view.PointerEntered += OnSlotPointerEntered;
+            view.PointerExited += OnSlotPointerExited;
         }
 
         private void Render()
@@ -239,23 +255,23 @@ namespace LetterHunter.UI.Skills
         private void CreateAssignmentGhost(SkillDefinition skill)
         {
             DestroyAssignmentGhost();
-            if (_rootCanvas == null)
-                _rootCanvas = GetComponentInParent<Canvas>();
-            if (_rootCanvas == null)
+            if (assignmentGhost == null)
                 return;
 
-            var ghost = new GameObject("DraggedSkillIcon", typeof(RectTransform), typeof(CanvasGroup), typeof(Image));
-            ghost.transform.SetParent(_rootCanvas.transform, false);
-            _assignmentGhost = ghost.GetComponent<Image>();
+            _assignmentGhost = assignmentGhost;
             _assignmentGhost.sprite = skill.Icon;
             _assignmentGhost.color = skill.Icon != null ? Color.white : new Color(0.95f, 0.78f, 0.25f, 0.9f);
             _assignmentGhost.raycastTarget = false;
             _assignmentGhost.preserveAspect = true;
             _assignmentGhost.rectTransform.sizeDelta = new Vector2(58f, 58f);
 
-            var group = ghost.GetComponent<CanvasGroup>();
-            group.blocksRaycasts = false;
-            group.alpha = 0.9f;
+            _assignmentGhost.enabled = true;
+            var group = _assignmentGhost.GetComponent<CanvasGroup>();
+            if (group != null)
+            {
+                group.blocksRaycasts = false;
+                group.alpha = 0.9f;
+            }
             UpdateAssignmentGhost();
         }
 
@@ -279,7 +295,10 @@ namespace LetterHunter.UI.Skills
         private void DestroyAssignmentGhost()
         {
             if (_assignmentGhost != null)
-                Destroy(_assignmentGhost.gameObject);
+            {
+                _assignmentGhost.enabled = false;
+                _assignmentGhost.sprite = null;
+            }
             _assignmentGhost = null;
         }
 

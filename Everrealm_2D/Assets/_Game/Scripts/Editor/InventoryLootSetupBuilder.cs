@@ -480,8 +480,7 @@ namespace LetterHunter.Editor
             if (legacy == null)
                 return;
 
-            legacy.gameObject.SetActive(false);
-            EditorUtility.SetDirty(legacy.gameObject);
+            Undo.DestroyObjectImmediate(legacy.gameObject);
         }
 
         private static void AssignInventoryHud(InventoryHudPresenter presenter, Scene scene)
