@@ -154,25 +154,34 @@ namespace LetterHunter.EditorTools
                 var button = slot.GetComponent<Button>() ?? slot.gameObject.AddComponent<Button>();
                 ResetButton(button);
 
-                var icon = FindImage(slot, "Icon");
-                if (icon != null)
-                {
-                    icon.preserveAspect = true;
-                    icon.raycastTarget = false;
-                }
+                DisablePackageIconLayers(slot);
+                var packageCooldown = FindImage(slot, "CoolDown");
+                if (packageCooldown != null)
+                    packageCooldown.enabled = false;
 
-                var cooldown = FindImage(slot, "CoolDown");
-                if (cooldown != null)
-                {
-                    cooldown.type = Image.Type.Filled;
-                    cooldown.fillMethod = Image.FillMethod.Radial360;
-                    cooldown.raycastTarget = false;
-                }
+                var icon = CreateSlotImage(slot, "LetterHunterSkillIcon", new Vector2(50f, 50f),
+                    new Vector2(0f, 5f));
+                icon.enabled = false;
+                icon.preserveAspect = true;
+
+                var cooldown = CreateSlotImage(slot, "LetterHunterCooldownOverlay", new Vector2(52f, 52f),
+                    new Vector2(0f, 5f));
+                cooldown.sprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd");
+                cooldown.color = new Color(0.01f, 0.015f, 0.02f, 0.82f);
+                cooldown.type = Image.Type.Filled;
+                cooldown.fillMethod = Image.FillMethod.Radial360;
+                cooldown.fillOrigin = (int)Image.Origin360.Top;
+                cooldown.fillClockwise = false;
+                cooldown.fillAmount = 0f;
+                cooldown.enabled = false;
 
                 var keyParent = FindDeep(slot, "Key") ?? slot;
                 var key = CreateLabel(keyParent, "LetterHunterKey", i == 9 ? "0" : (i + 1).ToString(), 16f);
-                var timerParent = FindDeep(slot, "CoolDown") ?? slot;
-                var timer = CreateLabel(timerParent, "LetterHunterCooldown", string.Empty, 17f);
+                var timer = CreateLabel(slot, "LetterHunterCooldown", string.Empty, 17f);
+                timer.color = Color.white;
+                timer.outlineColor = new Color(0f, 0f, 0f, 0.9f);
+                timer.outlineWidth = 0.22f;
+                timer.transform.SetAsLastSibling();
 
                 var serializedView = new SerializedObject(view);
                 serializedView.FindProperty("button").objectReferenceValue = button;
@@ -185,6 +194,8 @@ namespace LetterHunter.EditorTools
                 serializedView.ApplyModifiedPropertiesWithoutUndo();
                 views.Add(view);
             }
+
+            ValidateComposedSlots(views);
 
             ConfigureProgressStrip(shell.transform);
             DisableUnsupportedControls(shell.transform);
@@ -328,6 +339,51 @@ namespace LetterHunter.EditorTools
             rect.offsetMin = Vector2.zero;
             rect.offsetMax = Vector2.zero;
             return label;
+        }
+
+        private static Image CreateSlotImage(Transform parent, string name, Vector2 size, Vector2 position)
+        {
+            var image = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image))
+                .GetComponent<Image>();
+            image.transform.SetParent(parent, false);
+            image.raycastTarget = false;
+            var rect = image.rectTransform;
+            rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.sizeDelta = size;
+            rect.anchoredPosition = position;
+            image.transform.SetAsLastSibling();
+            return image;
+        }
+
+        private static void DisablePackageIconLayers(Transform slot)
+        {
+            foreach (var image in slot.GetComponentsInChildren<Image>(true))
+            {
+                if (image == null)
+                    continue;
+                if (image.name.Equals("Icon", StringComparison.OrdinalIgnoreCase) ||
+                    image.name.Equals("IconGlow", StringComparison.OrdinalIgnoreCase))
+                    image.enabled = false;
+            }
+        }
+
+        private static void ValidateComposedSlots(IReadOnlyList<SkillSlotView> views)
+        {
+            if (views == null || views.Count != 10)
+                throw new InvalidOperationException("SoftKitty skill bar must contain exactly 10 authored slots.");
+
+            foreach (var view in views)
+            {
+                var serializedView = new SerializedObject(view);
+                var icon = serializedView.FindProperty("icon")?.objectReferenceValue as Image;
+                var cooldown = serializedView.FindProperty("cooldownOverlay")?.objectReferenceValue as Image;
+                var cooldownText = serializedView.FindProperty("cooldownText")?.objectReferenceValue as TMP_Text;
+                if (icon == null || cooldown == null || cooldownText == null)
+                    throw new InvalidOperationException($"{view.name} is missing an authored icon or cooldown layer.");
+                if (cooldown.type != Image.Type.Filled || cooldown.fillMethod != Image.FillMethod.Radial360)
+                    throw new InvalidOperationException($"{view.name} cooldown is not configured as a radial fill.");
+            }
         }
 
         private static Image CreateGhost(Transform host)
