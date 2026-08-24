@@ -1,0 +1,38 @@
+# Unity generated folders
+/Everrealm_2D/[Ll]ibrary/
+/Everrealm_2D/[Tt]emp/
+/Everrealm_2D/[Oo]bj/
+/Everrealm_2D/[Bb]uild/
+/Everrealm_2D/[Bb]uilds/
+/Everrealm_2D/[Ll]ogs/
+/Everrealm_2D/[Uu]ser[Ss]ettings/
+
+# Unity generated IDE/project files
+/Everrealm_2D/*.csproj
+/Everrealm_2D/*.sln
+/Everrealm_2D/*.slnx
+/Everrealm_2D/*.userprefs
+/Everrealm_2D/.vs/
+/Everrealm_2D/.vscode/
+
+# Unity package and asset caches
+/Everrealm_2D/[Mm]emoryCaptures/
+/Everrealm_2D/[Rr]ecordings/
+/Everrealm_2D/[Aa]ssets/[Aa]ddressable[Aa]ssets[Dd]ata/*/*.bin*
+/Everrealm_2D/[Aa]ssets/[Ss]treamingAssets/aa*
+
+# Local tooling and workspace metadata
+/Everrealm_2D/.agents/
+/Everrealm_2D/.codex/
+
+# Nested repository metadata
+/Everrealm_2D/.git/
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Crash dumps
+sysinfo.txt
+*.stackdump
