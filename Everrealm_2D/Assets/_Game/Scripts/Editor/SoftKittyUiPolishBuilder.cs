@@ -50,9 +50,12 @@ namespace LetterHunter.EditorTools
                 BuildSkillBar(skillBar);
             foreach (var shop in Resources.FindObjectsOfTypeAll<ShopWindowPresenter>())
             {
-                if (shop != null && shop.gameObject.scene == scene)
+                if (shop != null && shop.gameObject.scene.path == scene.path)
                     BuildShop(shop);
             }
+            var authoredShop = GameObject.Find("ShopWindow")?.GetComponent<ShopWindowPresenter>();
+            if (authoredShop != null)
+                BuildShop(authoredShop);
 
             EditorSceneManager.MarkSceneDirty(scene);
             AssetDatabase.SaveAssets();
