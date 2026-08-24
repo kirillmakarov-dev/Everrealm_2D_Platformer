@@ -6,7 +6,6 @@ using LetterHunter.UI.Inventory;
 using LetterHunter.UI.SkillTree;
 using LetterHunter.UI.Skills;
 using LetterHunter.UI.Shop;
-using SoftKitty;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -36,7 +35,6 @@ namespace LetterHunter.EditorTools
             if (!scene.IsValid())
                 return;
 
-            EnsureSoftKittySettings();
             RemoveLegacyInventoryHud();
             foreach (var vitals in Object.FindObjectsByType<PlayerVitalsHudPresenter>(FindObjectsSortMode.None))
                 PolishVitals(vitals.transform);
@@ -61,17 +59,6 @@ namespace LetterHunter.EditorTools
             AssetDatabase.SaveAssets();
             EditorSceneManager.SaveScene(scene);
             Debug.Log("Soft Kitty UI polish complete. All runtime UI references are scene-authored.");
-        }
-
-        private static void EnsureSoftKittySettings()
-        {
-            var settings = AssetDatabase.LoadAssetAtPath<SGD_Settings>(
-                "Assets/SoftKitty/Data/SGD_Settings.asset");
-            if (settings == null)
-                return;
-
-            EditorBuildSettings.AddConfigObject(SGD_Settings.CONFIG_NAME, settings, true);
-            Debug.Log("Soft Kitty UI: registered SGD_Settings in Editor Build Settings.");
         }
 
         private static void RemoveLegacyInventoryHud()
