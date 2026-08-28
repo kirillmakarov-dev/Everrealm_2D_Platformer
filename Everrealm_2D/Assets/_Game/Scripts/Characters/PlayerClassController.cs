@@ -36,6 +36,7 @@ namespace LetterHunter.Characters
         public Transform Transform => transform;
         public CombatStats Stats { get; private set; }
         public CharacterClassType ClassType => classDefinition != null ? classDefinition.ClassType : CharacterClassType.Warrior;
+        public ClassDefinition ClassDefinition => classDefinition;
         public bool IsAlive => Stats != null && Stats.CurrentHealth > 0f;
         public Vector2 FacingDirection { get => facingDirection; set { if (value.sqrMagnitude > 0f) facingDirection = value.normalized; } }
         public IReadOnlyList<SkillDefinition> UsableSkills => _usableSkills;

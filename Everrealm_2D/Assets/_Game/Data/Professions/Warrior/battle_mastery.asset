@@ -16,11 +16,11 @@ MonoBehaviour:
   displayName: Battle Mastery
   description: Capstone training available after all three branches are completed.
   icon: {fileID: 21300000, guid: 3755acb606a5d7f44927ee243fbf1ee1, type: 3}
-  abilityToGrant: {fileID: 0}
+  abilityToGrant: {fileID: 11400000, guid: b6711d9d7638318499bc0252272eb067, type: 2}
   requiredLevel: 4
   price: 35
   parentNodes:
   - {fileID: 11400000, guid: 2c89fff890c95eb48827fe8d9ad521f4, type: 2}
   - {fileID: 11400000, guid: 3ec651d6964a6dc44b9c010ccd4ea6be, type: 2}
   - {fileID: 11400000, guid: 5ce5ebe7c1f01ba44ba839a532c58d7b, type: 2}
-  uiPosition: {x: 860, y: 245}
+  uiPosition: {x: 0.66141456, y: 0.6000835}

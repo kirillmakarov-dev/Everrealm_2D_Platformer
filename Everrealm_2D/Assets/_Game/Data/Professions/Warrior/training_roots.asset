@@ -16,8 +16,8 @@ MonoBehaviour:
   displayName: Warrior Foundation
   description: Master the discipline required to enter the warrior profession.
   icon: {fileID: 21300000, guid: 0f71cd7655d89ab428c2e7e2cbb11558, type: 3}
-  abilityToGrant: {fileID: 0}
+  abilityToGrant: {fileID: 11400000, guid: b1151502fcc4f22478722d4506880a4b, type: 2}
   requiredLevel: 1
   price: 0
   parentNodes: []
-  uiPosition: {x: 0, y: 185}
+  uiPosition: {x: 0.09492674, y: 0.7190782}

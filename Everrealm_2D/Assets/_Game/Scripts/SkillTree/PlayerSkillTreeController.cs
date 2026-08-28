@@ -46,6 +46,7 @@ namespace LetterHunter.SkillTree
         private void Awake()
         {
             if (player == null) player = GetComponent<PlayerClassController>();
+            if (player == null) player = FindFirstObjectByType<PlayerClassController>();
             if (wallet == null) wallet = GetComponent<CurrencyWallet>();
             if (skillBar == null) skillBar = FindFirstObjectByType<SkillBarPresenter>();
             EnsureService();
@@ -142,6 +143,14 @@ namespace LetterHunter.SkillTree
         private ProfessionDefinitionSO ResolveStartingProfession()
         {
             if (startingProfession != null) return startingProfession;
+            if (player != null)
+            {
+                var classId = player.ClassType.ToString();
+                foreach (var profession in availableProfessions ?? Array.Empty<ProfessionDefinitionSO>())
+                    if (profession != null && (profession.ProfessionId == classId.ToLowerInvariant() ||
+                        string.Equals(profession.DisplayName, classId, StringComparison.OrdinalIgnoreCase)))
+                        return profession;
+            }
             foreach (var profession in availableProfessions ?? Array.Empty<ProfessionDefinitionSO>())
                 if (profession != null) return profession;
             return null;

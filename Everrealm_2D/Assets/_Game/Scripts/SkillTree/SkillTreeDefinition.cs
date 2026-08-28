@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace LetterHunter.SkillTree
 {
-    [CreateAssetMenu(menuName = "Letter Hunter/Skill Tree/Skill Tree Definition")]
+    [CreateAssetMenu(menuName = "Everrealm/Skill Tree/Skill Tree Definition")]
     public sealed class SkillTreeDefinition : ScriptableObject
     {
         [SerializeField] private string treeId = "warrior_tree";

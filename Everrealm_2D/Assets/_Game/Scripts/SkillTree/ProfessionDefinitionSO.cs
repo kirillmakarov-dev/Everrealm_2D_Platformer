@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace LetterHunter.SkillTree
 {
-    [CreateAssetMenu(menuName = "Letter Hunter/Skill Tree/Profession Definition")]
+    [CreateAssetMenu(menuName = "Everrealm/Skill Tree/Profession Definition")]
     public sealed class ProfessionDefinitionSO : ScriptableObject
     {
         [SerializeField] private string professionId;

@@ -7,6 +7,7 @@ using LetterHunter.Debugging;
 using LetterHunter.SkillTree;
 using LetterHunter.Skills;
 using LetterHunter.UI.SkillTree;
+using LetterHunter.UI.Skills;
 using TMPro;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -25,6 +26,8 @@ namespace LetterHunter.EditorTools
         private const string NodePrefabPath = PrefabFolder + "/SkillTreeNode.prefab";
         private const string ConnectionPrefabPath = PrefabFolder + "/SkillTreeConnection.prefab";
         private const string WindowPrefabPath = PrefabFolder + "/SkillTreeWindow.prefab";
+        private const string ResourcesNodePrefabPath = "Assets/_Game/Resources/EnglishKingdomSkillTree/SkillTreeNode.prefab";
+        private const string ResourcesConnectionPrefabPath = "Assets/_Game/Resources/EnglishKingdomSkillTree/SkillTreeConnection.prefab";
         private const string AtlasPath = "Assets/SoftKitty/InventoryEngine/Textures/Sprites/Main.png";
         private const string IconFolder = "Assets/SoftKitty/InventoryEngine/Textures/SkillIcon";
 
@@ -52,21 +55,26 @@ namespace LetterHunter.EditorTools
         private static readonly NodeSpec[] Specs =
         {
             new("training_roots", "Warrior Foundation", "Master the discipline required to enter the warrior profession.",
-                7, 1, 0, new Vector2(0f, 185f), Array.Empty<string>()),
+                7, 1, 0, new Vector2(0f, 185f), Array.Empty<string>(),
+                "Assets/_Game/Data/Skills/Warrior/SpecialTraining.asset"),
             new("focus_slash", "Focus Slash", "Unlock a precise two-hit slash through the existing combat skill system.",
                 1, 1, 15, new Vector2(280f, 55f), new[] { "training_roots" },
                 "Assets/_Game/Data/Skills/SkillTree/TreeFocusSlash.asset"),
             new("defense_mastery", "Fortress Training", "Advance the defensive branch and prepare for Battle Mastery.",
-                10, 2, 18, new Vector2(280f, 245f), new[] { "training_roots" }),
+                10, 2, 18, new Vector2(280f, 245f), new[] { "training_roots" },
+                "Assets/_Game/Data/Skills/Warrior/IronStrength.asset"),
             new("rapid_assault", "Rapid Assault", "Advance the speed branch and prepare for Battle Mastery.",
-                8, 2, 18, new Vector2(280f, 435f), new[] { "training_roots" }),
+                8, 2, 18, new Vector2(280f, 435f), new[] { "training_roots" },
+                "Assets/_Game/Data/Skills/Warrior/FireSpin.asset"),
             new("focused_flow", "Focused Flow", "Deepen your control of Focus Slash and unlock the final tier.",
-                9, 2, 20, new Vector2(570f, 55f), new[] { "focus_slash" }),
+                9, 2, 20, new Vector2(570f, 55f), new[] { "focus_slash" },
+                "Assets/_Game/Data/Skills/Warrior/ExtremeFocus.asset"),
             new("battle_mastery", "Battle Mastery", "Capstone training available after all three branches are completed.",
-                12, 4, 35, new Vector2(860f, 245f), new[] { "focused_flow", "defense_mastery", "rapid_assault" })
+                12, 4, 35, new Vector2(860f, 245f), new[] { "focused_flow", "defense_mastery", "rapid_assault" },
+                "Assets/_Game/Data/Skills/Warrior/ComboMaster.asset")
         };
 
-        [MenuItem("Letter Hunter/Build Profession Skill Tree", priority = 2)]
+        [MenuItem("Everrealm/Build Profession Skill Tree", priority = 2)]
         public static void Build()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode) return;
@@ -81,14 +89,109 @@ namespace LetterHunter.EditorTools
             LoadAtlas();
             RegisterSoftKittySettings();
             var profession = BuildData();
-            var nodePrefab = BuildNodePrefab();
-            var connectionPrefab = BuildConnectionPrefab();
-            var windowPrefab = BuildWindowPrefab(profession, nodePrefab, connectionPrefab);
+            // Keep the imported English Kingdom visual prefab intact. This tool owns
+            // data and scene wiring; it must not recreate the old Everrealm UI.
+            var windowPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(WindowPrefabPath);
+            if (windowPrefab == null)
+                throw new InvalidOperationException($"Missing visual prefab at {WindowPrefabPath}.");
+            AssignImportedVisualReferences();
+            windowPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(WindowPrefabPath);
+            ValidateImportedVisualAssets(windowPrefab);
             IntegrateScene(scene, profession, windowPrefab);
+            ValidateSkillLoadout(scene);
             AssetDatabase.SaveAssets();
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
             Debug.Log("Profession Skill Tree data, prefabs and scene integration built successfully.");
+        }
+
+        [MenuItem("Everrealm/Validate Profession Skill Tree", priority = 3)]
+        public static void Validate()
+        {
+            var windowPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(WindowPrefabPath);
+            if (windowPrefab == null)
+            {
+                Debug.LogError($"Missing visual prefab at {WindowPrefabPath}.");
+                return;
+            }
+
+            AssignImportedVisualReferences();
+            windowPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(WindowPrefabPath);
+            ValidateImportedVisualAssets(windowPrefab);
+            ValidateSkillLoadout(SceneManager.GetActiveScene());
+            Debug.Log("Profession Skill Tree visual and skill-slot assignments validated.");
+        }
+
+        private static void ValidateImportedVisualAssets(GameObject windowPrefab)
+        {
+            var visual = windowPrefab.GetComponent<EverrealmSkillTreeVisual>();
+            if (visual == null)
+                throw new InvalidOperationException("SkillTreeWindow.prefab has no EverrealmSkillTreeVisual component.");
+
+            var nodePrefab = AssetDatabase.LoadAssetAtPath<GameObject>(ResourcesNodePrefabPath);
+            var connectionPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(ResourcesConnectionPrefabPath);
+            if (nodePrefab == null || nodePrefab.GetComponent<EverrealmSkillTreeNodeVisual>() == null)
+                throw new InvalidOperationException($"Invalid Resources node prefab: {ResourcesNodePrefabPath}.");
+            if (connectionPrefab == null || connectionPrefab.GetComponent<EverrealmSkillTreeConnectionVisual>() == null)
+                throw new InvalidOperationException($"Invalid Resources connection prefab: {ResourcesConnectionPrefabPath}.");
+        }
+
+        private static void AssignImportedVisualReferences()
+        {
+            var nodePrefab = AssetDatabase.LoadAssetAtPath<GameObject>(ResourcesNodePrefabPath);
+            var connectionPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(ResourcesConnectionPrefabPath);
+            if (nodePrefab == null || nodePrefab.GetComponent<EverrealmSkillTreeNodeVisual>() == null ||
+                connectionPrefab == null || connectionPrefab.GetComponent<EverrealmSkillTreeConnectionVisual>() == null)
+                throw new InvalidOperationException("Everrealm skill-tree Resources prefabs are missing or invalid.");
+
+            var contents = PrefabUtility.LoadPrefabContents(WindowPrefabPath);
+            try
+            {
+                var visual = contents.GetComponent<EverrealmSkillTreeVisual>();
+                if (visual == null)
+                    throw new InvalidOperationException("SkillTreeWindow.prefab has no EverrealmSkillTreeVisual component.");
+
+                var group = contents.GetComponent<CanvasGroup>() ?? contents.AddComponent<CanvasGroup>();
+                var so = new SerializedObject(visual);
+                so.FindProperty("_nodePrefab").objectReferenceValue = nodePrefab;
+                so.FindProperty("_connectionPrefab").objectReferenceValue = connectionPrefab;
+                so.FindProperty("_windowGroup").objectReferenceValue = group;
+                so.ApplyModifiedPropertiesWithoutUndo();
+                EditorUtility.SetDirty(contents);
+                PrefabUtility.SaveAsPrefabAsset(contents, WindowPrefabPath);
+            }
+            finally
+            {
+                PrefabUtility.UnloadPrefabContents(contents);
+            }
+        }
+
+        private static void ValidateSkillLoadout(Scene scene)
+        {
+            if (!scene.IsValid() || scene.path != ScenePath) return;
+            var loadout = UnityEngine.Object.FindFirstObjectByType<PlayerSkillLoadout>(FindObjectsInactive.Include);
+            if (loadout == null)
+            {
+                Debug.LogWarning("PlayerSkillLoadout was not found; skill slot validation skipped.");
+                return;
+            }
+
+            var seen = new HashSet<int>();
+            foreach (var binding in loadout.Slots)
+            {
+                if (binding == null || binding.Skill == null)
+                    throw new InvalidOperationException("Skill loadout contains an empty binding.");
+                if (!seen.Add(binding.SlotIndex))
+                    throw new InvalidOperationException($"Skill loadout contains duplicate slot {binding.SlotIndex + 1}.");
+            }
+
+            var third = loadout.ResolveSkill(loadout.GetComponent<PlayerClassController>(), 2, out var label);
+            if (third == null)
+                throw new InvalidOperationException("Skill 3 has no assigned SkillDefinition.");
+            if (label != "3")
+                Debug.LogWarning($"Skill 3 is assigned to '{third.DisplayName}' but its input label is '{label}'.");
+            else
+                Debug.Log($"Skill 3 assignment OK: {third.DisplayName} ({third.SkillId}).");
         }
 
         public static void BuildFromBatchMode()
@@ -111,8 +214,11 @@ namespace LetterHunter.EditorTools
                 so.FindProperty("displayName").stringValue = spec.Title;
                 so.FindProperty("description").stringValue = spec.Description;
                 so.FindProperty("icon").objectReferenceValue = LoadIcon(spec.Icon);
-                so.FindProperty("abilityToGrant").objectReferenceValue = string.IsNullOrWhiteSpace(spec.AbilityPath)
+                var ability = string.IsNullOrWhiteSpace(spec.AbilityPath)
                     ? null : AssetDatabase.LoadAssetAtPath<SkillDefinition>(spec.AbilityPath);
+                if (!string.IsNullOrWhiteSpace(spec.AbilityPath) && ability == null)
+                    throw new InvalidOperationException($"Skill asset is missing for node {spec.Id}: {spec.AbilityPath}.");
+                so.FindProperty("abilityToGrant").objectReferenceValue = ability;
                 so.FindProperty("requiredLevel").intValue = spec.Level;
                 so.FindProperty("price").intValue = spec.Price;
                 so.FindProperty("uiPosition").vector2Value = spec.Position;
@@ -394,6 +500,12 @@ namespace LetterHunter.EditorTools
                 parent = old.transform.parent;
                 UnityEngine.Object.DestroyImmediate(old.gameObject);
             }
+            var imported = UnityEngine.Object.FindFirstObjectByType<EverrealmSkillTreeVisual>(FindObjectsInactive.Include);
+            if (imported != null)
+            {
+                parent ??= imported.transform.parent;
+                UnityEngine.Object.DestroyImmediate(imported.gameObject);
+            }
             if (parent == null)
             {
                 var canvas = UnityEngine.Object.FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None)
@@ -409,16 +521,11 @@ namespace LetterHunter.EditorTools
             rect.anchorMax = Vector2.one;
             rect.offsetMin = Vector2.zero;
             rect.offsetMax = Vector2.zero;
-            var presenter = instance.GetComponent<SkillTreeWindowPresenter>();
+            var presenter = instance.GetComponent<EverrealmSkillTreeVisual>();
             var so = new SerializedObject(presenter);
-            so.FindProperty("controller").objectReferenceValue = controller;
-            so.FindProperty("characterInput").objectReferenceValue =
-                UnityEngine.Object.FindFirstObjectByType<CharacterInputRouter>(FindObjectsInactive.Include);
-            var blocked = so.FindProperty("additionalInputsToBlock");
-            var debugInput = UnityEngine.Object.FindFirstObjectByType<PlayerDebugInput2D>(FindObjectsInactive.Include);
-            blocked.arraySize = debugInput != null ? 1 : 0;
-            if (debugInput != null) blocked.GetArrayElementAtIndex(0).objectReferenceValue = debugInput;
+            so.FindProperty("_controller").objectReferenceValue = controller;
             so.ApplyModifiedPropertiesWithoutUndo();
+            instance.SetActive(true);
         }
 
         private static Canvas CreateCanvas(Scene scene)

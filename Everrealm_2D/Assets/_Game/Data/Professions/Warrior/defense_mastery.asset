@@ -16,9 +16,9 @@ MonoBehaviour:
   displayName: Fortress Training
   description: Advance the defensive branch and prepare for Battle Mastery.
   icon: {fileID: 21300000, guid: 4c189ee2ac5f64c43a65d0787aa97bab, type: 3}
-  abilityToGrant: {fileID: 0}
+  abilityToGrant: {fileID: 11400000, guid: 6fc377613b650324195469ca5ab1198e, type: 2}
   requiredLevel: 2
   price: 18
   parentNodes:
   - {fileID: 11400000, guid: 071679cb849bcee44869dac308aa9ddd, type: 2}
-  uiPosition: {x: 280, y: 245}
+  uiPosition: {x: 0.3966341, y: 0.71785057}

@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace LetterHunter.SkillTree
 {
-    [CreateAssetMenu(menuName = "Letter Hunter/Skill Tree/Skill Node Definition")]
+    [CreateAssetMenu(menuName = "Everrealm/Skill Tree/Skill Node Definition")]
     public sealed class SkillNodeDefinitionSO : ScriptableObject
     {
         [SerializeField] private string nodeId;
