@@ -6090,8 +6090,9 @@ MonoBehaviour:
   skillLoadout: {fileID: 0}
   skillBar: {fileID: 0}
   saveFileName: letter-hunter-save.json
-  loadOnStart: 0
+  loadOnStart: 1
   autoSaveProgress: 1
+  debugGoldAmount: 100
 --- !u!1 &785345315
 GameObject:
   m_ObjectHideFlags: 0

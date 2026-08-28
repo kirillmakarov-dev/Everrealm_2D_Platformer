@@ -63,6 +63,13 @@ namespace LetterHunter.Items
             return Inventory.TrySplitStack(fromIndex, toIndex, amount);
         }
 
+        public void ResetToStartingItems()
+        {
+            EnsureInventory();
+            Inventory.Clear();
+            AddStartingItems();
+        }
+
         private void EnsureInventory()
         {
             if (Inventory != null)

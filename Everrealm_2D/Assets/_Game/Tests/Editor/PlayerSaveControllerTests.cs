@@ -230,6 +230,124 @@ namespace LetterHunter.Tests.EditMode
             Object.DestroyImmediate(skill);
         }
 
+        [Test]
+        public void Sale_AutoSavesGoldAndInventory_AndReloadsAfterRestart()
+        {
+            var shard = CreateItem("sellable_shard", 20, 4);
+            var skill = CreateSkill("unused_skill", "Unused Skill");
+            var itemDatabase = CreateItemDatabase(shard);
+            var skillDatabase = CreateSkillDatabase(skill);
+            var saveFileName = $"letter-hunter-sale-test-{System.Guid.NewGuid():N}.json";
+            var savePath = Path.Combine(Application.persistentDataPath, saveFileName);
+            var source = CreatePlayerSaveObject(itemDatabase, skillDatabase, out var sourceWallet,
+                out var sourceInventory, out _, saveFileName);
+
+            InvokeStart(source);
+            sourceWallet.SetGold(10);
+            sourceInventory.RuntimeInventory.TrySetSlot(0, shard, 5);
+            var result = new ShopService(sourceInventory.RuntimeInventory, sourceWallet).TrySell(shard, 2);
+
+            Assert.That(result.Success, Is.True);
+            Assert.That(sourceWallet.Gold, Is.EqualTo(18));
+            Assert.That(sourceInventory.RuntimeInventory.Slots[0].Amount, Is.EqualTo(3));
+            Assert.That(File.Exists(savePath), Is.True);
+
+            var restarted = CreatePlayerSaveObject(itemDatabase, skillDatabase, out var restoredWallet,
+                out var restoredInventory, out _, saveFileName);
+            InvokeStart(restarted);
+
+            Assert.That(restoredWallet.Gold, Is.EqualTo(18));
+            Assert.That(restoredInventory.RuntimeInventory.Slots[0].Item, Is.EqualTo(shard));
+            Assert.That(restoredInventory.RuntimeInventory.Slots[0].Amount, Is.EqualTo(3));
+
+            if (File.Exists(savePath))
+                File.Delete(savePath);
+            Object.DestroyImmediate(source.gameObject);
+            Object.DestroyImmediate(restarted.gameObject);
+            Object.DestroyImmediate(itemDatabase);
+            Object.DestroyImmediate(skillDatabase);
+            Object.DestroyImmediate(shard);
+            Object.DestroyImmediate(skill);
+        }
+
+        [Test]
+        public void IndividualResetCommands_OnlyResetTheirOwnProgressBlock()
+        {
+            var shard = CreateItem("reset_shard", 20, 2);
+            var skill = CreateSkill("reset_skill", "Reset Skill");
+            var itemDatabase = CreateItemDatabase(shard);
+            var skillDatabase = CreateSkillDatabase(skill);
+            var saveFileName = $"letter-hunter-partial-reset-test-{System.Guid.NewGuid():N}.json";
+            var savePath = Path.Combine(Application.persistentDataPath, saveFileName);
+            var save = CreatePlayerSaveObject(itemDatabase, skillDatabase, out var wallet,
+                out var inventory, out var loadout, saveFileName);
+
+            InvokeStart(save);
+            wallet.SetGold(50);
+            inventory.RuntimeInventory.TrySetSlot(2, shard, 4);
+            Assert.That(loadout.TryAssignSkill(1, skill, out _), Is.True);
+
+            save.ResetSkills();
+            Assert.That(wallet.Gold, Is.EqualTo(50));
+            Assert.That(inventory.RuntimeInventory.Slots[2].Amount, Is.EqualTo(4));
+            Assert.That(loadout.Slots.Count, Is.EqualTo(0));
+
+            Assert.That(loadout.TryAssignSkill(1, skill, out _), Is.True);
+            save.ResetInventory();
+            Assert.That(wallet.Gold, Is.EqualTo(50));
+            Assert.That(inventory.RuntimeInventory.Slots[2].IsEmpty, Is.True);
+            Assert.That(loadout.Slots.Count, Is.EqualTo(1));
+
+            inventory.RuntimeInventory.TrySetSlot(2, shard, 4);
+            save.ResetGold();
+            Assert.That(wallet.Gold, Is.EqualTo(0));
+            Assert.That(inventory.RuntimeInventory.Slots[2].Amount, Is.EqualTo(4));
+            Assert.That(loadout.Slots.Count, Is.EqualTo(1));
+
+            var savedData = JsonUtility.FromJson<GameSaveData>(File.ReadAllText(savePath));
+            Assert.That(savedData.gold, Is.EqualTo(0));
+            Assert.That(savedData.inventorySlots.Count, Is.EqualTo(1));
+            Assert.That(savedData.skillBarSlots.Count, Is.EqualTo(1));
+
+            if (File.Exists(savePath))
+                File.Delete(savePath);
+            Object.DestroyImmediate(save.gameObject);
+            Object.DestroyImmediate(itemDatabase);
+            Object.DestroyImmediate(skillDatabase);
+            Object.DestroyImmediate(shard);
+            Object.DestroyImmediate(skill);
+        }
+
+        [Test]
+        public void AddDebugGold_UsesInspectorAmountAndPersistsIt()
+        {
+            var item = CreateItem("unused", 1);
+            var skill = CreateSkill("unused_skill", "Unused Skill");
+            var itemDatabase = CreateItemDatabase(item);
+            var skillDatabase = CreateSkillDatabase(skill);
+            var saveFileName = $"letter-hunter-debug-gold-test-{System.Guid.NewGuid():N}.json";
+            var savePath = Path.Combine(Application.persistentDataPath, saveFileName);
+            var save = CreatePlayerSaveObject(itemDatabase, skillDatabase, out var wallet, out _, out _, saveFileName);
+            var saveSo = new SerializedObject(save);
+            saveSo.FindProperty("debugGoldAmount").intValue = 275;
+            saveSo.ApplyModifiedPropertiesWithoutUndo();
+
+            InvokeStart(save);
+            save.AddDebugGold();
+
+            Assert.That(wallet.Gold, Is.EqualTo(275));
+            var savedData = JsonUtility.FromJson<GameSaveData>(File.ReadAllText(savePath));
+            Assert.That(savedData.gold, Is.EqualTo(275));
+
+            if (File.Exists(savePath))
+                File.Delete(savePath);
+            Object.DestroyImmediate(save.gameObject);
+            Object.DestroyImmediate(itemDatabase);
+            Object.DestroyImmediate(skillDatabase);
+            Object.DestroyImmediate(item);
+            Object.DestroyImmediate(skill);
+        }
+
         private static PlayerSkillTreeController AttachSkillTree(PlayerSaveController save,
             ProfessionDefinitionSO profession)
         {
@@ -328,13 +446,15 @@ namespace LetterHunter.Tests.EditMode
             return database;
         }
 
-        private static ItemDefinition CreateItem(string itemId, int maxStack)
+        private static ItemDefinition CreateItem(string itemId, int maxStack, int sellPrice = 0)
         {
             var item = ScriptableObject.CreateInstance<ItemDefinition>();
             var so = new SerializedObject(item);
             so.FindProperty("itemId").stringValue = itemId;
             so.FindProperty("displayName").stringValue = itemId;
             so.FindProperty("maxStack").intValue = maxStack;
+            so.FindProperty("sellPrice").intValue = sellPrice;
+            so.FindProperty("canSell").boolValue = sellPrice > 0;
             so.ApplyModifiedPropertiesWithoutUndo();
             return item;
         }

@@ -28,6 +28,9 @@ namespace LetterHunter.Save
         [SerializeField] private bool loadOnStart = true;
         [SerializeField] private bool autoSaveProgress = true;
 
+        [Header("Inspector Debug Tools")]
+        [Min(1), SerializeField] private int debugGoldAmount = 100;
+
         private bool _started;
         private bool _subscribed;
         private bool _isApplyingSave;
@@ -67,6 +70,18 @@ namespace LetterHunter.Save
             UnsubscribeAutoSave();
         }
 
+        private void OnApplicationPause(bool paused)
+        {
+            if (paused && _started && autoSaveProgress && !_isApplyingSave)
+                SaveToDisk();
+        }
+
+        private void OnApplicationQuit()
+        {
+            if (_started && autoSaveProgress && !_isApplyingSave)
+                SaveToDisk();
+        }
+
         public GameSaveData Capture()
         {
             var data = new GameSaveData
@@ -104,6 +119,9 @@ namespace LetterHunter.Save
         public void SaveToDisk()
         {
             var json = JsonUtility.ToJson(Capture(), true);
+            var directory = Path.GetDirectoryName(SavePath);
+            if (!string.IsNullOrWhiteSpace(directory))
+                Directory.CreateDirectory(directory);
             File.WriteAllText(SavePath, json);
             Debug.Log($"Saved game to {SavePath}", this);
         }
@@ -120,21 +138,43 @@ namespace LetterHunter.Save
             if (File.Exists(SavePath))
                 File.Delete(SavePath);
 
-            _isApplyingSave = true;
-            try
+            ApplyWithoutAutoSave(() =>
             {
                 wallet?.ResetToStartingGold();
-                inventory?.RuntimeInventory.Clear();
-                skillTree?.ResetProgress();
-                skillLoadout?.ClearSlots();
-                skillBar?.Rebuild();
-            }
-            finally
-            {
-                _isApplyingSave = false;
-            }
+                inventory?.ResetToStartingItems();
+                ResetSkillsRuntime();
+            });
             SaveToDisk();
             Debug.Log($"Reset progress and saved fresh state to {SavePath}", this);
+        }
+
+        [ContextMenu("Reset Skills Only")]
+        public void ResetSkills()
+        {
+            ApplyWithoutAutoSave(ResetSkillsRuntime);
+            SaveToDisk();
+        }
+
+        [ContextMenu("Reset Inventory Only")]
+        public void ResetInventory()
+        {
+            ApplyWithoutAutoSave(() => inventory?.ResetToStartingItems());
+            SaveToDisk();
+        }
+
+        [ContextMenu("Reset Gold Only")]
+        public void ResetGold()
+        {
+            ApplyWithoutAutoSave(() => wallet?.ResetToStartingGold());
+            SaveToDisk();
+        }
+
+        [ContextMenu("Add Debug Gold")]
+        public void AddDebugGold()
+        {
+            wallet?.AddGold(Mathf.Max(1, debugGoldAmount));
+            if (!_subscribed)
+                SaveToDisk();
         }
 
         private void LoadFromDisk(bool logMissingFile)
@@ -289,6 +329,10 @@ namespace LetterHunter.Save
         {
             if (_subscribed || !autoSaveProgress)
                 return;
+            if (wallet != null)
+                wallet.GoldChanged += OnGoldChanged;
+            if (inventory != null)
+                inventory.InventoryChanged += OnProgressionCommitted;
             if (skillTree != null)
                 skillTree.ProgressionCommitted += OnProgressionCommitted;
             if (skillLoadout != null)
@@ -300,6 +344,10 @@ namespace LetterHunter.Save
         {
             if (!_subscribed)
                 return;
+            if (wallet != null)
+                wallet.GoldChanged -= OnGoldChanged;
+            if (inventory != null)
+                inventory.InventoryChanged -= OnProgressionCommitted;
             if (skillTree != null)
                 skillTree.ProgressionCommitted -= OnProgressionCommitted;
             if (skillLoadout != null)
@@ -311,6 +359,31 @@ namespace LetterHunter.Save
         {
             if (!_isApplyingSave)
                 SaveToDisk();
+        }
+
+        private void OnGoldChanged(int _)
+        {
+            OnProgressionCommitted();
+        }
+
+        private void ResetSkillsRuntime()
+        {
+            skillTree?.ResetProgress();
+            skillLoadout?.ClearSlots();
+            skillBar?.Rebuild();
+        }
+
+        private void ApplyWithoutAutoSave(System.Action action)
+        {
+            _isApplyingSave = true;
+            try
+            {
+                action?.Invoke();
+            }
+            finally
+            {
+                _isApplyingSave = false;
+            }
         }
     }
 }
