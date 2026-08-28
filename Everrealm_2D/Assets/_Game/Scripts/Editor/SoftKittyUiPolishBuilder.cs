@@ -10,6 +10,7 @@ using LetterHunter.UI.Skills;
 using LetterHunter.UI.Shop;
 using TMPro;
 using UnityEditor;
+using UnityEditor.Events;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -66,6 +67,34 @@ namespace LetterHunter.EditorTools
             AssetDatabase.SaveAssets();
             EditorSceneManager.SaveScene(scene);
             Debug.Log("SoftKitty UI built from package sprites. Scene objects and project UI prefabs are Inspector-editable.");
+        }
+
+        [MenuItem("Tools/Letter Hunter/UI/Build SoftKitty Inventory")]
+        public static void BuildInventoryOnly()
+        {
+            var scene = SceneManager.GetActiveScene();
+            if (!scene.IsValid())
+                return;
+            if (!LoadSoftKittySprites())
+            {
+                Debug.LogError($"SoftKitty atlas is missing or not imported as multiple sprites: {AtlasPath}");
+                return;
+            }
+
+            SkinPrefab("Assets/_Game/Prefabs/UI/InventorySlot.prefab", SkinInventorySlot);
+            foreach (var inventory in UnityEngine.Object.FindObjectsByType<InventoryWindowPresenter>(FindObjectsSortMode.None))
+                BuildInventory(inventory);
+
+            EditorSceneManager.MarkSceneDirty(scene);
+            AssetDatabase.SaveAssets();
+            EditorSceneManager.SaveScene(scene);
+            Debug.Log("SoftKitty inventory visuals built. Runtime inventory logic was preserved.");
+        }
+
+        public static void BuildInventoryDebugScene()
+        {
+            EditorSceneManager.OpenScene("Assets/_Game/Scenes/InventoryLootDebug.unity", OpenSceneMode.Single);
+            BuildInventoryOnly();
         }
 
         private static bool LoadSoftKittySprites()
@@ -208,10 +237,14 @@ namespace LetterHunter.EditorTools
                 return;
 
             var grid = slotRoot.GetComponent<GridLayoutGroup>() ?? slotRoot.gameObject.AddComponent<GridLayoutGroup>();
-            grid.cellSize = new Vector2(78f, 78f);
-            grid.spacing = new Vector2(8f, 8f);
+            grid.cellSize = new Vector2(72f, 72f);
+            grid.spacing = new Vector2(10f, 10f);
+            grid.padding = new RectOffset(0, 0, 0, 0);
+            grid.startCorner = GridLayoutGroup.Corner.UpperLeft;
+            grid.startAxis = GridLayoutGroup.Axis.Horizontal;
+            grid.childAlignment = TextAnchor.UpperLeft;
             grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-            grid.constraintCount = Mathf.Clamp(Mathf.CeilToInt(Mathf.Sqrt(capacity)), 4, 8);
+            grid.constraintCount = 5;
             var slots = so.FindProperty("slotViews");
             slots.arraySize = capacity;
             for (var i = 0; i < capacity; i++)
@@ -225,8 +258,117 @@ namespace LetterHunter.EditorTools
             }
             so.FindProperty("dragGhost").objectReferenceValue = EnsureGhost(presenter.transform, "DraggedItemIcon", 72f);
             so.ApplyModifiedPropertiesWithoutUndo();
-            StylePanel(presenter.transform, "bg2");
+            LayoutInventoryWindow(presenter);
             AssignCurrencySprites(presenter.transform);
+        }
+
+        private static void LayoutInventoryWindow(InventoryWindowPresenter presenter)
+        {
+            var root = presenter.transform;
+            var rootRect = root as RectTransform;
+            if (rootRect != null)
+            {
+                rootRect.anchorMin = new Vector2(0f, 0.5f);
+                rootRect.anchorMax = new Vector2(0f, 0.5f);
+                rootRect.pivot = new Vector2(0f, 0.5f);
+                rootRect.anchoredPosition = new Vector2(24f, 0f);
+                rootRect.sizeDelta = new Vector2(500f, 650f);
+            }
+
+            SetImage(root.GetComponent<Image>() ?? root.gameObject.AddComponent<Image>(), "bg5",
+                new Color(0.16f, 0.13f, 0.11f, 0.99f), true);
+            AddFrame(root, "SoftKittyFrame", "frame2", new Color(0.7f, 0.55f, 0.32f, 1f));
+            AddShadow(root.gameObject, 12f);
+
+            var header = EnsureImage(root, "InventoryHeader");
+            SetRect(header.rectTransform, new Vector2(0f, 1f), new Vector2(1f, 1f),
+                new Vector2(0.5f, 1f), new Vector2(0f, -10f), new Vector2(-28f, 86f));
+            SetImage(header, "bg3", new Color(0.24f, 0.19f, 0.14f, 0.98f), true);
+            header.raycastTarget = false;
+            header.transform.SetAsFirstSibling();
+
+            var headerLine = EnsureImage(root, "InventoryHeaderLine");
+            SetRect(headerLine.rectTransform, new Vector2(0f, 1f), new Vector2(1f, 1f),
+                new Vector2(0.5f, 1f), new Vector2(0f, -91f), new Vector2(-42f, 6f));
+            SetImage(headerLine, "line2", Gold, true);
+            headerLine.raycastTarget = false;
+
+            var title = FindDeep(root, "Title")?.GetComponent<TMP_Text>();
+            if (title != null)
+            {
+                title.text = "INVENTORY";
+                title.fontSize = 30f;
+                title.fontStyle = FontStyles.Bold;
+                title.alignment = TextAlignmentOptions.Center;
+                title.color = new Color(0.94f, 0.78f, 0.45f, 1f);
+                SetRect(title.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f),
+                    new Vector2(0.5f, 1f), new Vector2(0f, -27f), new Vector2(320f, 48f));
+            }
+
+            var inventoryIcon = EnsureImage(root, "InventoryTitleIcon");
+            SetRect(inventoryIcon.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f),
+                new Vector2(0.5f, 0.5f), new Vector2(43f, -52f), new Vector2(42f, 42f));
+            SetImage(inventoryIcon, "icon_inventory", new Color(0.94f, 0.78f, 0.45f, 1f), false);
+            inventoryIcon.preserveAspect = true;
+            inventoryIcon.raycastTarget = false;
+
+            var close = EnsureButton(root, "CloseButton");
+            SetRect(close.GetComponent<RectTransform>(), new Vector2(1f, 1f), new Vector2(1f, 1f),
+                new Vector2(0.5f, 0.5f), new Vector2(-40f, -51f), new Vector2(34f, 34f));
+            SetImage(close.GetComponent<Image>(), "close", Parchment, false);
+            close.onClick.RemoveAllListeners();
+            UnityEventTools.AddPersistentListener(close.onClick, presenter.CloseInventory);
+
+            var slotRoot = new SerializedObject(presenter).FindProperty("slotRoot").objectReferenceValue as RectTransform;
+            if (slotRoot != null)
+                SetRect(slotRoot, new Vector2(0f, 1f), new Vector2(0f, 1f),
+                    new Vector2(0f, 1f), new Vector2(45f, -118f), new Vector2(400f, 400f));
+
+            var footer = FindDeep(root, "GoldRow");
+            if (footer != null)
+            {
+                var footerRect = footer as RectTransform;
+                SetRect(footerRect, new Vector2(0f, 0f), new Vector2(1f, 0f),
+                    new Vector2(0.5f, 0f), new Vector2(0f, 28f), new Vector2(-58f, 54f));
+                SetImage(footer.GetComponent<Image>() ?? footer.gameObject.AddComponent<Image>(), "bar1",
+                    new Color(0.38f, 0.3f, 0.19f, 1f), true);
+                AddFrame(footer, "FooterFrame", "frame1", new Color(0.68f, 0.55f, 0.34f, 0.9f));
+            }
+
+            var goldText = new SerializedObject(presenter).FindProperty("goldText").objectReferenceValue as TMP_Text;
+            if (goldText != null)
+            {
+                goldText.fontSize = 24f;
+                goldText.alignment = TextAlignmentOptions.MidlineLeft;
+                goldText.color = new Color(0.96f, 0.82f, 0.48f, 1f);
+                SetRect(goldText.rectTransform, new Vector2(0f, 0.5f), new Vector2(0.5f, 0.5f),
+                    new Vector2(0f, 0.5f), new Vector2(50f, 0f), new Vector2(-10f, 38f));
+            }
+
+            var capacityText = new SerializedObject(presenter).FindProperty("capacityText").objectReferenceValue as TMP_Text;
+            if (capacityText != null)
+            {
+                capacityText.fontSize = 22f;
+                capacityText.alignment = TextAlignmentOptions.MidlineRight;
+                capacityText.color = Steel;
+                SetRect(capacityText.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(1f, 0.5f),
+                    new Vector2(1f, 0.5f), new Vector2(-22f, 0f), new Vector2(-12f, 38f));
+            }
+
+            var hint = FindDeep(root, "Hint")?.GetComponent<TMP_Text>();
+            if (hint != null)
+            {
+                hint.text = "B  CLOSE     •     RMB  SPLIT STACK";
+                hint.fontSize = 15f;
+                hint.alignment = TextAlignmentOptions.Center;
+                hint.color = new Color(0.66f, 0.62f, 0.55f, 1f);
+                SetRect(hint.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f),
+                    new Vector2(0.5f, 0f), new Vector2(0f, 93f), new Vector2(420f, 28f));
+            }
+
+            var ghost = FindDeep(root, "DraggedItemIcon");
+            ghost?.SetAsLastSibling();
+            StyleText(root);
         }
 
         private static void BuildSkillTree(SkillTreeWindowPresenter presenter)
@@ -325,9 +467,19 @@ namespace LetterHunter.EditorTools
 
         private static void SkinInventorySlot(Transform root)
         {
-            SetImage(root.GetComponent<Image>(), "item", Color.white, true);
-            SetImage(FindDeep(root, "Highlight")?.GetComponent<Image>(), "item_frame", Gold, true);
-            AddShadow(root.gameObject, 3f);
+            SetImage(root.GetComponent<Image>(), "item", new Color(0.34f, 0.3f, 0.25f, 1f), true);
+            AddFrame(root, "InventorySlotFrame", "item_frame", new Color(0.63f, 0.55f, 0.42f, 0.72f));
+            SetImage(FindDeep(root, "Highlight")?.GetComponent<Image>(), "item_glow",
+                new Color(1f, 0.55f, 0.12f, 0.7f), true);
+            var icon = FindDeep(root, "Icon")?.GetComponent<Image>();
+            if (icon != null)
+            {
+                icon.preserveAspect = true;
+                var rect = icon.rectTransform;
+                rect.offsetMin = new Vector2(8f, 8f);
+                rect.offsetMax = new Vector2(-8f, -8f);
+            }
+            AddShadow(root.gameObject, 4f);
             StyleText(root);
         }
 
@@ -417,6 +569,47 @@ namespace LetterHunter.EditorTools
                 image.preserveAspect = true;
                 image.color = Color.white;
             }
+        }
+
+        private static Image EnsureImage(Transform parent, string name)
+        {
+            var existing = parent.Find(name);
+            if (existing == null)
+            {
+                var imageObject = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+                imageObject.transform.SetParent(parent, false);
+                existing = imageObject.transform;
+            }
+
+            return existing.GetComponent<Image>() ?? existing.gameObject.AddComponent<Image>();
+        }
+
+        private static Button EnsureButton(Transform parent, string name)
+        {
+            var existing = parent.Find(name);
+            if (existing == null)
+            {
+                var buttonObject = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+                buttonObject.transform.SetParent(parent, false);
+                existing = buttonObject.transform;
+            }
+
+            var image = existing.GetComponent<Image>() ?? existing.gameObject.AddComponent<Image>();
+            var button = existing.GetComponent<Button>() ?? existing.gameObject.AddComponent<Button>();
+            button.targetGraphic = image;
+            return button;
+        }
+
+        private static void SetRect(RectTransform rect, Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot,
+            Vector2 anchoredPosition, Vector2 sizeDelta)
+        {
+            if (rect == null)
+                return;
+            rect.anchorMin = anchorMin;
+            rect.anchorMax = anchorMax;
+            rect.pivot = pivot;
+            rect.anchoredPosition = anchoredPosition;
+            rect.sizeDelta = sizeDelta;
         }
 
         private static Image EnsureGhost(Transform parent, string name, float size)

@@ -145,6 +145,11 @@ namespace LetterHunter.UI.Inventory
             inventory.TrySplitStack(sourceIndex, targetIndex, source.Amount / 2);
         }
 
+        public void CloseInventory()
+        {
+            SetVisible(false);
+        }
+
         private void Render()
         {
             if (!IsVisible)
