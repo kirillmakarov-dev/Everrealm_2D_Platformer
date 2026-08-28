@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using LetterHunter.Economy;
+using LetterHunter.Characters;
 using LetterHunter.Items;
 using LetterHunter.Save;
 using TMPro;
@@ -14,6 +15,7 @@ namespace LetterHunter.UI.Shop
         [SerializeField] private PlayerInventory inventory;
         [SerializeField] private CurrencyWallet wallet;
         [SerializeField] private PlayerSaveController saveController;
+        [SerializeField] private CharacterInputRouter characterInput;
         [SerializeField] private CanvasGroup windowGroup;
         [SerializeField] private RectTransform rowRoot;
         [SerializeField] private ShopItemRowView rowPrefab;
@@ -35,6 +37,8 @@ namespace LetterHunter.UI.Shop
                 wallet = FindFirstObjectByType<CurrencyWallet>();
             if (saveController == null)
                 saveController = FindFirstObjectByType<PlayerSaveController>();
+            if (characterInput == null)
+                characterInput = FindFirstObjectByType<CharacterInputRouter>();
             if (windowGroup == null)
                 windowGroup = GetComponent<CanvasGroup>();
 
@@ -58,6 +62,7 @@ namespace LetterHunter.UI.Shop
                 inventory.InventoryChanged -= Render;
             if (wallet != null)
                 wallet.GoldChanged -= RenderGold;
+            characterInput?.SetBlocked(false);
         }
 
         private void Update()
@@ -69,6 +74,7 @@ namespace LetterHunter.UI.Shop
 
         public void SetVisible(bool visible)
         {
+            characterInput?.SetBlocked(visible);
             if (windowGroup == null)
             {
                 gameObject.SetActive(visible);
@@ -86,6 +92,11 @@ namespace LetterHunter.UI.Shop
                 Cursor.lockState = CursorLockMode.None;
                 Render();
             }
+        }
+
+        public void CloseShop()
+        {
+            SetVisible(false);
         }
 
         private void Render()

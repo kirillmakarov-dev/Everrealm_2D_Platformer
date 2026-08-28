@@ -30,6 +30,7 @@ namespace LetterHunter.Editor
         private const string CoinPickupPath = PrefabFolder + "/CoinPickup.prefab";
         private const string ItemPickupPath = PrefabFolder + "/ItemPickup.prefab";
         private const string InventorySlotPrefabPath = UiPrefabFolder + "/InventorySlot.prefab";
+        private const string InventoryWindowPrefabPath = UiPrefabFolder + "/InventoryWindow.prefab";
 
         public static void SetupCurrentScene()
         {
@@ -399,6 +400,15 @@ namespace LetterHunter.Editor
             if (existing != null)
             {
                 AssignInventoryWindow(existing, scene, slotPrefab);
+                return;
+            }
+
+            var windowPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(InventoryWindowPrefabPath);
+            if (windowPrefab != null)
+            {
+                var instance = (GameObject)PrefabUtility.InstantiatePrefab(windowPrefab, canvas.transform);
+                var prefabPresenter = instance.GetComponent<InventoryWindowPresenter>();
+                AssignInventoryWindow(prefabPresenter, scene, slotPrefab);
                 return;
             }
 

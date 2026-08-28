@@ -15,6 +15,7 @@ namespace LetterHunter.Editor
     public static class ShopSetupBuilder
     {
         private const string RowPrefabPath = "Assets/_Game/Prefabs/UI/ShopItemRow.prefab";
+        private const string WindowPrefabPath = "Assets/_Game/Prefabs/UI/ShopWindow.prefab";
 
         public static void SetupCurrentScene()
         {
@@ -39,6 +40,13 @@ namespace LetterHunter.Editor
 
         private static ShopWindowPresenter CreateShopWindow(Transform canvas, ShopItemRowView rowPrefab)
         {
+            var windowPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(WindowPrefabPath);
+            if (windowPrefab != null)
+            {
+                var instance = (GameObject)PrefabUtility.InstantiatePrefab(windowPrefab, canvas);
+                return instance.GetComponent<ShopWindowPresenter>();
+            }
+
             var window = CreateUIObject("ShopWindow", canvas, new Vector2(420f, 470f));
             var rect = window.GetComponent<RectTransform>();
             rect.anchorMin = new Vector2(1f, 0.5f);

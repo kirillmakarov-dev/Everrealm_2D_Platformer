@@ -169,8 +169,8 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 6339069268390485583}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: -16, y: -16}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -280,7 +280,7 @@ MonoBehaviour:
   m_Sprite: {fileID: -720060690, guid: 718ddd7eab6c5c140b0a774b60d4a533, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
-  m_FillCenter: 1
+  m_FillCenter: 0
   m_FillMethod: 4
   m_FillAmount: 1
   m_FillClockwise: 1
@@ -345,17 +345,17 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 0.55, b: 0.12, a: 0.7}
+  m_Color: {r: 1, g: 0.65, b: 0.2, a: 0.85}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 1763050513, guid: 718ddd7eab6c5c140b0a774b60d4a533, type: 3}
+  m_Sprite: {fileID: -720060690, guid: 718ddd7eab6c5c140b0a774b60d4a533, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
-  m_FillCenter: 1
+  m_FillCenter: 0
   m_FillMethod: 4
   m_FillAmount: 1
   m_FillClockwise: 1
@@ -394,10 +394,10 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1580910015298606793}
-  - {fileID: 5408991663462266483}
   - {fileID: 8955660269071753546}
   - {fileID: 4572154962870378978}
+  - {fileID: 1580910015298606793}
+  - {fileID: 5408991663462266483}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -459,8 +459,8 @@ MonoBehaviour:
   icon: {fileID: 8119957822530236188}
   amountText: {fileID: 6284541308527386046}
   highlight: {fileID: 4945886459278453736}
-  emptyColor: {r: 1, g: 1, b: 1, a: 0.92}
-  filledColor: {r: 0, g: 0.3333335, b: 1, a: 0.96}
+  emptyColor: {r: 0.18, g: 0.16, b: 0.13, a: 0.94}
+  filledColor: {r: 0.28, g: 0.23, b: 0.17, a: 0.98}
 --- !u!114 &6476258198630234688
 MonoBehaviour:
   m_ObjectHideFlags: 0

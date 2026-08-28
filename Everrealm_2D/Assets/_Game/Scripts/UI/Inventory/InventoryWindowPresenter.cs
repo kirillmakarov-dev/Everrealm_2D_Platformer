@@ -23,6 +23,8 @@ namespace LetterHunter.UI.Inventory
         [SerializeField] private bool startVisible;
 
         private Image _dragGhost;
+        private Transform _dragGhostOriginalParent;
+        private int _dragGhostOriginalSiblingIndex;
         private int _dragSourceIndex = -1;
         private InventorySlotView _dragSourceView;
         private Canvas _rootCanvas;
@@ -97,15 +99,16 @@ namespace LetterHunter.UI.Inventory
 
         public void UpdateSlotDrag(UnityEngine.EventSystems.PointerEventData eventData)
         {
-            if (_dragGhost == null)
+            if (_dragGhost == null || _rootCanvas == null)
                 return;
 
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                _dragGhost.rectTransform.parent as RectTransform,
-                eventData.position,
-                eventData.pressEventCamera,
-                out var localPoint);
-            _dragGhost.rectTransform.anchoredPosition = localPoint;
+            var canvasRect = _rootCanvas.transform as RectTransform;
+            var eventCamera = _rootCanvas.renderMode == RenderMode.ScreenSpaceOverlay
+                ? null
+                : eventData.pressEventCamera != null ? eventData.pressEventCamera : _rootCanvas.worldCamera;
+            if (canvasRect != null && RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                    canvasRect, eventData.position, eventCamera, out var localPoint))
+                _dragGhost.rectTransform.anchoredPosition = localPoint;
         }
 
         public void DropDraggedSlotOn(int targetIndex)
@@ -123,8 +126,15 @@ namespace LetterHunter.UI.Inventory
             {
                 _dragGhost.enabled = false;
                 _dragGhost.sprite = null;
+                if (_dragGhostOriginalParent != null)
+                {
+                    _dragGhost.transform.SetParent(_dragGhostOriginalParent, false);
+                    _dragGhost.transform.SetSiblingIndex(Mathf.Clamp(
+                        _dragGhostOriginalSiblingIndex, 0, _dragGhostOriginalParent.childCount - 1));
+                }
             }
             _dragGhost = null;
+            _dragGhostOriginalParent = null;
             if (IsVisible)
                 Render();
         }
@@ -179,6 +189,8 @@ namespace LetterHunter.UI.Inventory
 
         private void SetVisible(bool visible)
         {
+            if (!visible && _dragGhost != null)
+                EndSlotDrag();
             if (windowGroup == null)
             {
                 gameObject.SetActive(visible);
@@ -233,6 +245,18 @@ namespace LetterHunter.UI.Inventory
                 return;
 
             _dragGhost = dragGhost;
+            _dragGhostOriginalParent = _dragGhost.transform.parent;
+            _dragGhostOriginalSiblingIndex = _dragGhost.transform.GetSiblingIndex();
+            if (_rootCanvas != null)
+            {
+                _dragGhost.transform.SetParent(_rootCanvas.transform, false);
+                _dragGhost.transform.SetAsLastSibling();
+                var rect = _dragGhost.rectTransform;
+                rect.anchorMin = new Vector2(0.5f, 0.5f);
+                rect.anchorMax = new Vector2(0.5f, 0.5f);
+                rect.pivot = new Vector2(0.5f, 0.5f);
+                rect.localScale = Vector3.one;
+            }
             _dragGhost.sprite = sprite;
             _dragGhost.raycastTarget = false;
             _dragGhost.preserveAspect = true;

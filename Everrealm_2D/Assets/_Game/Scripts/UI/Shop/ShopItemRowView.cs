@@ -9,6 +9,7 @@ namespace LetterHunter.UI.Shop
     [DisallowMultipleComponent]
     public sealed class ShopItemRowView : MonoBehaviour
     {
+        [SerializeField] private Image itemIcon;
         [SerializeField] private TMP_Text nameText;
         [SerializeField] private TMP_Text priceText;
         [SerializeField] private TMP_Text amountText;
@@ -32,6 +33,13 @@ namespace LetterHunter.UI.Shop
             _item = item;
             _amount = amount;
             _sellRequested = sellRequested;
+
+            if (itemIcon != null)
+            {
+                itemIcon.sprite = item != null ? item.Icon : null;
+                itemIcon.enabled = item != null && item.Icon != null;
+                itemIcon.preserveAspect = true;
+            }
 
             if (nameText != null)
                 nameText.text = item != null ? item.DisplayName : string.Empty;

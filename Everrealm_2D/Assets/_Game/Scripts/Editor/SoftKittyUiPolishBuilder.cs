@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using LetterHunter.Items;
+using LetterHunter.Characters;
 using LetterHunter.UI.Hud;
 using LetterHunter.UI.Inventory;
 using LetterHunter.UI.SkillTree;
@@ -26,6 +27,8 @@ namespace LetterHunter.EditorTools
     {
         private const string AtlasPath = "Assets/SoftKitty/InventoryEngine/Textures/Sprites/Main.png";
         private const string CurrencyPath = "Assets/SoftKitty/InventoryEngine/Textures/Currency/Currency0.png";
+        private const string InventoryWindowPrefabPath = "Assets/_Game/Prefabs/UI/InventoryWindow.prefab";
+        private const string ShopWindowPrefabPath = "Assets/_Game/Prefabs/UI/ShopWindow.prefab";
 
         private static readonly Color Parchment = new(0.93f, 0.87f, 0.73f, 1f);
         private static readonly Color Gold = new(0.92f, 0.69f, 0.27f, 1f);
@@ -95,6 +98,113 @@ namespace LetterHunter.EditorTools
         {
             EditorSceneManager.OpenScene("Assets/_Game/Scenes/InventoryLootDebug.unity", OpenSceneMode.Single);
             BuildInventoryOnly();
+        }
+
+        [MenuItem("Tools/Letter Hunter/UI/Build SoftKitty Shop")]
+        public static void BuildShopOnly()
+        {
+            var scene = SceneManager.GetActiveScene();
+            if (!scene.IsValid())
+                return;
+            if (!LoadSoftKittySprites())
+            {
+                Debug.LogError($"SoftKitty atlas is missing or not imported as multiple sprites: {AtlasPath}");
+                return;
+            }
+
+            SkinPrefab("Assets/_Game/Prefabs/UI/ShopItemRow.prefab", SkinShopRow);
+            ReserveShopToggleKey(scene);
+            foreach (var shop in Resources.FindObjectsOfTypeAll<ShopWindowPresenter>())
+            {
+                if (shop != null && shop.gameObject.scene.path == scene.path)
+                    BuildShop(shop);
+            }
+
+            EditorSceneManager.MarkSceneDirty(scene);
+            AssetDatabase.SaveAssets();
+            EditorSceneManager.SaveScene(scene);
+            Debug.Log("SoftKitty shop visuals built. Shop logic and the O toggle were preserved.");
+        }
+
+        private static void ReserveShopToggleKey(Scene scene)
+        {
+            foreach (var router in Resources.FindObjectsOfTypeAll<CharacterInputRouter>())
+            {
+                if (router == null || router.gameObject.scene.path != scene.path)
+                    continue;
+                var routerSo = new SerializedObject(router);
+                var legacySkillKeys = routerSo.FindProperty("skillKeys");
+                if (legacySkillKeys == null)
+                    continue;
+                legacySkillKeys.arraySize = 0;
+                routerSo.ApplyModifiedPropertiesWithoutUndo();
+                EditorUtility.SetDirty(router);
+            }
+        }
+
+        public static void BuildShopDebugScene()
+        {
+            EditorSceneManager.OpenScene("Assets/_Game/Scenes/InventoryLootDebug.unity", OpenSceneMode.Single);
+            BuildShopOnly();
+        }
+
+        public static void BuildInventoryAndShopDebugScene()
+        {
+            EditorSceneManager.OpenScene("Assets/_Game/Scenes/InventoryLootDebug.unity", OpenSceneMode.Single);
+            BuildInventoryOnly();
+            BuildShopOnly();
+        }
+
+        [MenuItem("Tools/Letter Hunter/UI/Create Editable Inventory And Shop Prefabs")]
+        public static void CreateEditableWindowPrefabs()
+        {
+            var scene = SceneManager.GetActiveScene();
+            if (!scene.IsValid() || !LoadSoftKittySprites())
+                return;
+
+            SkinPrefab("Assets/_Game/Prefabs/UI/InventorySlot.prefab", SkinInventorySlot);
+            SkinPrefab("Assets/_Game/Prefabs/UI/ShopItemRow.prefab", SkinShopRow);
+
+            var inventory = UnityEngine.Object.FindFirstObjectByType<InventoryWindowPresenter>(FindObjectsInactive.Include);
+            if (inventory != null)
+            {
+                BuildInventory(inventory);
+                SaveOrApplyWindowPrefab(inventory.gameObject, InventoryWindowPrefabPath);
+            }
+
+            var shop = UnityEngine.Object.FindFirstObjectByType<ShopWindowPresenter>(FindObjectsInactive.Include);
+            if (shop != null)
+            {
+                BuildShop(shop);
+                SaveOrApplyWindowPrefab(shop.gameObject, ShopWindowPrefabPath);
+            }
+
+            EditorSceneManager.MarkSceneDirty(scene);
+            AssetDatabase.SaveAssets();
+            EditorSceneManager.SaveScene(scene);
+            Debug.Log("Inventory and shop are authored prefab instances. Open their prefab assets to tune every UI component.");
+        }
+
+        public static void CreateEditableWindowPrefabsDebugScene()
+        {
+            EditorSceneManager.OpenScene("Assets/_Game/Scenes/InventoryLootDebug.unity", OpenSceneMode.Single);
+            CreateEditableWindowPrefabs();
+        }
+
+        private static void SaveOrApplyWindowPrefab(GameObject root, string path)
+        {
+            var instanceRoot = PrefabUtility.GetOutermostPrefabInstanceRoot(root);
+            if (instanceRoot == root)
+            {
+                var source = PrefabUtility.GetCorrespondingObjectFromSource(root);
+                if (source != null && AssetDatabase.GetAssetPath(source) == path)
+                {
+                    PrefabUtility.ApplyPrefabInstance(root, InteractionMode.AutomatedAction);
+                    return;
+                }
+            }
+
+            PrefabUtility.SaveAsPrefabAssetAndConnect(root, path, InteractionMode.AutomatedAction);
         }
 
         private static bool LoadSoftKittySprites()
@@ -316,7 +426,7 @@ namespace LetterHunter.EditorTools
             SetRect(close.GetComponent<RectTransform>(), new Vector2(1f, 1f), new Vector2(1f, 1f),
                 new Vector2(0.5f, 0.5f), new Vector2(-40f, -51f), new Vector2(34f, 34f));
             SetImage(close.GetComponent<Image>(), "close", Parchment, false);
-            close.onClick.RemoveAllListeners();
+            ClearPersistentListeners(close);
             UnityEventTools.AddPersistentListener(close.onClick, presenter.CloseInventory);
 
             var slotRoot = new SerializedObject(presenter).FindProperty("slotRoot").objectReferenceValue as RectTransform;
@@ -342,7 +452,16 @@ namespace LetterHunter.EditorTools
                 goldText.alignment = TextAlignmentOptions.MidlineLeft;
                 goldText.color = new Color(0.96f, 0.82f, 0.48f, 1f);
                 SetRect(goldText.rectTransform, new Vector2(0f, 0.5f), new Vector2(0.5f, 0.5f),
-                    new Vector2(0f, 0.5f), new Vector2(50f, 0f), new Vector2(-10f, 38f));
+                    new Vector2(0f, 0.5f), new Vector2(56f, 0f), new Vector2(-16f, 38f));
+            }
+
+            var coinIcon = FindDeep(root, "CoinIcon")?.GetComponent<Image>();
+            if (coinIcon != null)
+            {
+                SetRect(coinIcon.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f),
+                    new Vector2(0.5f, 0.5f), new Vector2(30f, 0f), new Vector2(24f, 24f));
+                coinIcon.preserveAspect = true;
+                coinIcon.raycastTarget = false;
             }
 
             var capacityText = new SerializedObject(presenter).FindProperty("capacityText").objectReferenceValue as TMP_Text;
@@ -450,6 +569,14 @@ namespace LetterHunter.EditorTools
                 return;
             var authored = so.FindProperty("authoredRows");
             const int rowCount = 12;
+            var layout = rowRoot.GetComponent<VerticalLayoutGroup>() ?? rowRoot.gameObject.AddComponent<VerticalLayoutGroup>();
+            layout.padding = new RectOffset(8, 8, 8, 8);
+            layout.spacing = 4f;
+            layout.childAlignment = TextAnchor.UpperCenter;
+            layout.childControlWidth = true;
+            layout.childControlHeight = false;
+            layout.childForceExpandWidth = true;
+            layout.childForceExpandHeight = false;
             authored.arraySize = rowCount;
             for (var i = 0; i < rowCount; i++)
             {
@@ -461,23 +588,157 @@ namespace LetterHunter.EditorTools
                 SkinShopRow(row.transform);
             }
             so.ApplyModifiedPropertiesWithoutUndo();
-            StylePanel(presenter.transform, "bg2");
+            LayoutShopWindow(presenter, rowRoot);
             AssignCurrencySprites(presenter.transform);
+        }
+
+        private static void LayoutShopWindow(ShopWindowPresenter presenter, Transform rowRoot)
+        {
+            var root = presenter.transform;
+            var rootRect = root as RectTransform;
+            if (rootRect != null)
+            {
+                rootRect.anchorMin = new Vector2(1f, 0.5f);
+                rootRect.anchorMax = new Vector2(1f, 0.5f);
+                rootRect.pivot = new Vector2(1f, 0.5f);
+                rootRect.anchoredPosition = new Vector2(-24f, 0f);
+                rootRect.sizeDelta = new Vector2(540f, 700f);
+            }
+
+            SetImage(root.GetComponent<Image>() ?? root.gameObject.AddComponent<Image>(), "bg5",
+                new Color(0.16f, 0.13f, 0.11f, 0.99f), true);
+            AddFrame(root, "SoftKittyFrame", "frame2", new Color(0.7f, 0.55f, 0.32f, 1f));
+            AddShadow(root.gameObject, 12f);
+
+            var header = EnsureImage(root, "ShopHeader");
+            SetRect(header.rectTransform, new Vector2(0f, 1f), new Vector2(1f, 1f),
+                new Vector2(0.5f, 1f), new Vector2(0f, -10f), new Vector2(-28f, 86f));
+            SetImage(header, "bg3", new Color(0.24f, 0.19f, 0.14f, 0.98f), true);
+            header.raycastTarget = false;
+            header.transform.SetAsFirstSibling();
+
+            var headerLine = EnsureImage(root, "ShopHeaderLine");
+            SetRect(headerLine.rectTransform, new Vector2(0f, 1f), new Vector2(1f, 1f),
+                new Vector2(0.5f, 1f), new Vector2(0f, -91f), new Vector2(-42f, 6f));
+            SetImage(headerLine, "line2", Gold, true);
+            headerLine.raycastTarget = false;
+
+            var title = FindDeep(root, "Title")?.GetComponent<TMP_Text>();
+            if (title != null)
+            {
+                title.text = "MERCHANT";
+                title.fontSize = 30f;
+                title.fontStyle = FontStyles.Bold;
+                title.alignment = TextAlignmentOptions.Center;
+                title.color = new Color(0.94f, 0.78f, 0.45f, 1f);
+                SetRect(title.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f),
+                    new Vector2(0.5f, 1f), new Vector2(0f, -27f), new Vector2(340f, 48f));
+            }
+
+            var shopIcon = EnsureImage(root, "ShopTitleIcon");
+            SetRect(shopIcon.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f),
+                new Vector2(0.5f, 0.5f), new Vector2(43f, -52f), new Vector2(42f, 42f));
+            SetImage(shopIcon, "icon_store", new Color(0.94f, 0.78f, 0.45f, 1f), false);
+            shopIcon.preserveAspect = true;
+            shopIcon.raycastTarget = false;
+
+            var close = EnsureButton(root, "ShopCloseButton");
+            SetRect(close.GetComponent<RectTransform>(), new Vector2(1f, 1f), new Vector2(1f, 1f),
+                new Vector2(0.5f, 0.5f), new Vector2(-40f, -51f), new Vector2(34f, 34f));
+            SetImage(close.GetComponent<Image>(), "close", Parchment, false);
+            ClearPersistentListeners(close);
+            UnityEventTools.AddPersistentListener(close.onClick, presenter.CloseShop);
+
+            if (rowRoot is RectTransform rowsRect)
+            {
+                SetRect(rowsRect, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f),
+                    new Vector2(0.5f, 1f), new Vector2(0f, -110f), new Vector2(490f, 520f));
+                SetImage(rowRoot.GetComponent<Image>() ?? rowRoot.gameObject.AddComponent<Image>(), "bg3",
+                    new Color(0.12f, 0.1f, 0.085f, 0.88f), true);
+                AddFrame(rowRoot, "ShopRowsFrame", "frame1", new Color(0.58f, 0.48f, 0.32f, 0.75f));
+            }
+
+            var footer = EnsureImage(root, "ShopFooter");
+            SetRect(footer.rectTransform, new Vector2(0f, 0f), new Vector2(1f, 0f),
+                new Vector2(0.5f, 0f), new Vector2(0f, 18f), new Vector2(-58f, 48f));
+            SetImage(footer, "bar1", new Color(0.38f, 0.3f, 0.19f, 1f), true);
+            footer.raycastTarget = false;
+            footer.transform.SetSiblingIndex(Mathf.Min(1, root.childCount - 1));
+
+            var so = new SerializedObject(presenter);
+            var goldText = so.FindProperty("goldText").objectReferenceValue as TMP_Text;
+            if (goldText != null)
+            {
+                goldText.fontSize = 23f;
+                goldText.alignment = TextAlignmentOptions.MidlineLeft;
+                goldText.color = new Color(0.96f, 0.82f, 0.48f, 1f);
+                SetRect(goldText.rectTransform, new Vector2(0f, 0f), new Vector2(0.5f, 0f),
+                    new Vector2(0f, 0f), new Vector2(72f, 23f), new Vector2(-15f, 38f));
+            }
+
+            var feedback = so.FindProperty("feedbackText").objectReferenceValue as TMP_Text;
+            if (feedback != null)
+            {
+                feedback.fontSize = 18f;
+                feedback.alignment = TextAlignmentOptions.MidlineRight;
+                feedback.color = new Color(0.72f, 0.86f, 0.56f, 1f);
+                SetRect(feedback.rectTransform, new Vector2(0.5f, 0f), new Vector2(1f, 0f),
+                    new Vector2(1f, 0f), new Vector2(-32f, 23f), new Vector2(-18f, 38f));
+            }
+
+            var empty = so.FindProperty("emptyText").objectReferenceValue as TMP_Text;
+            if (empty != null)
+            {
+                empty.fontSize = 22f;
+                empty.alignment = TextAlignmentOptions.Center;
+                empty.color = new Color(0.72f, 0.68f, 0.61f, 1f);
+                SetRect(empty.rectTransform, Vector2.zero, Vector2.one, new Vector2(0.5f, 0.5f),
+                    Vector2.zero, new Vector2(-40f, -40f));
+                empty.transform.SetAsLastSibling();
+            }
+
+            StyleText(root);
         }
 
         private static void SkinInventorySlot(Transform root)
         {
             SetImage(root.GetComponent<Image>(), "item", new Color(0.34f, 0.3f, 0.25f, 1f), true);
             AddFrame(root, "InventorySlotFrame", "item_frame", new Color(0.63f, 0.55f, 0.42f, 0.72f));
-            SetImage(FindDeep(root, "Highlight")?.GetComponent<Image>(), "item_glow",
-                new Color(1f, 0.55f, 0.12f, 0.7f), true);
+            var frame = FindDeep(root, "InventorySlotFrame")?.GetComponent<Image>();
+            if (frame != null)
+                frame.fillCenter = false;
+            var highlight = FindDeep(root, "Highlight")?.GetComponent<Image>();
+            SetImage(highlight, "item_frame", new Color(1f, 0.65f, 0.2f, 0.85f), true);
+            if (highlight != null)
+            {
+                highlight.fillCenter = false;
+                highlight.raycastTarget = false;
+            }
             var icon = FindDeep(root, "Icon")?.GetComponent<Image>();
             if (icon != null)
             {
                 icon.preserveAspect = true;
+                icon.raycastTarget = false;
+                icon.color = Color.white;
                 var rect = icon.rectTransform;
+                rect.anchorMin = Vector2.zero;
+                rect.anchorMax = Vector2.one;
+                rect.pivot = new Vector2(0.5f, 0.5f);
+                rect.anchoredPosition = Vector2.zero;
                 rect.offsetMin = new Vector2(8f, 8f);
                 rect.offsetMax = new Vector2(-8f, -8f);
+                icon.transform.SetAsLastSibling();
+            }
+            var amount = FindDeep(root, "AmountText");
+            if (amount != null)
+                amount.SetAsLastSibling();
+            var view = root.GetComponent<InventorySlotView>();
+            if (view != null)
+            {
+                var viewSo = new SerializedObject(view);
+                viewSo.FindProperty("emptyColor").colorValue = new Color(0.18f, 0.16f, 0.13f, 0.94f);
+                viewSo.FindProperty("filledColor").colorValue = new Color(0.28f, 0.23f, 0.17f, 0.98f);
+                viewSo.ApplyModifiedPropertiesWithoutUndo();
             }
             AddShadow(root.gameObject, 4f);
             StyleText(root);
@@ -506,9 +767,57 @@ namespace LetterHunter.EditorTools
 
         private static void SkinShopRow(Transform root)
         {
-            SetImage(root.GetComponent<Image>(), "field1", Color.white, true);
+            if (root is RectTransform rect)
+                rect.sizeDelta = new Vector2(490f, 38f);
+            SetImage(root.GetComponent<Image>(), "field1", new Color(0.35f, 0.3f, 0.24f, 0.96f), true);
+            var layout = root.GetComponent<HorizontalLayoutGroup>();
+            if (layout != null)
+            {
+                layout.padding = new RectOffset(10, 8, 4, 4);
+                layout.spacing = 6f;
+                layout.childControlWidth = true;
+                layout.childControlHeight = true;
+                layout.childForceExpandWidth = false;
+                layout.childForceExpandHeight = false;
+            }
+
+            var itemIcon = EnsureImage(root, "ItemIcon");
+            itemIcon.preserveAspect = true;
+            itemIcon.raycastTarget = false;
+            itemIcon.transform.SetAsFirstSibling();
+            var iconLayout = itemIcon.GetComponent<LayoutElement>() ?? itemIcon.gameObject.AddComponent<LayoutElement>();
+            iconLayout.preferredWidth = 30f;
+            iconLayout.preferredHeight = 30f;
+            iconLayout.flexibleWidth = 0f;
+            ConfigureLayoutElement(FindDeep(root, "NameText"), 120f, 30f, 1f);
+            ConfigureLayoutElement(FindDeep(root, "AmountText"), 44f, 30f);
+            ConfigureLayoutElement(FindDeep(root, "PriceText"), 58f, 30f);
+            ConfigureLayoutElement(FindDeep(root, "SellOneButton"), 70f, 30f);
+            ConfigureLayoutElement(FindDeep(root, "SellStackButton"), 76f, 30f);
+            var view = root.GetComponent<ShopItemRowView>();
+            if (view != null)
+            {
+                var viewSo = new SerializedObject(view);
+                viewSo.FindProperty("itemIcon").objectReferenceValue = itemIcon;
+                viewSo.ApplyModifiedPropertiesWithoutUndo();
+            }
+
             StyleButtons(root);
             StyleText(root);
+            AddShadow(root.gameObject, 2f);
+        }
+
+        private static void ConfigureLayoutElement(Transform target, float preferredWidth, float preferredHeight,
+            float flexibleWidth = 0f)
+        {
+            if (target == null)
+                return;
+            var element = target.GetComponent<LayoutElement>() ?? target.gameObject.AddComponent<LayoutElement>();
+            element.minWidth = preferredWidth;
+            element.preferredWidth = preferredWidth;
+            element.preferredHeight = preferredHeight;
+            element.flexibleWidth = flexibleWidth;
+            element.flexibleHeight = 0f;
         }
 
         private static void StylePanel(Transform root, string backgroundSprite)
@@ -568,6 +877,7 @@ namespace LetterHunter.EditorTools
                 image.sprite = currency;
                 image.preserveAspect = true;
                 image.color = Color.white;
+                image.raycastTarget = false;
             }
         }
 
@@ -598,6 +908,15 @@ namespace LetterHunter.EditorTools
             var button = existing.GetComponent<Button>() ?? existing.gameObject.AddComponent<Button>();
             button.targetGraphic = image;
             return button;
+        }
+
+        private static void ClearPersistentListeners(Button button)
+        {
+            if (button == null)
+                return;
+            button.onClick.RemoveAllListeners();
+            for (var i = button.onClick.GetPersistentEventCount() - 1; i >= 0; i--)
+                UnityEventTools.RemovePersistentListener(button.onClick, i);
         }
 
         private static void SetRect(RectTransform rect, Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot,

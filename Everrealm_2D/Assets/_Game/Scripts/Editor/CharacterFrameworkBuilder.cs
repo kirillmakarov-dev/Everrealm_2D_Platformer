@@ -132,11 +132,7 @@ namespace LetterHunter.Editor
             inputSo.FindProperty("jumpKey").enumValueIndex = (int)UnityEngine.InputSystem.Key.Space;
             inputSo.FindProperty("attackKey").enumValueIndex = (int)UnityEngine.InputSystem.Key.J;
             var skillKeys = inputSo.FindProperty("skillKeys");
-            skillKeys.arraySize = 4;
-            skillKeys.GetArrayElementAtIndex(0).enumValueIndex = (int)UnityEngine.InputSystem.Key.U;
-            skillKeys.GetArrayElementAtIndex(1).enumValueIndex = (int)UnityEngine.InputSystem.Key.I;
-            skillKeys.GetArrayElementAtIndex(2).enumValueIndex = (int)UnityEngine.InputSystem.Key.O;
-            skillKeys.GetArrayElementAtIndex(3).enumValueIndex = (int)UnityEngine.InputSystem.Key.P;
+            skillKeys.arraySize = 0;
             inputSo.ApplyModifiedPropertiesWithoutUndo();
 
             for (var i = 0; i < 3; i++)

@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 namespace LetterHunter.Characters
@@ -14,7 +15,7 @@ namespace LetterHunter.Characters
 
         [Header("Combat")]
         [SerializeField] private Key attackKey = Key.J;
-        [SerializeField] private Key[] skillKeys = { Key.U, Key.I, Key.O, Key.P };
+        [SerializeField] private Key[] skillKeys = Array.Empty<Key>();
         [SerializeField] private Key[] secondarySkillKeys = { Key.Digit1, Key.Digit2, Key.Digit3, Key.Digit4 };
 
         public event Action<Vector2> MoveRequested;
@@ -47,7 +48,8 @@ namespace LetterHunter.Characters
             MoveRequested?.Invoke(move);
             if (WasPressedThisFrame(keyboard, jumpKey)) JumpRequested?.Invoke();
             var mouse = Mouse.current;
-            if (WasPressedThisFrame(keyboard, attackKey) || mouse?.leftButton.wasPressedThisFrame == true)
+            var mouseAttackPressed = mouse?.leftButton.wasPressedThisFrame == true && !IsPointerOverUi();
+            if (WasPressedThisFrame(keyboard, attackKey) || mouseAttackPressed)
                 AttackRequested?.Invoke();
 
             for (var i = 0; i < skillKeys.Length; i++)
@@ -71,6 +73,11 @@ namespace LetterHunter.Characters
                    index >= 0 &&
                    index < secondarySkillKeys.Length &&
                    WasPressedThisFrame(keyboard, secondarySkillKeys[index]);
+        }
+
+        private static bool IsPointerOverUi()
+        {
+            return EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
         }
     }
 }

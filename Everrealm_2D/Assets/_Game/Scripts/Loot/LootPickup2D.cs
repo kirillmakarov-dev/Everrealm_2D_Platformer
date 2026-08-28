@@ -13,12 +13,21 @@ namespace LetterHunter.Loot
         [Min(0), SerializeField] private int coins;
         [SerializeField] private ItemDefinition item;
         [Min(1), SerializeField] private int amount = 1;
+        [SerializeField] private SpriteRenderer visual;
         [SerializeField] private bool destroyAfterCollect = true;
 
         private void Awake()
         {
             var pickupCollider = GetComponent<Collider2D>();
             pickupCollider.isTrigger = true;
+            ResolveVisual();
+            RefreshItemVisual();
+        }
+
+        private void OnEnable()
+        {
+            ResolveVisual();
+            RefreshItemVisual();
         }
 
         public void ConfigureCoins(int value)
@@ -35,6 +44,22 @@ namespace LetterHunter.Loot
             item = stack.Item;
             amount = Mathf.Max(1, stack.Amount);
             coins = 0;
+            ResolveVisual();
+            RefreshItemVisual();
+        }
+
+        private void ResolveVisual()
+        {
+            if (visual == null)
+                visual = GetComponentInChildren<SpriteRenderer>();
+        }
+
+        private void RefreshItemVisual()
+        {
+            if (pickupKind != LootPickupKind.ItemStack || visual == null)
+                return;
+            visual.sprite = item != null ? item.Icon : null;
+            visual.color = Color.white;
         }
 
         private void OnTriggerEnter2D(Collider2D other)
