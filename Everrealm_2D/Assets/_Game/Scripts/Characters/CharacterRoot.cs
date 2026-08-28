@@ -24,12 +24,15 @@ namespace LetterHunter.Characters
         [SerializeField] private CharacterHitReaction2D hitReaction;
         [Header("Data")]
         [SerializeField] private CharacterMovementConfig movementConfig;
+        [Min(1f), SerializeField] private float sprintSpeedMultiplier = 1.5f;
+        [Range(.01f, 1f), SerializeField] private float walkBlendTreeValue = .5f;
         [Min(.01f), SerializeField] private float attackStateDuration = .2f;
 
         private CharacterMovementController _movement;
         private CharacterJumpController _jump;
         private CharacterFacingController _facing;
         private CharacterStateMachine _stateMachine;
+        private bool _sprintHeld;
 
         public CharacterRuntime Runtime { get; private set; }
         public CombatStats Stats => combatModule != null ? combatModule.Stats : null;
@@ -37,6 +40,7 @@ namespace LetterHunter.Characters
         public BuffService Buffs => combatModule != null ? combatModule.BuffService : null;
         public PassiveService Passives => combatModule != null ? combatModule.PassiveService : null;
         public float MoveSpeed => Stats != null ? Stats.MoveSpeed : movementConfig != null ? movementConfig.MoveSpeed : 0f;
+        private float EffectiveMoveSpeed => _sprintHeld ? MoveSpeed * Mathf.Max(1f, sprintSpeedMultiplier) : MoveSpeed;
         public float JumpHeight => Stats?.JumpHeight ?? 0f;
 
 
@@ -62,7 +66,7 @@ namespace LetterHunter.Characters
             Stats?.ConfigureJump(movementConfig.JumpForce,
                 Mathf.Abs(Physics2D.gravity.y) * movementConfig.GravityScale);
             _movement = new CharacterMovementController(motor, groundDetector, movementConfig, Runtime,
-                () => Stats?.MoveSpeed ?? movementConfig.MoveSpeed);
+                () => EffectiveMoveSpeed);
             _jump = new CharacterJumpController(motor, groundDetector, movementConfig,
                 () => Stats != null ? (float)Stats.JumpVelocity : movementConfig.JumpForce);
             _facing = new CharacterFacingController(Runtime, facingView);
@@ -71,6 +75,7 @@ namespace LetterHunter.Characters
             inputRouter.MoveRequested += OnMove;
             inputRouter.JumpRequested += OnJump;
             inputRouter.AttackRequested += OnAttack;
+            inputRouter.SprintChanged += OnSprintChanged;
             inputRouter.SkillRequested += OnSkill;
         }
 
@@ -95,7 +100,10 @@ namespace LetterHunter.Characters
             if (Runtime == null) return;
             Runtime.CurrentVelocity = motor.Velocity;
             Runtime.Grounded = groundDetector.IsGrounded;
+            Runtime.IsDead = combatModule != null && !combatModule.IsAlive;
             _stateMachine.Tick(Time.deltaTime);
+            if (Runtime.CurrentState == CharacterStateId.Run)
+                animationController?.SetMoveSpeed(GetAnimationMoveSpeed());
         }
 
         private void OnDestroy()
@@ -104,11 +112,26 @@ namespace LetterHunter.Characters
             inputRouter.MoveRequested -= OnMove;
             inputRouter.JumpRequested -= OnJump;
             inputRouter.AttackRequested -= OnAttack;
+            inputRouter.SprintChanged -= OnSprintChanged;
             inputRouter.SkillRequested -= OnSkill;
         }
 
         private void OnMove(Vector2 input) { _movement.SetMoveInput(input); _facing.UpdateFacing(input); }
-        private void OnJump() => _jump.TryJump();
+        private void OnSprintChanged(bool sprintHeld) => _sprintHeld = sprintHeld;
+        private void OnJump()
+        {
+            var gravity = Mathf.Max(.01f, Mathf.Abs(Physics2D.gravity.y) * movementConfig.GravityScale);
+            // Re-read the asset on every jump so DefaultMovement remains the source of truth.
+            Stats?.ConfigureJump(movementConfig.JumpForce, gravity);
+            if (!_jump.TryJump()) return;
+
+            // GroundDetector refreshes in FixedUpdate. Mark the runtime airborne now so
+            // the state machine cannot overwrite the immediate Jump animation with Idle
+            // during the frame between the input event and the next physics step.
+            Runtime.Grounded = false;
+            // Set the Animator parameter immediately; transition timing stays authored in the Animator.
+            animationController?.PlayJump();
+        }
         private void OnAttack()
         {
             if (combatModule == null) return;
@@ -169,11 +192,18 @@ namespace LetterHunter.Characters
             switch (next)
             {
                 case CharacterStateId.Idle: animationController.PlayIdle(); break;
-                case CharacterStateId.Run: animationController.PlayRun(Mathf.Abs(Runtime.CurrentVelocity.x) / Mathf.Max(.01f, MoveSpeed)); break;
+                case CharacterStateId.Run: animationController.PlayRun(GetAnimationMoveSpeed()); break;
                 case CharacterStateId.Jump: animationController.PlayJump(); break;
                 case CharacterStateId.Fall: animationController.PlayFall(); break;
                 case CharacterStateId.Attack: animationController.PlayAttack(); break;
+                case CharacterStateId.Dead: animationController.PlayDead(); break;
             }
+        }
+
+        private float GetAnimationMoveSpeed()
+        {
+            var normalizedVelocity = Mathf.Abs(Runtime.CurrentVelocity.x) / Mathf.Max(.01f, MoveSpeed);
+            return Mathf.Clamp01(normalizedVelocity * (_sprintHeld ? 1f : walkBlendTreeValue));
         }
     }
 }

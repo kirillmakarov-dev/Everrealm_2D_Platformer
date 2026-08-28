@@ -10,6 +10,7 @@ namespace LetterHunter.Characters
         [SerializeField] private Key moveLeftKey = Key.A;
         [SerializeField] private Key moveRightKey = Key.D;
         [SerializeField] private Key jumpKey = Key.Space;
+        [SerializeField] private Key sprintKey = Key.LeftShift;
 
         [Header("Combat")]
         [SerializeField] private Key attackKey = Key.J;
@@ -19,6 +20,7 @@ namespace LetterHunter.Characters
         public event Action<Vector2> MoveRequested;
         public event Action JumpRequested;
         public event Action AttackRequested;
+        public event Action<bool> SprintChanged;
         public event Action<int> SkillRequested;
         public bool IsBlocked { get; private set; }
 
@@ -26,7 +28,10 @@ namespace LetterHunter.Characters
         {
             IsBlocked = blocked;
             if (blocked)
+            {
+                SprintChanged?.Invoke(false);
                 MoveRequested?.Invoke(Vector2.zero);
+            }
         }
 
         private void Update()
@@ -35,12 +40,15 @@ namespace LetterHunter.Characters
                 return;
             var keyboard = Keyboard.current;
             if (keyboard == null) return;
+            SprintChanged?.Invoke(IsPressed(keyboard, sprintKey));
             var move = Vector2.zero;
             if (IsPressed(keyboard, moveLeftKey)) move.x -= 1f;
             if (IsPressed(keyboard, moveRightKey)) move.x += 1f;
             MoveRequested?.Invoke(move);
             if (WasPressedThisFrame(keyboard, jumpKey)) JumpRequested?.Invoke();
-            if (WasPressedThisFrame(keyboard, attackKey)) AttackRequested?.Invoke();
+            var mouse = Mouse.current;
+            if (WasPressedThisFrame(keyboard, attackKey) || mouse?.leftButton.wasPressedThisFrame == true)
+                AttackRequested?.Invoke();
 
             for (var i = 0; i < skillKeys.Length; i++)
                 if (WasPressedThisFrame(keyboard, skillKeys[i]) || WasSecondarySkillPressed(keyboard, i))

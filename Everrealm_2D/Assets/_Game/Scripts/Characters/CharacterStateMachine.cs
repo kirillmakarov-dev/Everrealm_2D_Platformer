@@ -50,6 +50,7 @@ namespace LetterHunter.Characters
 
         private CharacterStateId? EvaluateDefaultTransition(CharacterRuntime runtime)
         {
+            if (runtime.IsDead) return CharacterStateId.Dead;
             if (_attackRemaining > 0f) return CharacterStateId.Attack;
             if (!runtime.Grounded) return runtime.CurrentVelocity.y > .01f ? CharacterStateId.Jump : CharacterStateId.Fall;
             return Math.Abs(runtime.CurrentVelocity.x) > .05f ? CharacterStateId.Run : CharacterStateId.Idle;

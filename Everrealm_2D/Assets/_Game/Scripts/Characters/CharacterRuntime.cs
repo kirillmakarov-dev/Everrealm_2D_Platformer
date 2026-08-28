@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace LetterHunter.Characters
 {
-    public enum CharacterStateId { Idle, Run, Jump, Fall, Attack }
+    public enum CharacterStateId { Idle, Run, Jump, Fall, Attack, Dead }
 
     public sealed class CharacterRuntime
     {
@@ -10,6 +10,7 @@ namespace LetterHunter.Characters
         public Vector2 FacingDirection { get; internal set; } = Vector2.right;
         public CharacterStateId CurrentState { get; internal set; } = CharacterStateId.Idle;
         public bool Grounded { get; internal set; }
+        public bool IsDead { get; internal set; }
         public bool Jumping => CurrentState == CharacterStateId.Jump;
         public bool Falling => CurrentState == CharacterStateId.Fall;
     }

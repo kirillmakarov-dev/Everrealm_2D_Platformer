@@ -42,5 +42,6 @@ namespace LetterHunter.Characters
         void PlayJump();
         void PlayFall();
         void PlayAttack();
+        void PlayDead();
     }
 }
