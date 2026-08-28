@@ -29,6 +29,8 @@ namespace LetterHunter.Skills
         [SerializeField] private List<string> tags = new();
         [SerializeField] private SkillEffectDefinition effect;
         [SerializeField] private AttackImpactProfile impactProfile;
+        [Header("Projectile")]
+        [SerializeField] private GameObject projectilePrefab;
 
         public string SkillId => string.IsNullOrWhiteSpace(skillId) ? name : skillId;
         public string DisplayName => string.IsNullOrWhiteSpace(displayName) ? name : displayName;
@@ -48,5 +50,6 @@ namespace LetterHunter.Skills
         public IReadOnlyList<string> Tags => tags;
         public SkillEffectDefinition Effect => effect;
         public AttackImpactProfile ImpactProfile => impactProfile;
+        public GameObject ProjectilePrefab => projectilePrefab;
     }
 }

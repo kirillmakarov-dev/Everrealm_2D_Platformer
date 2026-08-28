@@ -133,6 +133,42 @@ namespace LetterHunter.Combat
             return results;
         }
 
+        public DamageResult ExecuteOnTarget(UnityEngine.Vector2 direction, IDamageable target)
+        {
+            if (!_owner.IsAlive || target == null || !target.IsAlive)
+                return DamageResult.Failed(DamageFailureReason.InvalidTarget);
+
+            var spec = Copy(_baseProfile);
+            _passives.ModifyAutoAttack(spec);
+            var buffImpactSourceSkillId = string.Empty;
+            AttackImpactProfile buffImpactProfile = null;
+            var hasBuffImpact = _buffs != null &&
+                _buffs.TryGetAttackImpactOverride(_owner, out buffImpactSourceSkillId, out buffImpactProfile);
+            if (hasBuffImpact)
+            {
+                spec.SourceSkillId = buffImpactSourceSkillId;
+                spec.ImpactProfile = buffImpactProfile;
+            }
+
+            if (_empower.IsActive)
+            {
+                _empower.ActiveModifier.Modify(spec);
+                spec.SourceSkillId = _empower.SourceSkillId;
+                if (_empower.ImpactProfile != null) spec.ImpactProfile = _empower.ImpactProfile;
+            }
+
+            var comboStepIndex = ResolveComboStepIndex();
+            var comboStep = ApplyComboStep(spec, comboStepIndex);
+            CommitComboStep(comboStepIndex, comboStep);
+            var lines = new DamageLine[Math.Max(1, spec.DamageLines)];
+            for (var i = 0; i < lines.Length; i++) lines[i] = new DamageLine(spec.DamageMultiplier, spec.Tags);
+            var result = _combat.ApplyDamage(new DamageRequest(_owner, target, _owner.Stats.AttackPower,
+                lines, spec.SourceSkillId, spec.Tags, spec.ImpactProfile, direction,
+                spec.CriticalChance, spec.CriticalDamageMultiplier));
+            if (_empower.IsActive) _empower.Clear();
+            return result;
+        }
+
         private int ResolveComboStepIndex()
         {
             if (_comboDefinition == null || _comboDefinition.StepCount == 0)

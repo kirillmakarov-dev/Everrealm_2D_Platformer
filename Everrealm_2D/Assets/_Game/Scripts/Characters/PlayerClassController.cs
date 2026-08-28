@@ -111,6 +111,47 @@ namespace LetterHunter.Characters
             return _skillService.TryUse(skillId, null, facingDirection);
         }
 
+        public SkillUseResult TryLaunchSkillProjectile(string skillId, Vector2 position, float speed,
+            float lifetime, GameObject fallbackPrefab, out SkillProjectile2D projectile)
+        {
+            projectile = null;
+            if (_skillService == null || string.IsNullOrWhiteSpace(skillId))
+                return SkillUseResult.Failed(SkillUseFailure.NotRegistered);
+
+            var skill = _usableSkills.Find(candidate => candidate != null && candidate.SkillId == skillId);
+            if (skill == null)
+                return SkillUseResult.Failed(SkillUseFailure.NotRegistered);
+
+            var result = _skillService.TryPrepareProjectile(skillId, FacingDirection,
+                position, out var cast);
+            if (!result.Success) return result;
+
+            var prefab = skill.ProjectilePrefab != null ? skill.ProjectilePrefab : fallbackPrefab;
+            var instance = prefab != null
+                ? Instantiate(prefab, position, Quaternion.identity)
+                : new GameObject($"{skill.DisplayName} Projectile");
+            instance.transform.SetPositionAndRotation(new Vector3(position.x, position.y, 0f), Quaternion.identity);
+            projectile = instance.GetComponent<SkillProjectile2D>() ?? instance.AddComponent<SkillProjectile2D>();
+            projectile.Launch(this, cast, speed, lifetime,
+                target => _skillService.ResolveProjectileHit(cast, target));
+            return result;
+        }
+
+        public bool TryLaunchBasicProjectile(Vector2 position, float speed, float lifetime,
+            GameObject prefab, out SkillProjectile2D projectile)
+        {
+            projectile = null;
+            if (_autoAttackService == null || !IsAlive) return false;
+            var instance = prefab != null
+                ? Instantiate(prefab, position, Quaternion.identity)
+                : new GameObject("Basic Skill Projectile");
+            instance.transform.SetPositionAndRotation(new Vector3(position.x, position.y, 0f), Quaternion.identity);
+            projectile = instance.GetComponent<SkillProjectile2D>() ?? instance.AddComponent<SkillProjectile2D>();
+            projectile.Launch(this, FacingDirection, speed, lifetime,
+                target => _autoAttackService.ExecuteOnTarget(FacingDirection, target));
+            return true;
+        }
+
         public bool TryGetSkillRuntimeState(string skillId, out SkillRuntimeState state)
         {
             state = null;

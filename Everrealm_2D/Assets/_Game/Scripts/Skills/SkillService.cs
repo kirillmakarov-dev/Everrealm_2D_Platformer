@@ -60,6 +60,42 @@ namespace LetterHunter.Skills
             return SkillUseResult.Succeeded();
         }
 
+        public SkillUseResult TryPrepareProjectile(string skillId, Vector2 direction,
+            Vector2 position, out PreparedSkillCast cast)
+        {
+            cast = null;
+            if (!_definitions.TryGetValue(skillId, out var definition))
+                return SkillUseResult.Failed(SkillUseFailure.NotRegistered);
+            if (definition.Effect == null)
+                return SkillUseResult.Failed(SkillUseFailure.NoEffect);
+            if (!_owner.IsAlive)
+                return SkillUseResult.Failed(SkillUseFailure.CasterDead);
+
+            var state = _states[skillId];
+            var values = GetRuntimeValues(definition);
+            if (!state.IsReady)
+                return SkillUseResult.Failed(SkillUseFailure.OnCooldown);
+            if (!_owner.Stats.TrySpendMana(values.ManaCost))
+                return SkillUseResult.Failed(SkillUseFailure.NotEnoughMana);
+
+            state.StartCooldown(values.Cooldown);
+            cast = new PreparedSkillCast(definition, values, position,
+                direction.sqrMagnitude > 0f ? direction.normalized : Vector2.right);
+            return SkillUseResult.Succeeded();
+        }
+
+        public SkillUseResult ResolveProjectileHit(PreparedSkillCast cast, IDamageable target)
+        {
+            if (cast == null || cast.Consumed || target == null || !target.IsAlive)
+                return SkillUseResult.Failed(SkillUseFailure.NoEffect);
+
+            cast.Consumed = true;
+            var context = CreateContext(cast.Definition, target, cast.Direction, cast.Position, cast.RuntimeValues);
+            cast.Definition.Effect.Apply(context);
+            _states[cast.Definition.SkillId].StartDuration(cast.Definition.Duration);
+            return SkillUseResult.Succeeded();
+        }
+
         public void Tick(float deltaTime)
         {
             foreach (var state in _states.Values) state.Tick(deltaTime);
@@ -87,8 +123,29 @@ namespace LetterHunter.Skills
         }
 
         private SkillContext CreateContext(SkillDefinition definition, IDamageable target, Vector2 direction) =>
+            CreateContext(definition, target, direction, _owner.Transform.position, GetRuntimeValues(definition));
+
+        private SkillContext CreateContext(SkillDefinition definition, IDamageable target, Vector2 direction,
+            Vector2 position, SkillRuntimeValues runtimeValues) =>
             new(_owner, target, definition, _combat, _buffs, _empower, _autoAttack, _targets,
-                GetRuntimeValues(definition),
-                _owner.Transform.position, direction);
+                runtimeValues, position, direction);
+    }
+
+    public sealed class PreparedSkillCast
+    {
+        internal PreparedSkillCast(SkillDefinition definition, SkillRuntimeValues runtimeValues,
+            Vector2 position, Vector2 direction)
+        {
+            Definition = definition;
+            RuntimeValues = runtimeValues;
+            Position = position;
+            Direction = direction;
+        }
+
+        public SkillDefinition Definition { get; }
+        public SkillRuntimeValues RuntimeValues { get; }
+        public Vector2 Position { get; }
+        public Vector2 Direction { get; }
+        internal bool Consumed { get; set; }
     }
 }

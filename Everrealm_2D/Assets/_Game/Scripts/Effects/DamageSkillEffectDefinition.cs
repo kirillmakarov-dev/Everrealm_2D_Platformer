@@ -18,17 +18,27 @@ namespace LetterHunter.Effects
         {
             var definition = context.SkillDefinition;
             var values = context.RuntimeValues;
+            if (context.Target != null)
+            {
+                ApplyDamage(context, context.Target, definition, values);
+                return;
+            }
+
             var targets = context.TargetProvider.FindTargets(new TargetingQuery(context.Position, context.Direction,
                 attackShape, values.MaxTargets, context.Caster));
             foreach (var target in targets)
-            {
-                var lines = new DamageLine[Math.Max(1, values.DamageLines)];
-                for (var i = 0; i < lines.Length; i++) lines[i] = new DamageLine(values.DamageMultiplier, damageTags);
-                context.CombatService.ApplyDamage(new DamageRequest(context.Caster, target,
-                    context.Caster.Stats.AttackPower, lines, definition.SkillId, damageTags,
-                    definition.ImpactProfile != null ? definition.ImpactProfile : impactProfile,
-                    context.Direction));
-            }
+                ApplyDamage(context, target, definition, values);
+        }
+
+        private void ApplyDamage(SkillContext context, IDamageable target, SkillDefinition definition,
+            SkillRuntimeValues values)
+        {
+            var lines = new DamageLine[Math.Max(1, values.DamageLines)];
+            for (var i = 0; i < lines.Length; i++) lines[i] = new DamageLine(values.DamageMultiplier, damageTags);
+            context.CombatService.ApplyDamage(new DamageRequest(context.Caster, target,
+                context.Caster.Stats.AttackPower, lines, definition.SkillId, damageTags,
+                definition.ImpactProfile != null ? definition.ImpactProfile : impactProfile,
+                context.Direction));
         }
     }
 }

@@ -27,6 +27,11 @@ namespace LetterHunter.Characters
         [Min(1f), SerializeField] private float sprintSpeedMultiplier = 1.5f;
         [Range(.01f, 1f), SerializeField] private float walkBlendTreeValue = .5f;
         [Min(.01f), SerializeField] private float attackStateDuration = .2f;
+        [Header("Skill Projectiles")]
+        [SerializeField] private Transform projectileSpawnPoint;
+        [SerializeField] private GameObject defaultSkillProjectilePrefab;
+        [Min(0f), SerializeField] private float skillProjectileSpeed = 12f;
+        [Min(.01f), SerializeField] private float skillProjectileLifetime = 2f;
 
         private CharacterMovementController _movement;
         private CharacterJumpController _jump;
@@ -135,21 +140,11 @@ namespace LetterHunter.Characters
         private void OnAttack()
         {
             if (combatModule == null) return;
-            var empowered = combatModule.EmpowerState?.IsActive == true;
-            var empowerId = empowered ? combatModule.EmpowerState.SourceSkillId : string.Empty;
-            var results = combatModule.AutoAttack();
-            var totalDamage = 0f;
-            var critical = false;
-            foreach (var result in results) totalDamage += result.FinalDamage;
-            foreach (var result in results) critical |= result.WasCritical;
-            var combo = combatModule.AutoAttackService;
-            var comboMessage = results.Count > 0 && combo != null && combo.ComboStepCount > 0 && combo.LastComboStepNumber > 0
-                ? $" Combo: {combo.LastComboStepNumber}/{combo.ComboStepCount} '{combo.LastComboStep.DisplayName}'{(critical ? " CRIT!" : string.Empty)}."
-                : string.Empty;
-            Debug.Log(empowered
-                ? $"[Combat] Empower '{empowerId}' consumed. Hit {results.Count} target(s), total damage: {totalDamage:0.##}.{comboMessage}"
-                : $"[Combat] Auto Attack hit {results.Count} target(s), total damage: {totalDamage:0.##}.{comboMessage}", this);
-            if (results.Count == 0) Debug.LogWarning("[Combat] No target found inside the attack shape.", this);
+            var launched = combatModule.TryLaunchBasicProjectile(
+                GetProjectileSpawnPosition(),
+                skillProjectileSpeed, skillProjectileLifetime, defaultSkillProjectilePrefab, out _);
+            if (!launched) return;
+            Debug.Log("[Combat] Basic Skill projectile launched. Damage resolves on hit.", this);
             _stateMachine.BeginAttack(attackStateDuration);
         }
         private void OnSkill(int slot)
@@ -166,8 +161,10 @@ namespace LetterHunter.Characters
                 : slot >= 0 && slot < combatModule.UsableSkills.Count ? combatModule.UsableSkills[slot] : null;
             var manaBefore = combatModule.Stats?.CurrentMana ?? 0f;
             var result = skill != null
-                ? combatModule.UseSkill(skill.SkillId)
-                : combatModule.UseSkill(slot);
+                ? combatModule.TryLaunchSkillProjectile(skill.SkillId,
+                    GetProjectileSpawnPosition(),
+                    skillProjectileSpeed, skillProjectileLifetime, defaultSkillProjectilePrefab, out _)
+                : LetterHunter.Skills.SkillUseResult.Failed(LetterHunter.Skills.SkillUseFailure.NotRegistered);
             if (!result.Success)
             {
                 Debug.LogWarning($"[Skill] Slot {slot + 1} failed: {result.Failure}.", this);
@@ -175,15 +172,24 @@ namespace LetterHunter.Characters
             }
 
             var manaAfter = combatModule.Stats.CurrentMana;
-            var message = $"[Skill] {skill.DisplayName} activated. Mana: {manaBefore:0.##} → {manaAfter:0.##}.";
+            var message = $"[Skill] {skill.DisplayName} projectile launched. Mana: {manaBefore:0.##} → {manaAfter:0.##}. Effect resolves on hit.";
             if (skill.SkillType == SkillType.Empower)
                 message += " Empower is armed; press J to apply it to the next Auto Attack.";
             else if (skill.SkillType == SkillType.Buff)
                 message += $" Buff duration: {skill.Duration:0.##}s. AttackPower: {combatModule.Stats.AttackPower:0.##}, AttackSpeed: {combatModule.Stats.AttackSpeed:0.##}.";
             else if (skill.SkillType == SkillType.Active)
-                message += " Active effect resolved immediately.";
+                message += " Active effect is attached to the projectile.";
             Debug.Log(message, this);
             _stateMachine.BeginAttack(attackStateDuration);
+        }
+
+        private Vector2 GetProjectileSpawnPosition()
+        {
+            if (projectileSpawnPoint != null)
+                return projectileSpawnPoint.position;
+
+            var collider = GetComponent<Collider2D>();
+            return collider != null ? collider.bounds.center : transform.position;
         }
 
         private void OnStateChanged(CharacterStateId previous, CharacterStateId next)

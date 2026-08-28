@@ -30,3 +30,4 @@ MonoBehaviour:
   tags: []
   effect: {fileID: 11400000, guid: 36b26f904833c5947a4db0fc8c781d05, type: 2}
   impactProfile: {fileID: 11400000, guid: 1812bd41de27591409f2df2c7a108c41, type: 2}
+  projectilePrefab: {fileID: 7864389296320187450, guid: 9f53d8b1eb3e4e80a18c85aacadfd3d3, type: 3}
