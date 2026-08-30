@@ -149,11 +149,23 @@ namespace LetterHunter.Characters
         }
         private void OnSkill(int slot)
         {
-            if (combatModule == null) return;
             if (skillBar == null)
                 skillBar = FindFirstObjectByType<SkillBarPresenter>();
             if (skillBar != null && skillBar.IsAssigningSkill)
                 return;
+
+            TryUseSkillSlot(slot);
+        }
+
+        public SkillUseResult TryUseSkillSlot(int slot)
+        {
+            if (combatModule == null)
+                return LetterHunter.Skills.SkillUseResult.Failed(LetterHunter.Skills.SkillUseFailure.NotRegistered);
+
+            if (skillBar == null)
+                skillBar = FindFirstObjectByType<SkillBarPresenter>();
+            if (skillBar != null && skillBar.IsAssigningSkill)
+                return LetterHunter.Skills.SkillUseResult.Failed(LetterHunter.Skills.SkillUseFailure.NotRegistered);
             if (skillLoadout == null)
                 skillLoadout = GetComponent<PlayerSkillLoadout>();
             var skill = skillLoadout != null
@@ -168,7 +180,7 @@ namespace LetterHunter.Characters
             if (!result.Success)
             {
                 Debug.LogWarning($"[Skill] Slot {slot + 1} failed: {result.Failure}.", this);
-                return;
+                return result;
             }
 
             var manaAfter = combatModule.Stats.CurrentMana;
@@ -181,6 +193,7 @@ namespace LetterHunter.Characters
                 message += " Active effect is attached to the projectile.";
             Debug.Log(message, this);
             _stateMachine.BeginAttack(attackStateDuration);
+            return result;
         }
 
         private Vector2 GetProjectileSpawnPosition()

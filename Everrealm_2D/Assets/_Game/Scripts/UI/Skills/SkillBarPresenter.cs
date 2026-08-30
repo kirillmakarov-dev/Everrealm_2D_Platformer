@@ -214,7 +214,14 @@ namespace LetterHunter.UI.Skills
             var skill = _runtimeSlots[index].Skill;
             if (skill == null) return;
 
-            var result = player.UseSkill(skill.SkillId);
+            var characterRoot = player.GetComponent<CharacterRoot>();
+            if (characterRoot == null)
+            {
+                Debug.LogError("[Skill Bar] Cannot activate a skill: the player has no CharacterRoot projectile route.", this);
+                return;
+            }
+
+            var result = characterRoot.TryUseSkillSlot(index);
             if (logSkillClicks)
             {
                 Debug.Log(result.Success

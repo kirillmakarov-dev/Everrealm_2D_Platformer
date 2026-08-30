@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LetterHunter.Combat.EnemyAttackDefinition
   attackId: enemy_basic_hit
   displayName: Enemy Basic Hit
-  baseDamage: 12
+  baseDamage: 8
   damageMultiplier: 1
   damageLines: 1
   cooldown: 1.25

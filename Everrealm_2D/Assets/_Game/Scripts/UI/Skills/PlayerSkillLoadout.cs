@@ -43,7 +43,7 @@ namespace LetterHunter.UI.Skills
                 }
             }
 
-            var inputLabel = ResolveInputLabel(slotIndex, skill, null);
+            var inputLabel = ResolveSlotLabel(slotIndex);
             for (var i = 0; i < slots.Count; i++)
             {
                 if (slots[i] == null || slots[i].SlotIndex != slotIndex)
@@ -74,9 +74,9 @@ namespace LetterHunter.UI.Skills
             slots.RemoveAll(binding => binding != null &&
                 (binding.SlotIndex == firstIndex || binding.SlotIndex == secondIndex));
             slots.Add(new SkillSlotBinding(firstIndex, secondSkill,
-                ResolveInputLabel(firstIndex, secondSkill, null)));
+                ResolveSlotLabel(firstIndex)));
             slots.Add(new SkillSlotBinding(secondIndex, firstSkill,
-                ResolveInputLabel(secondIndex, firstSkill, null)));
+                ResolveSlotLabel(secondIndex)));
             LoadoutChanged?.Invoke();
             return true;
         }
@@ -99,14 +99,14 @@ namespace LetterHunter.UI.Skills
             var explicitBinding = FindBinding(slotIndex);
             if (explicitBinding != null)
             {
-                inputLabel = ResolveInputLabel(slotIndex, explicitBinding.Skill, explicitBinding.InputLabel);
+                inputLabel = ResolveSlotLabel(slotIndex);
                 return explicitBinding.Skill;
             }
 
             var skill = player != null && slotIndex >= 0 && slotIndex < player.UsableSkills.Count
                 ? player.UsableSkills[slotIndex]
                 : null;
-            inputLabel = ResolveInputLabel(slotIndex, skill, null);
+            inputLabel = ResolveSlotLabel(slotIndex);
             return skill;
         }
 
@@ -154,10 +154,8 @@ namespace LetterHunter.UI.Skills
             return null;
         }
 
-        private string ResolveInputLabel(int index, SkillDefinition skill, string overrideLabel)
+        private string ResolveSlotLabel(int index)
         {
-            if (!string.IsNullOrWhiteSpace(overrideLabel)) return overrideLabel;
-            if (skill != null && !string.IsNullOrWhiteSpace(skill.InputLabel)) return skill.InputLabel;
             if (index == 9) return "0";
             return index >= 0 && index < defaultInputLabels.Length ? defaultInputLabels[index] : (index + 1).ToString();
         }
