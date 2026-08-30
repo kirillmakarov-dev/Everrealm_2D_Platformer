@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using LetterHunter.Combat;
+using LetterHunter.Core;
 using LetterHunter.Effects;
 using UnityEngine;
 
@@ -91,9 +93,24 @@ namespace LetterHunter.Skills
 
             cast.Consumed = true;
             var context = CreateContext(cast.Definition, target, cast.Direction, cast.Position, cast.RuntimeValues);
+            if (cast.Definition.Effect is not DamageSkillEffectDefinition)
+                ApplyProjectileDamage(cast, target);
             cast.Definition.Effect.Apply(context);
             _states[cast.Definition.SkillId].StartDuration(cast.Definition.Duration);
             return SkillUseResult.Succeeded();
+        }
+
+        private void ApplyProjectileDamage(PreparedSkillCast cast, IDamageable target)
+        {
+            var values = cast.RuntimeValues;
+            var tags = cast.Definition.ProjectileDamageTags;
+            var lines = new DamageLine[Math.Max(1, values.DamageLines)];
+            for (var i = 0; i < lines.Length; i++)
+                lines[i] = new DamageLine(values.DamageMultiplier, tags);
+
+            _combat.ApplyDamage(new DamageRequest(_owner, target, _owner.Stats.AttackPower,
+                lines, cast.Definition.SkillId, tags, cast.Definition.ImpactProfile,
+                cast.Direction));
         }
 
         public void Tick(float deltaTime)

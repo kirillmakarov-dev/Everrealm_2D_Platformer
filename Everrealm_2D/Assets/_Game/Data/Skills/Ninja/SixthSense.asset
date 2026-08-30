@@ -23,11 +23,14 @@ MonoBehaviour:
   manaCost: 8
   cooldown: 9
   duration: 6
-  baseDamageMultiplier: 0
+  baseDamageMultiplier: 0.65
   damageLines: 1
   maxTargets: 1
   rank: 1
   tags: []
   effect: {fileID: 11400000, guid: 32b067bb9ed39aa47a508f675164a63b, type: 2}
-  impactProfile: {fileID: 11400000, guid: 7af14e6c391737d498d66b75a4f12379, type: 2}
-  projectilePrefab: {fileID: 7864389296320187450, guid: 9f53d8b1eb3e4e80a18c85aacadfd3d3, type: 3}
+  impactProfile: {fileID: 11400000, guid: 64cb49fadce9e3c488d9c30d3a01e239, type: 2}
+  projectilePrefab: {fileID: 7463707268872093173, guid: 422f6b899977d1940a4d7e2417354bf2, type: 3}
+  projectileSpeed: 13.05
+  projectileLifetime: 2.4
+  projectileDamageTags: 10

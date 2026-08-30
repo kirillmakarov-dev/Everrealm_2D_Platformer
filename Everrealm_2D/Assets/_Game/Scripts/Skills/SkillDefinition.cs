@@ -31,6 +31,9 @@ namespace LetterHunter.Skills
         [SerializeField] private AttackImpactProfile impactProfile;
         [Header("Projectile")]
         [SerializeField] private GameObject projectilePrefab;
+        [Min(0f), SerializeField] private float projectileSpeed;
+        [Min(0f), SerializeField] private float projectileLifetime;
+        [SerializeField] private DamageTag projectileDamageTags = DamageTag.Skill | DamageTag.Ranged;
 
         public string SkillId => string.IsNullOrWhiteSpace(skillId) ? name : skillId;
         public string DisplayName => string.IsNullOrWhiteSpace(displayName) ? name : displayName;
@@ -51,5 +54,8 @@ namespace LetterHunter.Skills
         public SkillEffectDefinition Effect => effect;
         public AttackImpactProfile ImpactProfile => impactProfile;
         public GameObject ProjectilePrefab => projectilePrefab;
+        public float ProjectileSpeed => Mathf.Max(0f, projectileSpeed);
+        public float ProjectileLifetime => Mathf.Max(0f, projectileLifetime);
+        public DamageTag ProjectileDamageTags => projectileDamageTags | DamageTag.Skill | DamageTag.Ranged;
     }
 }

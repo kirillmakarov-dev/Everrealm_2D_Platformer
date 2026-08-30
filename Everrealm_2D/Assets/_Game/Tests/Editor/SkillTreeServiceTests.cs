@@ -110,7 +110,7 @@ namespace LetterHunter.Tests.EditMode
         }
 
         [Test]
-        public void SkillTreeWindowPrefab_HasTwoAxisScrollingAndAuthoredConnections()
+        public void SkillTreeWindowPrefab_HasTwoAxisScrollingAndConnectionSetup()
         {
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(
                 "Assets/_Game/Prefabs/UI/SkillTree/SkillTreeWindow.prefab");
@@ -122,7 +122,16 @@ namespace LetterHunter.Tests.EditMode
             Assert.That(scroll.vertical, Is.True);
             Assert.That(scroll.horizontalScrollbar, Is.Not.Null);
             Assert.That(scroll.verticalScrollbar, Is.Not.Null);
-            Assert.That(prefab.GetComponentsInChildren<SkillTreeConnectionView>(true).Length, Is.EqualTo(7));
+
+            var visual = prefab.GetComponent<EverrealmSkillTreeVisual>();
+            Assert.That(visual, Is.Not.Null);
+            Assert.That(prefab.GetComponentsInChildren<RectTransform>(true),
+                Has.Some.Matches<RectTransform>(rect => rect.name == "ConnectionLayer"));
+
+            var connectionPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(
+                "Assets/_Game/Resources/EnglishKingdomSkillTree/SkillTreeConnection.prefab");
+            Assert.That(connectionPrefab, Is.Not.Null);
+            Assert.That(connectionPrefab.GetComponent<EverrealmSkillTreeConnectionVisual>(), Is.Not.Null);
         }
 
         private static SkillTreeNodeView CreateView(Transform parent, string name)

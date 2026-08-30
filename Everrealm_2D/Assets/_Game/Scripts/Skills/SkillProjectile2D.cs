@@ -88,15 +88,33 @@ namespace LetterHunter.Skills
                 return;
             }
 
-            transform.position += (Vector3)(_direction * (_speed * Time.deltaTime));
-            foreach (var collider in Physics2D.OverlapCircleAll(transform.position, hitRadius, hitLayers))
+            var start = (Vector2)transform.position;
+            var travel = _direction * (_speed * Time.deltaTime);
+            var distance = travel.magnitude;
+            if (distance > 0f)
             {
-                var target = FindDamageable(collider);
-                if (target == null || ReferenceEquals(target, _owner) || !target.IsAlive) continue;
-                _hit?.Invoke(target);
-                Destroy(gameObject);
-                return;
+                foreach (var hit in Physics2D.CircleCastAll(start, hitRadius, _direction, distance, hitLayers))
+                {
+                    if (TryResolveHit(hit.collider))
+                        return;
+                }
             }
+
+            transform.position = start + travel;
+            foreach (var collider in Physics2D.OverlapCircleAll(transform.position, hitRadius, hitLayers))
+                if (TryResolveHit(collider))
+                    return;
+        }
+
+        private bool TryResolveHit(Collider2D collider)
+        {
+            var target = FindDamageable(collider);
+            if (target == null || ReferenceEquals(target, _owner) || !target.IsAlive)
+                return false;
+
+            _hit?.Invoke(target);
+            Destroy(gameObject);
+            return true;
         }
 
         private static IDamageable FindDamageable(Collider2D collider)

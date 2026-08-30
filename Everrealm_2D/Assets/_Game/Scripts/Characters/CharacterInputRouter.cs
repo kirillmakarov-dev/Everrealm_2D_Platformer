@@ -52,8 +52,9 @@ namespace LetterHunter.Characters
             if (WasPressedThisFrame(keyboard, attackKey) || mouseAttackPressed)
                 AttackRequested?.Invoke();
 
-            for (var i = 0; i < skillKeys.Length; i++)
-                if (WasPressedThisFrame(keyboard, skillKeys[i]) || WasSecondarySkillPressed(keyboard, i))
+            var configuredSkillCount = Mathf.Max(skillKeys?.Length ?? 0, secondarySkillKeys?.Length ?? 0);
+            for (var i = 0; i < configuredSkillCount; i++)
+                if (WasPrimarySkillPressed(keyboard, i) || WasSecondarySkillPressed(keyboard, i))
                     SkillRequested?.Invoke(i);
         }
 
@@ -65,6 +66,14 @@ namespace LetterHunter.Characters
         private static bool WasPressedThisFrame(Keyboard keyboard, Key key)
         {
             return keyboard[key]?.wasPressedThisFrame == true;
+        }
+
+        private bool WasPrimarySkillPressed(Keyboard keyboard, int index)
+        {
+            return skillKeys != null &&
+                   index >= 0 &&
+                   index < skillKeys.Length &&
+                   WasPressedThisFrame(keyboard, skillKeys[index]);
         }
 
         private bool WasSecondarySkillPressed(Keyboard keyboard, int index)

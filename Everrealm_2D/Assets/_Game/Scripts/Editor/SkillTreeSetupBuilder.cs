@@ -152,6 +152,7 @@ namespace LetterHunter.EditorTools
                     throw new InvalidOperationException("SkillTreeWindow.prefab has no EverrealmSkillTreeVisual component.");
 
                 var group = contents.GetComponent<CanvasGroup>() ?? contents.AddComponent<CanvasGroup>();
+                EnsureTwoAxisScrollbars(contents);
                 var so = new SerializedObject(visual);
                 so.FindProperty("_nodePrefab").objectReferenceValue = nodePrefab;
                 so.FindProperty("_connectionPrefab").objectReferenceValue = connectionPrefab;
@@ -164,6 +165,82 @@ namespace LetterHunter.EditorTools
             {
                 PrefabUtility.UnloadPrefabContents(contents);
             }
+        }
+
+        [MenuItem("Everrealm/Repair Skill Tree Scrollbars", priority = 4)]
+        public static void RepairSkillTreeScrollbars()
+        {
+            var contents = PrefabUtility.LoadPrefabContents(WindowPrefabPath);
+            try
+            {
+                EnsureTwoAxisScrollbars(contents);
+                PrefabUtility.SaveAsPrefabAsset(contents, WindowPrefabPath);
+            }
+            finally
+            {
+                PrefabUtility.UnloadPrefabContents(contents);
+            }
+        }
+
+        private static void EnsureTwoAxisScrollbars(GameObject window)
+        {
+            var scroll = window.GetComponentInChildren<ScrollRect>(true);
+            if (scroll == null) return;
+
+            scroll.horizontal = true;
+            scroll.vertical = true;
+            scroll.horizontalScrollbarVisibility = ScrollRect.ScrollbarVisibility.Permanent;
+            scroll.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.Permanent;
+
+            if (scroll.verticalScrollbar != null) return;
+
+            var verticalRoot = scroll.transform.Find("VerticalScrollbar");
+            if (verticalRoot == null)
+            {
+                var objectRoot = new GameObject("VerticalScrollbar", typeof(RectTransform), typeof(Image));
+                verticalRoot = objectRoot.transform;
+                verticalRoot.SetParent(scroll.transform, false);
+                var rect = (RectTransform)verticalRoot;
+                rect.anchorMin = new Vector2(1f, 0f);
+                rect.anchorMax = new Vector2(1f, 1f);
+                rect.pivot = new Vector2(1f, .5f);
+                rect.anchoredPosition = new Vector2(-6f, 0f);
+                rect.sizeDelta = new Vector2(16f, 0f);
+                objectRoot.GetComponent<Image>().color = new Color(.1f, .12f, .13f, 1f);
+            }
+
+            var slidingArea = verticalRoot.Find("SlidingArea");
+            if (slidingArea == null)
+            {
+                var objectRoot = new GameObject("SlidingArea", typeof(RectTransform));
+                slidingArea = objectRoot.transform;
+                slidingArea.SetParent(verticalRoot, false);
+                var rect = (RectTransform)slidingArea;
+                rect.anchorMin = Vector2.zero;
+                rect.anchorMax = Vector2.one;
+                rect.offsetMin = new Vector2(2f, 2f);
+                rect.offsetMax = new Vector2(-2f, -2f);
+            }
+
+            var handle = slidingArea.Find("Handle");
+            if (handle == null)
+            {
+                var objectRoot = new GameObject("Handle", typeof(RectTransform), typeof(Image));
+                handle = objectRoot.transform;
+                handle.SetParent(slidingArea, false);
+                var rect = (RectTransform)handle;
+                rect.anchorMin = new Vector2(0f, .5f);
+                rect.anchorMax = new Vector2(1f, .5f);
+                rect.pivot = new Vector2(.5f, .5f);
+                rect.sizeDelta = new Vector2(0f, 120f);
+                objectRoot.GetComponent<Image>().color = new Color(.92f, .55f, .12f, 1f);
+            }
+
+            var verticalScrollbar = verticalRoot.GetComponent<Scrollbar>() ?? verticalRoot.gameObject.AddComponent<Scrollbar>();
+            verticalScrollbar.handleRect = (RectTransform)handle;
+            verticalScrollbar.targetGraphic = handle.GetComponent<Graphic>();
+            verticalScrollbar.direction = Scrollbar.Direction.BottomToTop;
+            scroll.verticalScrollbar = verticalScrollbar;
         }
 
         private static void ValidateSkillLoadout(Scene scene)

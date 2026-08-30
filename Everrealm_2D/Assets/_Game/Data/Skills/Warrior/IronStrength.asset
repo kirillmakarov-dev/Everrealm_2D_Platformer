@@ -29,5 +29,8 @@ MonoBehaviour:
   rank: 1
   tags: []
   effect: {fileID: 11400000, guid: ae120d7d17e073f47b6b7d70073aa974, type: 2}
-  impactProfile: {fileID: 11400000, guid: cec19981dfcc97545a69ddb80d6853c4, type: 2}
-  projectilePrefab: {fileID: 7864389296320187450, guid: 9f53d8b1eb3e4e80a18c85aacadfd3d3, type: 3}
+  impactProfile: {fileID: 11400000, guid: 4fc7f21733889564789fcdf0e9d4fba8, type: 2}
+  projectilePrefab: {fileID: 6414193006487064133, guid: 15dd54a652768574cada3bcbbb13c0e2, type: 3}
+  projectileSpeed: 10.5
+  projectileLifetime: 2.6000001
+  projectileDamageTags: 10

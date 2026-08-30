@@ -132,7 +132,9 @@ namespace LetterHunter.Characters
                 : new GameObject($"{skill.DisplayName} Projectile");
             instance.transform.SetPositionAndRotation(new Vector3(position.x, position.y, 0f), Quaternion.identity);
             projectile = instance.GetComponent<SkillProjectile2D>() ?? instance.AddComponent<SkillProjectile2D>();
-            projectile.Launch(this, cast, speed, lifetime,
+            var resolvedSpeed = skill.ProjectileSpeed > 0f ? skill.ProjectileSpeed : speed;
+            var resolvedLifetime = skill.ProjectileLifetime > 0f ? skill.ProjectileLifetime : lifetime;
+            projectile.Launch(this, cast, resolvedSpeed, resolvedLifetime,
                 target => _skillService.ResolveProjectileHit(cast, target));
             return result;
         }
