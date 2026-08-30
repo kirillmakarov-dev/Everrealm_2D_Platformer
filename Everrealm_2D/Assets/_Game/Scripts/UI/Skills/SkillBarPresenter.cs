@@ -29,6 +29,8 @@ namespace LetterHunter.UI.Skills
         private IReadOnlyList<SkillSlotBinding> _runtimeSlots;
         private SkillDefinition _pendingAssignment;
         private Image _assignmentGhost;
+        private Transform _assignmentGhostOriginalParent;
+        private int _assignmentGhostOriginalSiblingIndex;
         private Canvas _rootCanvas;
         private int _hoveredSlotIndex = -1;
         private int _dragSourceIndex = -1;
@@ -50,6 +52,9 @@ namespace LetterHunter.UI.Skills
 
             if (assignmentGhost != null)
             {
+                _assignmentGhostOriginalParent = assignmentGhost.transform.parent;
+                _assignmentGhostOriginalSiblingIndex = assignmentGhost.transform.GetSiblingIndex();
+                assignmentGhost.gameObject.SetActive(false);
                 assignmentGhost.enabled = false;
                 assignmentGhost.raycastTarget = false;
             }
@@ -371,8 +376,21 @@ namespace LetterHunter.UI.Skills
             _assignmentGhost.color = skill.Icon != null ? Color.white : new Color(0.95f, 0.78f, 0.25f, 0.9f);
             _assignmentGhost.raycastTarget = false;
             _assignmentGhost.preserveAspect = true;
+
+            var canvasTransform = _rootCanvas != null ? _rootCanvas.transform as RectTransform : null;
+            if (canvasTransform != null && _assignmentGhost.transform.parent != canvasTransform)
+            {
+                _assignmentGhost.transform.SetParent(canvasTransform, false);
+                _assignmentGhost.transform.SetAsLastSibling();
+            }
+
+            _assignmentGhost.rectTransform.anchorMin = new Vector2(.5f, .5f);
+            _assignmentGhost.rectTransform.anchorMax = new Vector2(.5f, .5f);
+            _assignmentGhost.rectTransform.pivot = new Vector2(.5f, .5f);
+            _assignmentGhost.rectTransform.localScale = Vector3.one;
             _assignmentGhost.rectTransform.sizeDelta = new Vector2(58f, 58f);
 
+            _assignmentGhost.gameObject.SetActive(true);
             _assignmentGhost.enabled = true;
             var group = _assignmentGhost.GetComponent<CanvasGroup>();
             if (group != null)
@@ -392,8 +410,12 @@ namespace LetterHunter.UI.Skills
             if (mouse == null)
                 return;
 
+            var ghostParent = _assignmentGhost.rectTransform.parent as RectTransform;
+            if (ghostParent == null)
+                return;
+
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                _rootCanvas.transform as RectTransform,
+                ghostParent,
                 mouse.position.ReadValue(),
                 _rootCanvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : _rootCanvas.worldCamera,
                 out var localPoint);
@@ -405,7 +427,14 @@ namespace LetterHunter.UI.Skills
             if (_assignmentGhost != null)
             {
                 _assignmentGhost.enabled = false;
+                _assignmentGhost.gameObject.SetActive(false);
                 _assignmentGhost.sprite = null;
+
+                if (_assignmentGhostOriginalParent != null)
+                {
+                    _assignmentGhost.transform.SetParent(_assignmentGhostOriginalParent, false);
+                    _assignmentGhost.transform.SetSiblingIndex(_assignmentGhostOriginalSiblingIndex);
+                }
             }
             _assignmentGhost = null;
         }

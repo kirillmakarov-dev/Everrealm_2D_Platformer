@@ -94,6 +94,38 @@ namespace LetterHunter.EditorTools
             Debug.Log("SoftKitty inventory visuals built. Runtime inventory logic was preserved.");
         }
 
+        [MenuItem("Tools/Letter Hunter/UI/Build SoftKitty Player Stats")]
+        public static void BuildPlayerStatsOnly()
+        {
+            var scene = SceneManager.GetActiveScene();
+            if (!scene.IsValid() || !LoadSoftKittySprites())
+                return;
+
+            BuildPlayerStatsPrefabOnly();
+            foreach (var stats in UnityEngine.Object.FindObjectsByType<PlayerStatsPanelPresenter>(FindObjectsSortMode.None))
+                PolishStats(stats.transform);
+
+            EditorSceneManager.MarkSceneDirty(scene);
+            AssetDatabase.SaveAssets();
+            EditorSceneManager.SaveScene(scene);
+            Debug.Log("SoftKitty Player Stats visuals built. Runtime stats logic and serialized value bindings were preserved.");
+        }
+
+        public static void BuildPlayerStatsPrefabOnly()
+        {
+            if (sprites == null && !LoadSoftKittySprites())
+                return;
+            SkinPrefab("Assets/_Game/Prefabs/UI/PlayerStatsPanel.prefab", PolishStats);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+        }
+
+        public static void BuildPlayerStatsDebugScene()
+        {
+            EditorSceneManager.OpenScene("Assets/_Game/Scenes/InventoryLootDebug.unity", OpenSceneMode.Single);
+            BuildPlayerStatsOnly();
+        }
+
         public static void BuildInventoryDebugScene()
         {
             EditorSceneManager.OpenScene("Assets/_Game/Scenes/InventoryLootDebug.unity", OpenSceneMode.Single);
@@ -320,13 +352,100 @@ namespace LetterHunter.EditorTools
 
         private static void PolishStats(Transform root)
         {
-            StylePanel(root, "bg2");
+            StylePanel(root, "bg5");
+            var panelRect = root.GetComponent<RectTransform>();
+            if (panelRect != null)
+                panelRect.sizeDelta = new Vector2(360f, 380f);
+
+            var header = EnsureImage(root, "StatsHeader");
+            SetRect(header.rectTransform, new Vector2(0f, 1f), new Vector2(1f, 1f),
+                new Vector2(.5f, 1f), new Vector2(0f, -10f), new Vector2(-24f, 62f));
+            SetImage(header, "bg3", new Color(.24f, .19f, .14f, .98f), true);
+            header.raycastTarget = false;
+            header.transform.SetAsFirstSibling();
+
+            var headerLine = EnsureImage(root, "StatsHeaderLine");
+            SetRect(headerLine.rectTransform, new Vector2(0f, 1f), new Vector2(1f, 1f),
+                new Vector2(.5f, 1f), new Vector2(0f, -72f), new Vector2(-36f, 5f));
+            SetImage(headerLine, "line2", Gold, true);
+            headerLine.raycastTarget = false;
+
+            var title = FindDeep(root, "Title")?.GetComponent<TMP_Text>();
+            if (title != null)
+            {
+                title.text = "PLAYER STATS";
+                title.fontSize = 25f;
+                title.fontStyle = FontStyles.Bold;
+                title.alignment = TextAlignmentOptions.Center;
+                title.color = Gold;
+                SetRect(title.rectTransform, new Vector2(.5f, 1f), new Vector2(.5f, 1f),
+                    new Vector2(.5f, 1f), new Vector2(0f, -33f), new Vector2(240f, 42f));
+            }
+
             foreach (var image in root.GetComponentsInChildren<Image>(true))
             {
                 var name = image.name.ToLowerInvariant();
                 if (name.Contains("row") || name.Contains("background"))
-                    SetImage(image, "field1", Color.white, true);
+                {
+                    SetImage(image, "field1", new Color(.82f, .72f, .55f, .92f), true);
+                    image.raycastTarget = false;
+                }
             }
+
+            var statsIcons = new[]
+            {
+                ("LevelRow", "star"),
+                ("AttackRow", "icon_hammer"),
+                ("DefenseRow", "icon_lock"),
+                ("MoveSpeedRow", "up"),
+                ("AttackSpeedRow", "icon_craft"),
+                ("JumpHeightRow", "Plus")
+            };
+            foreach (var (rowName, spriteName) in statsIcons)
+            {
+                var row = FindDeep(root, rowName);
+                if (row == null)
+                    continue;
+
+                var rowRect = row.GetComponent<RectTransform>();
+                if (rowRect != null)
+                {
+                    rowRect.anchorMin = new Vector2(.5f, .5f);
+                    rowRect.anchorMax = new Vector2(.5f, .5f);
+                    rowRect.pivot = new Vector2(.5f, .5f);
+                    rowRect.sizeDelta = new Vector2(320f, 36f);
+                    var rowIndex = Array.IndexOf(statsIcons, (rowName, spriteName));
+                    rowRect.anchoredPosition = new Vector2(0f, 70f - rowIndex * 42f);
+                }
+
+                var icon = EnsureImage(row, "StatIcon");
+                SetRect(icon.rectTransform, new Vector2(0f, .5f), new Vector2(0f, .5f),
+                    new Vector2(.5f, .5f), new Vector2(14f, 0f), new Vector2(24f, 24f));
+                SetImage(icon, spriteName, Gold, false);
+                icon.preserveAspect = true;
+                icon.raycastTarget = false;
+
+                var label = row.Find("Label")?.GetComponent<TMP_Text>();
+                if (label != null)
+                {
+                    SetRect(label.rectTransform, new Vector2(0f, .5f), new Vector2(0f, .5f),
+                        new Vector2(0f, .5f), new Vector2(44f, 0f), new Vector2(190f, 28f));
+                    label.color = Parchment;
+                    label.fontSize = 15f;
+                }
+
+                var value = row.Find("Value")?.GetComponent<TMP_Text>();
+                if (value != null)
+                {
+                    SetRect(value.rectTransform, new Vector2(1f, .5f), new Vector2(1f, .5f),
+                        new Vector2(1f, .5f), new Vector2(-12f, 0f), new Vector2(64f, 28f));
+                    value.color = Color.white;
+                    value.fontSize = 18f;
+                    value.fontStyle = FontStyles.Bold;
+                }
+            }
+
+            StyleText(root);
         }
 
         private static void BuildInventory(InventoryWindowPresenter presenter)
