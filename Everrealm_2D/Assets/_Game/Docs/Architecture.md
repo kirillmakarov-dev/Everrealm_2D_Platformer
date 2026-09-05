@@ -20,6 +20,24 @@ When a new session is approved:
 
 ## Architectural Goals
 
+### Environment parallax
+
+`Environment/ParallaxLayer2D` moves explicitly assigned decorative segments relative
+to an assigned camera in LateUpdate, after camera tracking. Horizontal wrapping
+reuses scene-authored segments; no gameplay objects are spawned or mutated.
+Camera follow factors and repetition width are authored per layer. Texture scale
+is authored independently of screen coverage to preserve native image detail.
+
+### Enemy sprite presentation
+
+`EnemySpriteAnimator` lives on a prefab's visual child and reads the existing
+`DummyEnemy2D` health/death state and Rigidbody2D speed. It listens to
+`EnemyAttackController2D.AttackPerformed` for attack presentation only; damage
+still executes through the existing CombatService path. The visual child remains
+active during the root's death cleanup so the non-looping death clip can finish.
+`GolemEnemy.prefab` uses this adapter with explicit references and the five clips
+in `Assets/Anim enemy/Golem Setup`; the original source clips remain unchanged.
+
 ### Player experience and levels
 
 LevelProgressionDefinition authors cumulative XP thresholds (level 1 starts at 0,

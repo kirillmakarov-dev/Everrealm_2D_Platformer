@@ -23,6 +23,8 @@ namespace LetterHunter.Characters
         private EnemyPatrolAI2D _patrolAI;
         private float _cooldownRemaining;
 
+        public event Action AttackPerformed;
+
         private void Awake()
         {
             if (attackerComponent == null)
@@ -62,6 +64,7 @@ namespace LetterHunter.Characters
 
                 ApplyAttack(target);
                 _cooldownRemaining = attackDefinition.Cooldown;
+                AttackPerformed?.Invoke();
                 return true;
             }
 
