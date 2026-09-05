@@ -38,6 +38,9 @@ namespace LetterHunter.Characters
         private CharacterFacingController _facing;
         private CharacterStateMachine _stateMachine;
         private bool _sprintHeld;
+        private bool _pendingBasicShot;
+        private string _pendingSkillId;
+        private bool _pendingSkillProjectile;
 
         public CharacterRuntime Runtime { get; private set; }
         public CombatStats Stats => combatModule != null ? combatModule.Stats : null;
@@ -140,11 +143,9 @@ namespace LetterHunter.Characters
         private void OnAttack()
         {
             if (combatModule == null) return;
-            var launched = combatModule.TryLaunchBasicProjectile(
-                GetProjectileSpawnPosition(),
-                skillProjectileSpeed, skillProjectileLifetime, defaultSkillProjectilePrefab, out _);
-            if (!launched) return;
-            Debug.Log("[Combat] Basic Skill projectile launched. Damage resolves on hit.", this);
+            _pendingSkillId = null;
+            _pendingSkillProjectile = false;
+            _pendingBasicShot = true;
             _stateMachine.BeginAttack(attackStateDuration);
         }
         private void OnSkill(int slot)
@@ -172,13 +173,17 @@ namespace LetterHunter.Characters
                 ? skillLoadout.ResolveSkill(combatModule, slot, out _)
                 : slot >= 0 && slot < combatModule.UsableSkills.Count ? combatModule.UsableSkills[slot] : null;
             var manaBefore = combatModule.Stats?.CurrentMana ?? 0f;
-            var result = skill != null
-                ? skill.SkillType == SkillType.Empower
-                    ? combatModule.UseSkill(skill.SkillId)
-                    : combatModule.TryLaunchSkillProjectile(skill.SkillId,
-                    GetProjectileSpawnPosition(),
-                    skillProjectileSpeed, skillProjectileLifetime, defaultSkillProjectilePrefab, out _)
-                : LetterHunter.Skills.SkillUseResult.Failed(LetterHunter.Skills.SkillUseFailure.NotRegistered);
+            if (skill == null)
+                return LetterHunter.Skills.SkillUseResult.Failed(LetterHunter.Skills.SkillUseFailure.NotRegistered);
+            _pendingBasicShot = false;
+            if (skill.SkillType == SkillType.Empower)
+            {
+                var empowerResult = combatModule.UseSkill(skill.SkillId);
+                return empowerResult;
+            }
+            _pendingSkillId = skill.SkillId;
+            _pendingSkillProjectile = true;
+            var result = LetterHunter.Skills.SkillUseResult.Succeeded();
             if (!result.Success)
             {
                 Debug.LogWarning($"[Skill] Slot {slot + 1} failed: {result.Failure}.", this);
@@ -197,6 +202,26 @@ namespace LetterHunter.Characters
             if (skill.SkillType != SkillType.Empower)
                 _stateMachine.BeginAttack(attackStateDuration);
             return result;
+        }
+
+        /// <summary>Animation Event receiver. Add an event named Shoot to Shooting.anim.</summary>
+        public void Shoot()
+        {
+            if (_pendingBasicShot)
+            {
+                _pendingBasicShot = false;
+                var launched = combatModule.TryLaunchBasicProjectile(GetProjectileSpawnPosition(),
+                    skillProjectileSpeed, skillProjectileLifetime, defaultSkillProjectilePrefab, out _);
+                if (launched) Debug.Log("[Combat] Basic projectile launched on animation event.", this);
+            }
+            if (_pendingSkillProjectile && !string.IsNullOrWhiteSpace(_pendingSkillId))
+            {
+                var skillId = _pendingSkillId;
+                _pendingSkillId = null;
+                _pendingSkillProjectile = false;
+                combatModule.TryLaunchSkillProjectile(skillId, GetProjectileSpawnPosition(),
+                    skillProjectileSpeed, skillProjectileLifetime, defaultSkillProjectilePrefab, out _);
+            }
         }
 
         private Vector2 GetProjectileSpawnPosition()
