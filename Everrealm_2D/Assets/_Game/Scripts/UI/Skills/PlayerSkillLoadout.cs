@@ -30,6 +30,11 @@ namespace LetterHunter.UI.Skills
                 failure = "Skill is missing.";
                 return false;
             }
+            if (!CanAssign(skill))
+            {
+                failure = "Skill is locked or has not been learned.";
+                return false;
+            }
 
             for (var i = 0; i < slots.Count; i++)
             {
@@ -70,6 +75,11 @@ namespace LetterHunter.UI.Skills
             }
             if (firstIndex == secondIndex)
                 return true;
+            if ((firstSkill != null && !CanAssign(firstSkill)) || (secondSkill != null && !CanAssign(secondSkill)))
+            {
+                failure = "Skill is locked or has not been learned.";
+                return false;
+            }
 
             slots.RemoveAll(binding => binding != null &&
                 (binding.SlotIndex == firstIndex || binding.SlotIndex == secondIndex));
@@ -100,15 +110,19 @@ namespace LetterHunter.UI.Skills
             if (explicitBinding != null)
             {
                 inputLabel = ResolveSlotLabel(slotIndex);
-                return explicitBinding.Skill;
+                return player != null && player.IsSkillAvailable(explicitBinding.Skill) ? explicitBinding.Skill : null;
             }
 
             var skill = player != null && slotIndex >= 0 && slotIndex < player.UsableSkills.Count
                 ? player.UsableSkills[slotIndex]
                 : null;
             inputLabel = ResolveSlotLabel(slotIndex);
-            return skill;
+            return player != null && player.IsSkillAvailable(skill) ? skill : null;
         }
+
+        private bool CanAssign(SkillDefinition skill) => skill != null &&
+            skill.SkillType is not (LetterHunter.Core.SkillType.Passive or LetterHunter.Core.SkillType.AutoAttackUpgrade) &&
+            (!TryGetComponent<LetterHunter.SkillTree.PlayerSkillTreeController>(out var tree) || tree.IsSkillUnlocked(skill));
 
         public void SetSlots(IEnumerable<SkillSlotBinding> bindings)
         {

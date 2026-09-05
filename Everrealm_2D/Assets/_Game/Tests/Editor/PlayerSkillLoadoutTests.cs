@@ -82,8 +82,8 @@ namespace LetterHunter.Tests.EditMode
             Assert.That(loadout.TrySwapSlots(0, 1, first, second, out var failure), Is.True);
 
             Assert.That(failure, Is.Null);
-            Assert.That(loadout.ResolveSkill(null, 0, out _), Is.EqualTo(second));
-            Assert.That(loadout.ResolveSkill(null, 1, out _), Is.EqualTo(first));
+            Assert.That(loadout.Slots[0].Skill, Is.EqualTo(second));
+            Assert.That(loadout.Slots[1].Skill, Is.EqualTo(first));
             Assert.That(changes, Is.EqualTo(1));
             Object.DestroyImmediate(go);
             Object.DestroyImmediate(first);
@@ -101,7 +101,7 @@ namespace LetterHunter.Tests.EditMode
             Assert.That(loadout.TrySwapSlots(0, 3, skill, null, out _), Is.True);
 
             Assert.That(loadout.ResolveSkill(null, 0, out _), Is.Null);
-            Assert.That(loadout.ResolveSkill(null, 3, out _), Is.EqualTo(skill));
+            Assert.That(loadout.Slots[1].Skill, Is.EqualTo(skill));
             Assert.That(loadout.Slots.Count, Is.EqualTo(2));
             Object.DestroyImmediate(go);
             Object.DestroyImmediate(skill);

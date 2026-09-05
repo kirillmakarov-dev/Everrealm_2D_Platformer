@@ -6,9 +6,10 @@ namespace LetterHunter.SkillTree
     /// <summary>English Kingdom-style shared conversion for normalized authored coordinates.</summary>
     public static class EverrealmSkillTreeLayout
     {
-        public const float NodeWidth = 172f;
-        public const float NodeHeight = 72f;
-        public const float RuntimeNodeWidth = 190f;
+        public const float PreviewScale = .75f;
+        public const float NodeWidth = 140f * PreviewScale;
+        public const float NodeHeight = 150f * PreviewScale;
+        public const float RuntimeNodeWidth = 140f;
         public const float RuntimeNodeHeight = 150f;
         public const float ColumnSpacing = 205f;
         public const float LegacyMinimumX = .18f;
@@ -70,10 +71,11 @@ namespace LetterHunter.SkillTree
                 maximumY = Mathf.Max(maximumY, node.UiPosition.y);
             }
 
-            float xScale = ColumnSpacing / LegacyXStep;
-            float yScale = Mathf.Max(1f,
-                (Mathf.Max(400f, availableHeight - 210f) - VerticalPadding * 2f) /
-                (LegacyMaximumY - LegacyMinimumY));
+            // Use a fixed game viewport so resizing the editor cannot stretch the authored graph.
+            // Cards and spacing use the same scale as the game's zoomed-out view.
+            var runtime = Calculate(nodes, 900f, 650f);
+            float xScale = runtime.XScale * PreviewScale;
+            float yScale = runtime.YScale * PreviewScale;
             float width = Mathf.Max(900f, HorizontalPadding * 2f +
                 (maximumX - minimumX) * xScale + NodeWidth);
             float height = Mathf.Max(650f, VerticalPadding * 2f +

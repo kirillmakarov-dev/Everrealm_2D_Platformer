@@ -37,6 +37,7 @@ namespace LetterHunter.SkillTree
         public int CurrentLevel => Service.CurrentLevel;
         public int CurrentCoins => Service.CurrentCoins;
         public SkillTreeDefinition SkillTree => legacySkillTree;
+        public bool IsChangingProgress => _service != null && _service.IsPurchasing;
 
         public SkillTreeService Service
         {
@@ -72,6 +73,63 @@ namespace LetterHunter.SkillTree
 
         public SkillTreePurchaseResult TryPurchase(SkillNodeDefinitionSO node) => Service.TryPurchase(node);
 
+        public bool TryGrantNodeForDebug(SkillNodeDefinitionSO node, out string failure)
+        {
+            failure = null;
+            var profession = ActiveProfession;
+            if (profession == null || node == null || !profession.Contains(node))
+            { failure = "Select a node in the active profession."; return false; }
+            var ancestors = new List<SkillNodeDefinitionSO>();
+            if (!CollectGrantNodes(profession, node, new HashSet<SkillNodeDefinitionSO>(),
+                    new HashSet<SkillNodeDefinitionSO>(), ancestors))
+            { failure = "The node has cyclic or missing parent references."; return false; }
+            var purchased = new List<PurchasedSkillNode>(_progress.EnumeratePurchased());
+            foreach (var ancestor in ancestors)
+                purchased.Add(new PurchasedSkillNode(profession.ProfessionId, ancestor.NodeId));
+            RestoreProgress(profession.ProfessionId, purchased);
+            ProgressionCommitted?.Invoke();
+            return true;
+        }
+
+        private static bool CollectGrantNodes(ProfessionDefinitionSO profession, SkillNodeDefinitionSO node,
+            HashSet<SkillNodeDefinitionSO> visiting, HashSet<SkillNodeDefinitionSO> visited,
+            List<SkillNodeDefinitionSO> result)
+        {
+            if (node == null || !profession.Contains(node)) return false;
+            if (visited.Contains(node)) return true;
+            if (!visiting.Add(node)) return false;
+            foreach (var parent in node.ParentNodes)
+                if (!CollectGrantNodes(profession, parent, visiting, visited, result)) return false;
+            visiting.Remove(node);
+            visited.Add(node);
+            result.Add(node);
+            return true;
+        }
+
+        // Tree purchases are authoritative even when a class or an old loadout lists the same skill.
+        // This reads serialized definitions and progress directly, so it is safe before either Awake runs.
+        public bool IsSkillUnlocked(SkillDefinition skill)
+        {
+            if (skill == null) return false;
+            bool controlled = false;
+            if (CheckProfession(startingProfession, skill, ref controlled)) return true;
+            foreach (var profession in availableProfessions ?? Array.Empty<ProfessionDefinitionSO>())
+                if (CheckProfession(profession, skill, ref controlled)) return true;
+            return !controlled;
+        }
+
+        private bool CheckProfession(ProfessionDefinitionSO profession, SkillDefinition skill, ref bool controlled)
+        {
+            if (profession == null) return false;
+            foreach (var node in profession.SkillNodes)
+            {
+                if (node?.AbilityToGrant == null || node.AbilityToGrant.SkillId != skill.SkillId) continue;
+                controlled = true;
+                if (_progress.IsPurchased(profession.ProfessionId, node.NodeId)) return true;
+            }
+            return false;
+        }
+
         public void RestoreProgress(string activeProfessionId, IEnumerable<PurchasedSkillNode> purchased)
         {
             var entries = new List<PurchasedSkillNode>();
@@ -86,6 +144,7 @@ namespace LetterHunter.SkillTree
             professionId = active != null ? active.ProfessionId : string.Empty;
             _progress.Replace(professionId, entries);
             Service.SetActiveProfession(active);
+            player?.ResetLearnedSkills();
             RegrantPurchasedAbilities();
             StateChanged?.Invoke();
         }

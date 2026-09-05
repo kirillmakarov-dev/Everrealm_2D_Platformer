@@ -50,6 +50,36 @@ namespace LetterHunter.Save
         }
 
         public string SavePath => Path.Combine(Application.persistentDataPath, saveFileName);
+        public PlayerSkillTreeController SkillTreeController => skillTree;
+        public int CurrentGold => wallet != null ? wallet.Gold : 0;
+
+        public void AddDebugGold(int amount)
+        {
+            if (wallet == null || amount <= 0) return;
+            ApplyWithoutAutoSave(() => wallet.AddGold(amount));
+            SaveToDisk();
+        }
+
+        public bool TryDebugSkill(SkillNodeDefinitionSO node, bool freeGrant, out string message)
+        {
+            message = "Enter Play Mode with a ready player.";
+            if (!Application.isPlaying || skillTree == null || skillTree.Player?.SkillService == null) return false;
+            bool success = false;
+            string failure = null;
+            ApplyWithoutAutoSave(() =>
+            {
+                if (freeGrant) success = skillTree.TryGrantNodeForDebug(node, out failure);
+                else
+                {
+                    var result = skillTree.TryPurchase(node);
+                    success = result.Success;
+                    failure = result.Failure.ToString();
+                }
+            });
+            if (success) SaveToDisk();
+            message = success ? $"{node.DisplayName}: {(freeGrant ? "granted with parents" : "purchased")} and saved." : failure;
+            return success;
+        }
 
         private void Start()
         {
@@ -172,9 +202,7 @@ namespace LetterHunter.Save
         [ContextMenu("Add Debug Gold")]
         public void AddDebugGold()
         {
-            wallet?.AddGold(Mathf.Max(1, debugGoldAmount));
-            if (!_subscribed)
-                SaveToDisk();
+            AddDebugGold(Mathf.Max(1, debugGoldAmount));
         }
 
         private void LoadFromDisk(bool logMissingFile)
@@ -357,7 +385,7 @@ namespace LetterHunter.Save
 
         private void OnProgressionCommitted()
         {
-            if (!_isApplyingSave)
+            if (!_isApplyingSave && (skillTree == null || !skillTree.IsChangingProgress))
                 SaveToDisk();
         }
 

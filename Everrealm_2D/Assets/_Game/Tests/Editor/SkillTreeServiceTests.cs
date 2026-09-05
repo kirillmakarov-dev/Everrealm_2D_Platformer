@@ -110,6 +110,115 @@ namespace LetterHunter.Tests.EditMode
         }
 
         [Test]
+        public void StartingSkills_RespectTreePurchasesAndOldLoadoutAfterRestoreAndReset()
+        {
+            var skill = CreateSkill("gated");
+            var free = CreateSkill("innate");
+            var node = CreateNode("gated_node", 1, 0, ability: skill);
+            var profession = CreateProfession(node);
+            var definition = ScriptableObject.CreateInstance<LetterHunter.Classes.ClassDefinition>();
+            var playerObject = new GameObject("GatedPlayer");
+            playerObject.SetActive(false);
+            try
+            {
+                var classData = new SerializedObject(definition);
+                var starting = classData.FindProperty("startingSkills");
+                starting.arraySize = 2;
+                starting.GetArrayElementAtIndex(0).objectReferenceValue = skill;
+                starting.GetArrayElementAtIndex(1).objectReferenceValue = free;
+                classData.ApplyModifiedPropertiesWithoutUndo();
+                var player = playerObject.AddComponent<LetterHunter.Characters.PlayerClassController>();
+                var targets = playerObject.AddComponent<LetterHunter.Infrastructure.Physics2DTargetProvider>();
+                var playerData = new SerializedObject(player);
+                playerData.FindProperty("classDefinition").objectReferenceValue = definition;
+                playerData.FindProperty("targetProviderComponent").objectReferenceValue = targets;
+                playerData.ApplyModifiedPropertiesWithoutUndo();
+                var tree = playerObject.AddComponent<PlayerSkillTreeController>();
+                var treeData = new SerializedObject(tree);
+                treeData.FindProperty("startingProfession").objectReferenceValue = profession;
+                treeData.FindProperty("player").objectReferenceValue = player;
+                treeData.ApplyModifiedPropertiesWithoutUndo();
+                var loadout = playerObject.AddComponent<LetterHunter.UI.Skills.PlayerSkillLoadout>();
+                player.ResetLearnedSkills();
+                Assert.That(player.IsSkillAvailable(skill), Is.False);
+                Assert.That(player.IsSkillAvailable(free), Is.True);
+                Assert.That(loadout.TryAssignSkill(0, skill, out _), Is.False);
+                loadout.SetSlots(new[] { new LetterHunter.UI.Skills.SkillSlotBinding(0, skill, "1") });
+                Assert.That(loadout.ResolveSkill(player, 0, out _), Is.Null);
+                Assert.That(player.UseSkill(skill.SkillId).Failure, Is.EqualTo(SkillUseFailure.NotRegistered));
+
+                Assert.That(tree.TryGrantNodeForDebug(node, out _), Is.True);
+                Assert.That(player.IsSkillAvailable(skill), Is.True);
+                Assert.That(loadout.ResolveSkill(player, 0, out _), Is.SameAs(skill));
+                tree.RestoreProgress(profession.ProfessionId, System.Array.Empty<PurchasedSkillNode>());
+                Assert.That(player.IsSkillAvailable(skill), Is.False);
+                Assert.That(loadout.ResolveSkill(player, 0, out _), Is.Null);
+                tree.TryGrantNodeForDebug(node, out _);
+                tree.ResetProgress();
+                Assert.That(player.IsSkillAvailable(skill), Is.False);
+                Assert.That(player.IsSkillAvailable(free), Is.True);
+            }
+            finally { Destroy(playerObject, definition, profession, node, skill, free); }
+        }
+
+        [Test]
+        public void DebugGrant_IncludesParentsWithoutSpendingAndRejectsCycles()
+        {
+            var root = CreateNode("root", 10, 500);
+            var child = CreateNode("child", 20, 900, root);
+            var profession = CreateProfession(root, child);
+            var go = new GameObject("DebugGrant");
+            go.SetActive(false);
+            try
+            {
+                var tree = go.AddComponent<PlayerSkillTreeController>();
+                var data = new SerializedObject(tree);
+                data.FindProperty("startingProfession").objectReferenceValue = profession;
+                data.ApplyModifiedPropertiesWithoutUndo();
+                Assert.That(tree.TryGrantNodeForDebug(child, out _), Is.True);
+                Assert.That(tree.Progress.IsPurchased("warrior", "root"), Is.True);
+                Assert.That(tree.Progress.IsPurchased("warrior", "child"), Is.True);
+                Assert.That(tree.CurrentCoins, Is.Zero);
+                tree.ResetProgress();
+                var rootData = new SerializedObject(root);
+                var parents = rootData.FindProperty("parentNodes");
+                parents.arraySize = 1;
+                parents.GetArrayElementAtIndex(0).objectReferenceValue = child;
+                rootData.ApplyModifiedPropertiesWithoutUndo();
+                Assert.That(tree.TryGrantNodeForDebug(child, out _), Is.False);
+                Assert.That(tree.Progress.IsPurchased("warrior", "root"), Is.False);
+            }
+            finally { Destroy(go, profession, root, child); }
+        }
+
+        [Test]
+        public void Purchase_OnlyPublishesCommitAfterWalletAndGrantComplete()
+        {
+            var skill = CreateSkill("paid");
+            var node = CreateNode("paid", 1, 10, ability: skill);
+            var profession = CreateProfession(node);
+            var wallet = CreateWallet(20);
+            try
+            {
+                bool granted = false;
+                var service = new SkillTreeService(new SkillTreeProgress(), wallet, () => 1, _ => false, _ => granted = true);
+                service.SetActiveProfession(profession);
+                wallet.GoldChanged += _ => Assert.That(service.IsPurchasing, Is.True);
+                int commits = 0;
+                service.NodePurchased += (_, _) =>
+                {
+                    Assert.That(service.IsPurchasing, Is.False);
+                    Assert.That(granted, Is.True);
+                    Assert.That(wallet.Gold, Is.EqualTo(10));
+                    commits++;
+                };
+                Assert.That(service.TryPurchase(node).Success, Is.True);
+                Assert.That(commits, Is.EqualTo(1));
+            }
+            finally { Destroy(profession, node, skill, wallet.gameObject); }
+        }
+
+        [Test]
         public void SkillTreeWindowPrefab_HasTwoAxisScrollingAndConnectionSetup()
         {
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(
@@ -132,6 +241,46 @@ namespace LetterHunter.Tests.EditMode
                 "Assets/_Game/Resources/EnglishKingdomSkillTree/SkillTreeConnection.prefab");
             Assert.That(connectionPrefab, Is.Not.Null);
             Assert.That(connectionPrefab.GetComponent<EverrealmSkillTreeConnectionVisual>(), Is.Not.Null);
+        }
+
+        [TestCase(300f, 180f)]
+        [TestCase(2400f, 1600f)]
+        public void Visual_ZoomedOutGraphCentersInViewport(float width, float height)
+        {
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(
+                "Assets/_Game/Prefabs/UI/SkillTree/SkillTreeWindow.prefab");
+            var canvas = new GameObject("Preview", typeof(RectTransform), typeof(Canvas));
+            canvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
+            var instance = Object.Instantiate(prefab, canvas.transform);
+            var first = CreateNode("left", 1, 0, position: new Vector2(-.3f, .2f));
+            var second = CreateNode("right", 1, 0, position: new Vector2(.8f, 1.2f));
+            var profession = CreateProfession(first, second);
+            try
+            {
+                var visual = instance.GetComponent<EverrealmSkillTreeVisual>();
+                var scroll = instance.GetComponentInChildren<ScrollRect>(true);
+                const System.Reflection.BindingFlags flags = System.Reflection.BindingFlags.NonPublic |
+                    System.Reflection.BindingFlags.Instance;
+                typeof(EverrealmSkillTreeVisual).GetMethod("ConfigureTreeScroll", flags).Invoke(visual, null);
+                var metrics = new EverrealmSkillTreeLayout.Metrics(-.3f, .2f, 100f, 100f, new Vector2(width, height));
+                var positions = (Dictionary<SkillNodeDefinitionSO, Vector2>)typeof(EverrealmSkillTreeVisual)
+                    .GetMethod("BuildLayout", flags).Invoke(visual, new object[] { profession, metrics });
+                scroll.content.sizeDelta = metrics.ContentSize;
+                typeof(EverrealmSkillTreeVisual).GetField("_zoom", flags).SetValue(visual, .75f);
+                scroll.velocity = new Vector2(500f, -200f);
+                typeof(EverrealmSkillTreeVisual).GetMethod("CenterTreeScroll", flags).Invoke(visual, null);
+                Canvas.ForceUpdateCanvases();
+
+                var graphCenter = (positions[first] + positions[second]) * .5f;
+                var worldCenter = scroll.content.TransformPoint(scroll.content.rect.min + graphCenter);
+                var viewportCenter = scroll.viewport.InverseTransformPoint(worldCenter);
+                Assert.That(Vector2.Distance(viewportCenter, scroll.viewport.rect.center), Is.LessThan(.1f));
+                Assert.That(scroll.content.localScale.x, Is.EqualTo(.75f));
+                Assert.That(scroll.velocity, Is.EqualTo(Vector2.zero));
+                Assert.That(first.UiPosition, Is.EqualTo(new Vector2(-.3f, .2f)));
+                Assert.That(second.UiPosition, Is.EqualTo(new Vector2(.8f, 1.2f)));
+            }
+            finally { Destroy(canvas, profession, first, second); }
         }
 
         private static SkillTreeNodeView CreateView(Transform parent, string name)

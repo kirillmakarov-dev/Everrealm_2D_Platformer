@@ -374,6 +374,12 @@ Node rank state must remain outside ScriptableObject assets. Unlock-skill action
 
 Skill-tree assets are authored content and must be validated before playtesting. Validation covers stable unique ids, prerequisite existence and acyclic graphs, required skill references, effect targets, and legal rank ranges. General scene setup must preserve manually authored node arrays; replacing demo content requires a separate explicit editor command.
 
+Profession-controlled skills require a purchased node even when listed in a class's starting skills or an older saved loadout. Startup registration, skill-bar resolution, and casting enforce this ownership rule. Restoring or resetting purchases rebuilds learned runtime skills; non-tree starting skills remain available.
+
+`Tools > Everrealm > Save Inspector` edits the live player in Play Mode through `PlayerSaveController`: Buy follows ordinary requirements; Grant + Parents records the selected branch without spending coins or requiring a level. Both persist native profession/node identifiers. The editor does not mutate definition assets or use a second save format. Purchase autosave waits for the final progression commit instead of intermediate wallet or loadout notifications.
+
+The Skill Tree authoring preview uses the runtime node prefab's frame/background sprites, a 140x150 card scaled to 75%, and a fixed 900x650 reference viewport for graph spacing. Editor window resizing must not stretch the coordinate scale or change authored node positions.
+
 Progress autosave must be transaction-oriented. High-level systems publish commit events only after all currency, inventory, rank, learned-skill, and loadout mutations succeed. `PlayerSaveController` listens to those commit events and suppresses autosave while restoring or resetting state; it must not persist intermediate wallet or inventory notifications.
 
 Skill-tree respec is also transactional. Validation must run before rank mutation or refunds: the last rank cannot be removed while unlocked dependents exist, and optional material refunds require sufficient inventory capacity. A successful respec updates rank, currency, materials, learned skills, loadout, runtime modifiers, and then publishes one progression commit for autosave.

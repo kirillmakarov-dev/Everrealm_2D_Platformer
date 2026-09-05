@@ -79,6 +79,8 @@ namespace LetterHunter.Characters
         {
             if (skill == null || string.IsNullOrWhiteSpace(skill.SkillId) || _skillService == null)
                 return;
+            var tree = GetComponent<LetterHunter.SkillTree.PlayerSkillTreeController>();
+            if (tree != null && !tree.IsSkillUnlocked(skill)) return;
 
             _skillService.Register(skill);
             if (skill.SkillType is SkillType.Passive or SkillType.AutoAttackUpgrade)
@@ -97,15 +99,25 @@ namespace LetterHunter.Characters
                 RebuildSkillRuntime(targetProvider);
         }
 
+        public bool IsSkillAvailable(SkillDefinition skill)
+        {
+            if (skill == null || !TryGetSkillRuntimeState(skill.SkillId, out _)) return false;
+            var tree = GetComponent<LetterHunter.SkillTree.PlayerSkillTreeController>();
+            return tree == null || tree.IsSkillUnlocked(skill);
+        }
+
         public SkillUseResult UseSkill(int index)
         {
             if (_skillService == null || index < 0 || index >= _usableSkills.Count) return SkillUseResult.Failed(SkillUseFailure.NotRegistered);
-            return _skillService.TryUse(_usableSkills[index].SkillId, null, facingDirection);
+            return UseSkill(_usableSkills[index].SkillId);
         }
 
         public SkillUseResult UseSkill(string skillId)
         {
             if (_skillService == null || string.IsNullOrWhiteSpace(skillId))
+                return SkillUseResult.Failed(SkillUseFailure.NotRegistered);
+
+            if (!IsSkillAvailable(_usableSkills.Find(skill => skill != null && skill.SkillId == skillId)))
                 return SkillUseResult.Failed(SkillUseFailure.NotRegistered);
 
             return _skillService.TryUse(skillId, null, facingDirection);
@@ -119,7 +131,7 @@ namespace LetterHunter.Characters
                 return SkillUseResult.Failed(SkillUseFailure.NotRegistered);
 
             var skill = _usableSkills.Find(candidate => candidate != null && candidate.SkillId == skillId);
-            if (skill == null)
+            if (!IsSkillAvailable(skill))
                 return SkillUseResult.Failed(SkillUseFailure.NotRegistered);
 
             var result = _skillService.TryPrepareProjectile(skillId, FacingDirection,
@@ -187,9 +199,7 @@ namespace LetterHunter.Characters
             _usableSkills.Clear();
             foreach (var skill in classDefinition.StartingSkills)
             {
-                _skillService.Register(skill);
-                if (skill != null && skill.SkillType is not (SkillType.Passive or SkillType.AutoAttackUpgrade))
-                    _usableSkills.Add(skill);
+                LearnSkill(skill);
             }
         }
     }

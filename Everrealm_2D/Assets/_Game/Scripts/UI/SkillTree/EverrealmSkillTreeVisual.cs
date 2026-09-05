@@ -36,7 +36,6 @@ namespace LetterHunter.UI.SkillTree
 
         private readonly Dictionary<string, EverrealmSkillTreeNodeVisual> _nodes = new();
         private readonly List<EverrealmSkillTreeConnectionVisual> _connections = new();
-        private readonly Dictionary<SkillNodeDefinitionSO, Vector2> _layoutPositions = new();
         private SkillNodeDefinitionSO _selected;
         private bool _isOpen;
         private float _zoom = 1f;
@@ -150,9 +149,11 @@ namespace LetterHunter.UI.SkillTree
             float next = Mathf.Clamp(_zoom + (wheel > 0f ? _zoomStep : -_zoomStep), min, max);
             if (Mathf.Approximately(next, _zoom)) return;
             _zoom = next;
+            var scrollPosition = _treeScrollRect.normalizedPosition;
+            _treeScrollRect.StopMovement();
             _treeScrollRect.content.localScale = Vector3.one * _zoom;
             Canvas.ForceUpdateCanvases();
-            CenterTreeScroll();
+            _treeScrollRect.normalizedPosition = scrollPosition;
         }
 
         private void ConfigureTreeScroll()
@@ -165,6 +166,12 @@ namespace LetterHunter.UI.SkillTree
             _treeScrollRect.decelerationRate = .12f;
             // Wheel input is reserved for zoom; pointer dragging still pans the tree.
             _treeScrollRect.scrollSensitivity = 0f;
+            if (_treeScrollRect.content != null)
+            {
+                // A centered pivot keeps trees smaller than the viewport centered after zooming out.
+                _treeScrollRect.content.anchorMin = _treeScrollRect.content.anchorMax = new Vector2(.5f, .5f);
+                _treeScrollRect.content.pivot = new Vector2(.5f, .5f);
+            }
         }
 
         private bool WasTogglePressed()
@@ -176,7 +183,7 @@ namespace LetterHunter.UI.SkillTree
         public void Open()
         {
             _isOpen = true;
-            _zoom = 1f;
+            _zoom = Mathf.Max(.1f, Mathf.Min(_minZoom, _maxZoom));
             ApplyVisibility();
             Canvas.ForceUpdateCanvases();
             Refresh();
@@ -226,8 +233,6 @@ namespace LetterHunter.UI.SkillTree
                 ConfigureLayer(_connectionLayer);
             }
             var positions = BuildLayout(profession, metrics);
-            _layoutPositions.Clear();
-            foreach (var pair in positions) _layoutPositions[pair.Key] = pair.Value;
             foreach (var node in profession.SkillNodes)
             {
                 if (node == null || _nodePrefab == null) continue;
@@ -275,35 +280,29 @@ namespace LetterHunter.UI.SkillTree
             var result = new Dictionary<SkillNodeDefinitionSO, Vector2>();
             foreach (var node in profession.SkillNodes)
                 if (node != null) result[node] = EverrealmSkillTreeLayout.ToCanvasPosition(node.UiPosition, metrics);
+            if (result.Count == 0) return result;
+            Vector2 minimum = new(float.MaxValue, float.MaxValue);
+            Vector2 maximum = new(float.MinValue, float.MinValue);
+            foreach (var point in result.Values)
+            {
+                minimum = Vector2.Min(minimum, point);
+                maximum = Vector2.Max(maximum, point);
+            }
+            // Equal margins around the actual graph make the ScrollRect midpoint the visual midpoint.
+            Vector2 offset = metrics.ContentSize * .5f - (minimum + maximum) * .5f;
+            foreach (var node in profession.SkillNodes)
+                if (node != null) result[node] += offset;
             return result;
         }
 
         private void CenterTreeScroll()
         {
-            if (_treeScrollRect == null) return;
+            if (_treeScrollRect == null || _treeScrollRect.content == null) return;
+            _treeScrollRect.StopMovement();
+            _treeScrollRect.content.localScale = Vector3.one * _zoom;
             Canvas.ForceUpdateCanvases();
-            if (_treeScrollRect.content != null)
-                _treeScrollRect.content.localScale = Vector3.one * _zoom;
-            if (_treeScrollRect.content == null || _layoutPositions.Count == 0)
-                return;
-            Vector2 halfNode = new(EverrealmSkillTreeLayout.RuntimeNodeWidth * .5f,
-                EverrealmSkillTreeLayout.RuntimeNodeHeight * .5f);
-            Vector2 minimum = new(float.MaxValue, float.MaxValue);
-            Vector2 maximum = new(float.MinValue, float.MinValue);
-            foreach (var position in _layoutPositions.Values)
-            {
-                minimum = Vector2.Min(minimum, position - halfNode);
-                maximum = Vector2.Max(maximum, position + halfNode);
-            }
-            Vector2 target = (minimum + maximum) * .5f * _zoom;
-            Vector2 contentSize = _treeScrollRect.content.rect.size * _zoom;
-            Vector2 viewportSize = _treeScrollRect.viewport.rect.size;
-            Vector2 desired = viewportSize * .5f - target;
-            float minX = Mathf.Min(0f, viewportSize.x - contentSize.x);
-            float minY = Mathf.Min(0f, viewportSize.y - contentSize.y);
-            _treeScrollRect.content.anchoredPosition = new Vector2(
-                Mathf.Clamp(desired.x, minX, 0f),
-                Mathf.Clamp(desired.y, minY, 0f));
+            _treeScrollRect.content.anchoredPosition = Vector2.zero;
+            _treeScrollRect.normalizedPosition = new Vector2(.5f, .5f);
         }
 
         private static void ConfigureLayer(RectTransform layer)

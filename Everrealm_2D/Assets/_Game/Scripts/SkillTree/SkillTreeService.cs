@@ -28,6 +28,7 @@ namespace LetterHunter.SkillTree
         public int CurrentCoins => _wallet != null ? _wallet.Gold : 0;
         public event Action Changed;
         public event Action<ProfessionDefinitionSO, SkillNodeDefinitionSO> NodePurchased;
+        public bool IsPurchasing { get; private set; }
 
         public void SetActiveProfession(ProfessionDefinitionSO profession)
         {
@@ -53,6 +54,21 @@ namespace LetterHunter.SkillTree
         }
 
         public SkillTreePurchaseResult TryPurchase(SkillNodeDefinitionSO node)
+        {
+            if (IsPurchasing) return SkillTreePurchaseResult.Failed(SkillTreePurchaseFailure.GrantFailed);
+            SkillTreePurchaseResult result;
+            IsPurchasing = true;
+            try { result = PurchaseCore(node); }
+            finally { IsPurchasing = false; }
+            if (result.Success)
+            {
+                NodePurchased?.Invoke(ActiveProfession, node);
+                Changed?.Invoke();
+            }
+            return result;
+        }
+
+        private SkillTreePurchaseResult PurchaseCore(SkillNodeDefinitionSO node)
         {
             if (ActiveProfession == null) return SkillTreePurchaseResult.Failed(SkillTreePurchaseFailure.ProfessionMissing);
             if (node == null || !ActiveProfession.Contains(node)) return SkillTreePurchaseResult.Failed(SkillTreePurchaseFailure.NodeMissing);
@@ -82,8 +98,6 @@ namespace LetterHunter.SkillTree
                 return SkillTreePurchaseResult.Failed(SkillTreePurchaseFailure.GrantFailed);
             }
 
-            NodePurchased?.Invoke(ActiveProfession, node);
-            Changed?.Invoke();
             return SkillTreePurchaseResult.Succeeded();
         }
 

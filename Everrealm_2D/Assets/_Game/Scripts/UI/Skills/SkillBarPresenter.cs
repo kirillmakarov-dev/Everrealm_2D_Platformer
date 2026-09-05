@@ -98,6 +98,7 @@ namespace LetterHunter.UI.Skills
         {
             if (skill == null || string.IsNullOrWhiteSpace(skill.SkillId))
                 return false;
+            if (player == null || !player.IsSkillAvailable(skill)) return false;
 
             if (loadout == null && player != null)
                 loadout = player.GetComponent<PlayerSkillLoadout>();
@@ -180,6 +181,7 @@ namespace LetterHunter.UI.Skills
             {
                 var binding = _runtimeSlots[i];
                 var skill = binding.Skill;
+                if (!player.IsSkillAvailable(skill)) skill = null;
                 SkillRuntimeState state = null;
                 var effectiveManaCost = skill != null ? skill.ManaCost : 0f;
                 var effectiveCooldown = skill != null ? skill.Cooldown : 0f;

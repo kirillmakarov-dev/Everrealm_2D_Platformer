@@ -20,7 +20,6 @@ MonoBehaviour:
   requiredLevel: 4
   price: 35
   parentNodes:
-  - {fileID: 11400000, guid: 2c89fff890c95eb48827fe8d9ad521f4, type: 2}
-  - {fileID: 11400000, guid: 3ec651d6964a6dc44b9c010ccd4ea6be, type: 2}
   - {fileID: 11400000, guid: 5ce5ebe7c1f01ba44ba839a532c58d7b, type: 2}
-  uiPosition: {x: 0.66141456, y: 0.6000835}
+  - {fileID: 11400000, guid: 3ec651d6964a6dc44b9c010ccd4ea6be, type: 2}
+  uiPosition: {x: 0.55097544, y: 0.6419164}
