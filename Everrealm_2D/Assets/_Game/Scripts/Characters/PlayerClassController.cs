@@ -11,7 +11,7 @@ using UnityEngine;
 namespace LetterHunter.Characters
 {
     [DisallowMultipleComponent]
-    public sealed class PlayerClassController : MonoBehaviour, ICombatActor
+    public sealed class PlayerClassController : MonoBehaviour, ICombatActor, IExperienceRecipient
     {
         [SerializeField] private ClassDefinition classDefinition;
         [SerializeField] private MonoBehaviour targetProviderComponent;
@@ -35,6 +35,7 @@ namespace LetterHunter.Characters
 
         public Transform Transform => transform;
         public CombatStats Stats { get; private set; }
+        public void AddExperience(int amount) => GetComponent<PlayerLevelProgression>()?.AddExperience(amount);
         public CharacterClassType ClassType => classDefinition != null ? classDefinition.ClassType : CharacterClassType.Warrior;
         public ClassDefinition ClassDefinition => classDefinition;
         public bool IsAlive => Stats != null && Stats.CurrentHealth > 0f;

@@ -8,6 +8,7 @@ namespace LetterHunter.Effects
     {
         [Min(0.01f), SerializeField] private float interval = 5f;
         [Min(0f), SerializeField] private float healAmount = 5f;
+        public override string Describe(LetterHunter.Skills.SkillDefinition skill) => $"Restores {healAmount:0.##} health every {interval:0.##} s.";
         public override IPassiveEffect CreateRuntime() => new Runtime(interval, healAmount);
 
         private sealed class Runtime : IPassiveEffect

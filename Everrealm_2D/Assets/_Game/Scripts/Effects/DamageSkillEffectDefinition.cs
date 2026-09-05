@@ -14,6 +14,7 @@ namespace LetterHunter.Effects
         [SerializeField] private DamageTag damageTags = DamageTag.Skill;
         [SerializeField] private AttackImpactProfile impactProfile;
 
+        public override string Describe(SkillDefinition skill) => $"Damage: {skill.BaseDamageMultiplier:0.##} x attack power per line; {skill.DamageLines} lines; up to {skill.MaxTargets} targets (before defense).";
         public override void Apply(SkillContext context)
         {
             var definition = context.SkillDefinition;

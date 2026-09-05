@@ -22,6 +22,7 @@ namespace LetterHunter.Save
         [SerializeField] private PlayerSkillTreeController skillTree;
         [SerializeField] private PlayerSkillLoadout skillLoadout;
         [SerializeField] private SkillBarPresenter skillBar;
+        [SerializeField] private LetterHunter.Stats.PlayerLevelProgression progression;
 
         [Header("File")]
         [SerializeField] private string saveFileName = "letter-hunter-save.json";
@@ -37,6 +38,7 @@ namespace LetterHunter.Save
 
         private void Awake()
         {
+            if (progression == null) progression = GetComponent<LetterHunter.Stats.PlayerLevelProgression>();
             if (wallet == null)
                 wallet = GetComponent<CurrencyWallet>();
             if (inventory == null)
@@ -52,6 +54,14 @@ namespace LetterHunter.Save
         public string SavePath => Path.Combine(Application.persistentDataPath, saveFileName);
         public PlayerSkillTreeController SkillTreeController => skillTree;
         public int CurrentGold => wallet != null ? wallet.Gold : 0;
+        public int CurrentLevel => progression != null ? progression.State.Level : skillTree != null ? skillTree.CurrentLevel : 1;
+
+        public void SetDebugLevel(int level)
+        {
+            if (progression == null) { Debug.LogError("Player Level Progression is missing.", this); return; }
+            ApplyWithoutAutoSave(() => progression.SetLevel(level));
+            SaveToDisk();
+        }
 
         public void AddDebugGold(int amount)
         {
@@ -116,7 +126,10 @@ namespace LetterHunter.Save
         {
             var data = new GameSaveData
             {
-                gold = wallet != null ? wallet.Gold : 0
+                gold = wallet != null ? wallet.Gold : 0,
+                level = CurrentLevel,
+                progressionVersion = progression != null ? 1 : 0,
+                totalExperience = progression != null ? progression.State.TotalExperience : 0
             };
 
             CaptureInventory(data);
@@ -134,6 +147,13 @@ namespace LetterHunter.Save
             try
             {
                 wallet?.SetGold(data.gold);
+                if (progression != null)
+                {
+                    if (data.progressionVersion >= 1) progression.Restore(data.totalExperience);
+                    else progression.SetLevel(Mathf.Max(1, data.level));
+                }
+                else if (skillTree?.Player?.Stats != null)
+                    skillTree.Player.Stats.SetLevel(Mathf.Max(1, data.level));
                 RestoreInventory(data);
                 RestoreSkillTree(data);
                 RestoreSkillLoadout(data);
@@ -171,6 +191,7 @@ namespace LetterHunter.Save
             ApplyWithoutAutoSave(() =>
             {
                 wallet?.ResetToStartingGold();
+                progression?.Restore(0);
                 inventory?.ResetToStartingItems();
                 ResetSkillsRuntime();
             });
@@ -359,6 +380,7 @@ namespace LetterHunter.Save
                 return;
             if (wallet != null)
                 wallet.GoldChanged += OnGoldChanged;
+            if (progression != null) progression.Changed += OnProgressionCommitted;
             if (inventory != null)
                 inventory.InventoryChanged += OnProgressionCommitted;
             if (skillTree != null)
@@ -374,6 +396,7 @@ namespace LetterHunter.Save
                 return;
             if (wallet != null)
                 wallet.GoldChanged -= OnGoldChanged;
+            if (progression != null) progression.Changed -= OnProgressionCommitted;
             if (inventory != null)
                 inventory.InventoryChanged -= OnProgressionCommitted;
             if (skillTree != null)

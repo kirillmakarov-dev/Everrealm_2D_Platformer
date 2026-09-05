@@ -16,6 +16,7 @@ namespace LetterHunter.Effects
         [SerializeField] private DamageTag tags = DamageTag.AutoAttack;
         [SerializeField] private AttackImpactProfile impactProfile;
 
+        public override string Describe(SkillDefinition skill) => $"Changes base auto attack: x{damageMultiplier:0.##} attack power per line, {damageLines} lines, up to {maxTargets} targets.";
         public override void Apply(SkillContext context) => context.AutoAttackService.SetBaseProfile(new AutoAttackSpec
         {
             DamageMultiplier = damageMultiplier, DamageLines = damageLines, MaxTargets = maxTargets,

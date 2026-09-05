@@ -20,6 +20,7 @@ namespace LetterHunter.Skills
         private float _remainingLifetime;
         private ICombatActor _owner;
         private Action<IDamageable> _hit;
+        private Sprite _skillIcon;
         private static Sprite _fallbackSprite;
 
         public void Launch(ICombatActor owner, PreparedSkillCast cast, float speed, float lifetime,
@@ -30,6 +31,7 @@ namespace LetterHunter.Skills
             _speed = Mathf.Max(0f, speed);
             _remainingLifetime = Mathf.Max(.01f, lifetime);
             _hit = hit;
+            _skillIcon = cast.Definition != null ? cast.Definition.Icon : null;
             transform.right = _direction;
             EnsureFallbackVisual();
         }
@@ -53,7 +55,7 @@ namespace LetterHunter.Skills
             var visual = new GameObject("Projectile Visual");
             visual.transform.SetParent(transform, false);
             var renderer = visual.AddComponent<SpriteRenderer>();
-            renderer.sprite = GetFallbackSprite();
+            renderer.sprite = _skillIcon != null ? _skillIcon : GetFallbackSprite();
             renderer.color = fallbackColor;
             renderer.sortingOrder = 100;
             visual.transform.localScale = new Vector3(fallbackLength / .02f, fallbackWidth / .02f, 1f);

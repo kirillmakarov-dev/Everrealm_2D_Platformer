@@ -20,6 +20,19 @@ When a new session is approved:
 
 ## Architectural Goals
 
+### Player experience and levels
+
+LevelProgressionDefinition authors cumulative XP thresholds (level 1 starts at 0,
+level 2 at 150, level 3 at 300). LevelProgressionState owns total XP and derives
+the level and progress within it. PlayerLevelProgression synchronizes CombatStats,
+notifies Skill Tree and emits Changed for autosave. PlayerSaveController stores
+total XP and migrates older level-only saves to that level's threshold.
+CombatService awards IExperienceReward only on a living-to-dead transition to the
+attacker implementing IExperienceRecipient. DummyEnemy2D exposes Experience Reward
+per monster; PlayerClassController forwards it to the player progression adapter.
+PlayerVitalsHudPresenter only displays level/XP using the existing Soft Kitty strip.
+The last authored threshold is the level cap; excess XP is retained and the bar is full.
+
 - Keep gameplay code understandable, testable, and easy to extend.
 - Avoid global state and hidden dependencies. Do not introduce gameplay singletons.
 - Keep ScriptableObjects as authoring-time data, not runtime state containers.

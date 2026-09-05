@@ -7,6 +7,7 @@ namespace LetterHunter.Effects
     public sealed class DefensePassiveDefinition : PassiveSkillEffectDefinition
     {
         [Min(0f), SerializeField] private float defenseBonus = 5f;
+        public override string Describe(LetterHunter.Skills.SkillDefinition skill) => $"Permanent defense bonus: +{defenseBonus:0.##}.";
         public override IPassiveEffect CreateRuntime() => new Runtime(defenseBonus);
 
         private sealed class Runtime : IPassiveEffect

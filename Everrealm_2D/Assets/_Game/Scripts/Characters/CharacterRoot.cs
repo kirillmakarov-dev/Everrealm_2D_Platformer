@@ -173,7 +173,9 @@ namespace LetterHunter.Characters
                 : slot >= 0 && slot < combatModule.UsableSkills.Count ? combatModule.UsableSkills[slot] : null;
             var manaBefore = combatModule.Stats?.CurrentMana ?? 0f;
             var result = skill != null
-                ? combatModule.TryLaunchSkillProjectile(skill.SkillId,
+                ? skill.SkillType == SkillType.Empower
+                    ? combatModule.UseSkill(skill.SkillId)
+                    : combatModule.TryLaunchSkillProjectile(skill.SkillId,
                     GetProjectileSpawnPosition(),
                     skillProjectileSpeed, skillProjectileLifetime, defaultSkillProjectilePrefab, out _)
                 : LetterHunter.Skills.SkillUseResult.Failed(LetterHunter.Skills.SkillUseFailure.NotRegistered);
@@ -184,7 +186,7 @@ namespace LetterHunter.Characters
             }
 
             var manaAfter = combatModule.Stats.CurrentMana;
-            var message = $"[Skill] {skill.DisplayName} projectile launched. Mana: {manaBefore:0.##} → {manaAfter:0.##}. Effect resolves on hit.";
+            var message = $"[Skill] {skill.DisplayName} activated. Mana: {manaBefore:0.##} → {manaAfter:0.##}.";
             if (skill.SkillType == SkillType.Empower)
                 message += " Empower is armed; press J to apply it to the next Auto Attack.";
             else if (skill.SkillType == SkillType.Buff)
@@ -192,7 +194,8 @@ namespace LetterHunter.Characters
             else if (skill.SkillType == SkillType.Active)
                 message += " Active effect is attached to the projectile.";
             Debug.Log(message, this);
-            _stateMachine.BeginAttack(attackStateDuration);
+            if (skill.SkillType != SkillType.Empower)
+                _stateMachine.BeginAttack(attackStateDuration);
             return result;
         }
 

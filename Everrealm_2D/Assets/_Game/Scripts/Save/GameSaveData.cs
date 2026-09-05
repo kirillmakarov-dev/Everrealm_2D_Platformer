@@ -7,6 +7,9 @@ namespace LetterHunter.Save
     public sealed class GameSaveData
     {
         public int gold;
+        public int level = 1;
+        public int progressionVersion;
+        public int totalExperience;
         public List<InventorySlotSaveData> inventorySlots = new();
         public SkillTreeSaveBlock skillTree = new();
         // Legacy fields are retained only for migration of saves created before schema v1.

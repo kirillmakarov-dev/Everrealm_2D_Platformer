@@ -27,6 +27,9 @@ namespace LetterHunter.Combat
             var result = DamageResult.Success(total, request.Lines.Count, critical, request.SourceSkillId,
                 request.Tags, request.ImpactProfile, request.AttackDirection);
             request.Target.ReceiveDamage(result);
+            if (!request.Target.IsAlive && request.Target is IExperienceReward reward &&
+                request.Attacker is IExperienceRecipient recipient)
+                recipient.AddExperience(reward.ExperienceReward);
             return result;
         }
     }

@@ -8,6 +8,7 @@ namespace LetterHunter.Effects
     {
         [Range(0f, 1f), SerializeField] private float chance = 0.2f;
         [Min(1), SerializeField] private int extraLines = 1;
+        public override string Describe(LetterHunter.Skills.SkillDefinition skill) => $"Auto attacks have a {chance * 100:0.##}% chance to add {extraLines} damage lines.";
         public override IPassiveEffect CreateRuntime() => new Runtime(chance, extraLines);
 
         private sealed class Runtime : IPassiveEffect

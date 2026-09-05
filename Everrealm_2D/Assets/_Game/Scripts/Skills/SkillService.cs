@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace LetterHunter.Skills
 {
-    public enum SkillUseFailure { None, NotRegistered, NoEffect, OnCooldown, NotEnoughMana, CasterDead }
+    public enum SkillUseFailure { None, NotRegistered, NoEffect, OnCooldown, NotEnoughMana, CasterDead, NotProjectileSkill }
 
     public readonly struct SkillUseResult
     {
@@ -68,6 +68,8 @@ namespace LetterHunter.Skills
             cast = null;
             if (!_definitions.TryGetValue(skillId, out var definition))
                 return SkillUseResult.Failed(SkillUseFailure.NotRegistered);
+            if (definition.SkillType == SkillType.Empower)
+                return SkillUseResult.Failed(SkillUseFailure.NotProjectileSkill);
             if (definition.Effect == null)
                 return SkillUseResult.Failed(SkillUseFailure.NoEffect);
             if (!_owner.IsAlive)

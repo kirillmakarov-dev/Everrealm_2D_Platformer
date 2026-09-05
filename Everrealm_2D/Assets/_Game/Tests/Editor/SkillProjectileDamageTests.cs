@@ -13,6 +13,35 @@ namespace LetterHunter.Tests.EditMode
     public sealed class SkillProjectileDamageTests
     {
         [Test]
+        public void EmpowerActivatesWithoutProjectileOrImmediateDamage()
+        {
+            var ownerObject = new GameObject("Owner");
+            var targetObject = new GameObject("Target");
+            var effect = ScriptableObject.CreateInstance<EmpowerEffectDefinition>();
+            var skill = CreateSkill("empower", SkillType.Empower, effect, 10f, 0f);
+            try
+            {
+                var owner = ownerObject.AddComponent<TestActor>(); owner.Initialize();
+                var target = targetObject.AddComponent<TestActor>(); target.Initialize();
+                var service = CreateService(owner);
+                service.Register(skill);
+                var mana = owner.Stats.CurrentMana;
+                var health = target.Stats.CurrentHealth;
+                Assert.That(service.TryPrepareProjectile(skill.SkillId, Vector2.right, Vector2.zero,
+                    out var cast).Failure, Is.EqualTo(SkillUseFailure.NotProjectileSkill));
+                Assert.That(cast, Is.Null);
+                Assert.That(owner.Stats.CurrentMana, Is.EqualTo(mana));
+                Assert.That(service.TryUse(skill.SkillId, target, Vector2.right).Success, Is.True);
+                Assert.That(target.Stats.CurrentHealth, Is.EqualTo(health));
+            }
+            finally
+            {
+                Object.DestroyImmediate(skill); Object.DestroyImmediate(effect);
+                Object.DestroyImmediate(ownerObject); Object.DestroyImmediate(targetObject);
+            }
+        }
+
+        [Test]
         public void BuffProjectile_DamagesEnemyAndAppliesBuffToCaster()
         {
             var ownerObject = new GameObject("Owner");

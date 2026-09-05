@@ -21,7 +21,10 @@ namespace LetterHunter.SkillTree
 
         public string NodeId => string.IsNullOrWhiteSpace(nodeId) ? name : nodeId;
         public string DisplayName => string.IsNullOrWhiteSpace(displayName) ? name : displayName;
-        public string Description => description ?? string.Empty;
+        public string Description => abilityToGrant != null ? SkillDescription.Build(abilityToGrant) : description ?? string.Empty;
+        // Keep the authored Skill Tree Tool icon as the source of truth for the node.
+        // Skill assets are synchronized to these sprites so the tree, bar and projectile
+        // fallback still display the same artwork without hiding the authored icon.
         public Sprite Icon => icon != null ? icon : abilityToGrant != null ? abilityToGrant.Icon : null;
         public SkillDefinition AbilityToGrant => abilityToGrant;
         public int RequiredLevel => Mathf.Max(1, requiredLevel);

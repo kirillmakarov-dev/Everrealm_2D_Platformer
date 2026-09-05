@@ -10,12 +10,13 @@ namespace LetterHunter.Editor
     public sealed class PlayerSaveControllerEditor : UnityEditor.Editor
     {
         private int _gold = 100;
+        private int _level = 1;
         private string _status;
         public override bool RequiresConstantRepaint() => Application.isPlaying;
         public override void OnInspectorGUI()
         {
             DrawDefaultInspector();
-            PlayerSaveTools.Draw((PlayerSaveController)target, ref _gold, ref _status);
+            PlayerSaveTools.Draw((PlayerSaveController)target, ref _gold, ref _level, ref _status);
         }
     }
 
@@ -23,6 +24,7 @@ namespace LetterHunter.Editor
     {
         private PlayerSaveController _player;
         private int _gold = 100;
+        private int _level = 1;
         private string _status;
         private Vector2 _scroll;
 
@@ -38,13 +40,13 @@ namespace LetterHunter.Editor
                 typeof(PlayerSaveController), true);
             using var scroll = new EditorGUILayout.ScrollViewScope(_scroll);
             _scroll = scroll.scrollPosition;
-            PlayerSaveTools.Draw(_player, ref _gold, ref _status);
+            PlayerSaveTools.Draw(_player, ref _gold, ref _level, ref _status);
         }
     }
 
     internal static class PlayerSaveTools
     {
-        public static void Draw(PlayerSaveController controller, ref int gold, ref string status)
+        public static void Draw(PlayerSaveController controller, ref int gold, ref int level, ref string status)
         {
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("Runtime Save Tools", EditorStyles.boldLabel);
@@ -66,6 +68,13 @@ namespace LetterHunter.Editor
             {
                 controller.AddDebugGold(gold);
                 status = $"Added {gold} coins and saved.";
+            }
+            EditorGUILayout.LabelField($"Current level: {controller.CurrentLevel}");
+            level = Mathf.Max(1, EditorGUILayout.IntField("Target level", level));
+            if (GUILayout.Button("Set Level + Save"))
+            {
+                controller.SetDebugLevel(level);
+                status = $"Set player level to {level} and saved.";
             }
 
             var tree = controller.SkillTreeController;

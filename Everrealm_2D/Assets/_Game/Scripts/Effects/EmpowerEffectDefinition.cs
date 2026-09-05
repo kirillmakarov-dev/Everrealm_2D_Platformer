@@ -15,6 +15,7 @@ namespace LetterHunter.Effects
         [SerializeField] private AttackShape attackShape = default;
         [SerializeField] private DamageTag additionalTags;
         [SerializeField] private AttackImpactProfile impactProfile;
+        public override string Describe(SkillDefinition skill) => $"Next auto attack: damage x{damageMultiplier:0.##}, {damageLines} damage lines, up to {maxTargets} targets.";
         public override void Apply(SkillContext context)
         {
             context.EmpowerState.Set(context.SkillDefinition.SkillId, this,

@@ -303,6 +303,9 @@ namespace LetterHunter.EditorTools
                 DrawSerialized(serialized, "description", "Description");
                 DrawSerialized(serialized, "icon", "Icon");
                 DrawSerialized(serialized, "abilityToGrant", "Skill");
+                if (_selectedNode.AbilityToGrant != null)
+                    EditorGUILayout.HelpBox(LetterHunter.Skills.SkillDescription.Build(_selectedNode.AbilityToGrant), MessageType.None);
+                if (GUILayout.Button("All Skills — Effects and Types")) SkillCatalogWindow.Open();
                 EditorGUILayout.LabelField("Granted skill", _selectedNode.AbilityToGrant != null
                     ? $"{_selectedNode.AbilityToGrant.DisplayName} ({_selectedNode.AbilityToGrant.SkillId})"
                     : "Not assigned", EditorStyles.boldLabel);

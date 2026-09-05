@@ -11,7 +11,7 @@ namespace LetterHunter.Debugging
     [RequireComponent(typeof(Collider2D))]
     [RequireComponent(typeof(Rigidbody2D))]
     [RequireComponent(typeof(FloatingDamageTextController))]
-    public sealed class DummyEnemy2D : MonoBehaviour, ICombatActor
+    public sealed class DummyEnemy2D : MonoBehaviour, ICombatActor, IExperienceReward
     {
         [SerializeField] private CombatStatsData stats = default;
         [SerializeField] private CharacterClassType classType = CharacterClassType.Warrior;
@@ -28,6 +28,9 @@ namespace LetterHunter.Debugging
         [Min(0f), SerializeField] private float hitKnockbackVertical = 1.25f;
         [Min(0f), SerializeField] private float hitMovementLockDuration = 0.16f;
         [SerializeField] private MonsterLoot monsterLoot;
+        [Header("Progression")]
+        [Min(0), SerializeField] private int experienceReward = 25;
+        public int ExperienceReward => Mathf.Max(0, experienceReward);
 
         public Transform Transform => transform;
         public CombatStats Stats { get; private set; }
