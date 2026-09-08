@@ -41,13 +41,20 @@ namespace LetterHunter.Skills
         public void Launch(ICombatActor owner, Vector2 direction, float speed, float lifetime,
             Action<IDamageable> hit)
         {
+            Launch(owner, direction, speed, lifetime, hit, null);
+        }
+
+        public void Launch(ICombatActor owner, Vector2 direction, float speed, float lifetime,
+            Action<IDamageable> hit, Sprite visualOverride)
+        {
             _owner = owner;
             _direction = direction.sqrMagnitude > 0f ? direction.normalized : Vector2.right;
             _speed = Mathf.Max(0f, speed);
             _remainingLifetime = Mathf.Max(.01f, lifetime);
             _hit = hit;
-            _skillIcon = null;
+            _skillIcon = visualOverride;
             transform.right = _direction;
+            ApplySkillIconVisual();
             EnsureFallbackVisual();
         }
 

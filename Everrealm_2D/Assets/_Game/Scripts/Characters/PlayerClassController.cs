@@ -163,8 +163,19 @@ namespace LetterHunter.Characters
             instance.transform.SetPositionAndRotation(new Vector3(position.x, position.y, 0f), Quaternion.identity);
             projectile = instance.GetComponent<SkillProjectile2D>() ?? instance.AddComponent<SkillProjectile2D>();
             projectile.Launch(this, FacingDirection, speed, lifetime,
-                target => _autoAttackService.ExecuteOnTarget(FacingDirection, target));
+                target => _autoAttackService.ExecuteOnTarget(FacingDirection, target),
+                GetEmpowerVisualIcon());
             return true;
+        }
+
+        private Sprite GetEmpowerVisualIcon()
+        {
+            if (_empowerState == null || !_empowerState.IsActive || string.IsNullOrWhiteSpace(_empowerState.SourceSkillId))
+                return null;
+
+            var skill = _usableSkills.Find(candidate => candidate != null &&
+                candidate.SkillId == _empowerState.SourceSkillId);
+            return skill != null ? skill.Icon : null;
         }
 
         public bool TryGetSkillRuntimeState(string skillId, out SkillRuntimeState state)
