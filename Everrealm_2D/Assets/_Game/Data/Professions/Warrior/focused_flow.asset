@@ -15,7 +15,7 @@ MonoBehaviour:
   nodeId: focused_flow
   displayName: Focused Flow
   description: Deepen your control of Focus Slash and unlock the final tier.
-  icon: {fileID: 21300000, guid: 5d8451e34e268624bb3ad16e9d53a07a, type: 3}
+  icon: {fileID: 21300000, guid: 32f96d8a6ea7e4b4fb0a1bb4613781ab, type: 3}
   abilityToGrant: {fileID: 11400000, guid: 69fd8d0dfcd3e3743ad720162854bd2e, type: 2}
   requiredLevel: 2
   price: 20

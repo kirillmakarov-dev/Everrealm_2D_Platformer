@@ -15,7 +15,7 @@ MonoBehaviour:
   nodeId: rapid_assault
   displayName: Rapid Assault
   description: Advance the speed branch and prepare for Battle Mastery.
-  icon: {fileID: 21300000, guid: 8b92adf5062c5f649b28071e5ab7e825, type: 3}
+  icon: {fileID: 21300000, guid: 2fcfb7032d6da9e4d94142171f482ea9, type: 3}
   abilityToGrant: {fileID: 11400000, guid: d4c409278fde27149a10a3757eb7fd04, type: 2}
   requiredLevel: 2
   price: 18
