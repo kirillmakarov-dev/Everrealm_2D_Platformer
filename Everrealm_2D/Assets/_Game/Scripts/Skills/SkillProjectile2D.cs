@@ -33,6 +33,7 @@ namespace LetterHunter.Skills
             _hit = hit;
             _skillIcon = cast.Definition != null ? cast.Definition.Icon : null;
             transform.right = _direction;
+            ApplySkillIconVisual();
             EnsureFallbackVisual();
         }
 
@@ -44,8 +45,17 @@ namespace LetterHunter.Skills
             _speed = Mathf.Max(0f, speed);
             _remainingLifetime = Mathf.Max(.01f, lifetime);
             _hit = hit;
+            _skillIcon = null;
             transform.right = _direction;
             EnsureFallbackVisual();
+        }
+
+        private void ApplySkillIconVisual()
+        {
+            if (_skillIcon == null) return;
+
+            foreach (var renderer in GetComponentsInChildren<SpriteRenderer>(true))
+                renderer.sprite = _skillIcon;
         }
 
         private void EnsureFallbackVisual()
