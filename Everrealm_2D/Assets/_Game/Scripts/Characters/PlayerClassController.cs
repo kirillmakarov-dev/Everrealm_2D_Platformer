@@ -172,6 +172,8 @@ namespace LetterHunter.Characters
         {
             if (_empowerState == null || !_empowerState.IsActive || string.IsNullOrWhiteSpace(_empowerState.SourceSkillId))
                 return null;
+            if (!_empowerState.TryConsumeVisual())
+                return null;
 
             var skill = _usableSkills.Find(candidate => candidate != null &&
                 candidate.SkillId == _empowerState.SourceSkillId);

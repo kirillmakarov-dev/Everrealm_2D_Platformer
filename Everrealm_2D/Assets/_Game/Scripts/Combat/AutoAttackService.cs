@@ -26,12 +26,21 @@ namespace LetterHunter.Combat
         public IEmpowerModifier ActiveModifier { get; private set; }
         public string SourceSkillId { get; private set; }
         public AttackImpactProfile ImpactProfile { get; private set; }
+        public bool VisualConsumed { get; private set; }
         public bool IsActive => ActiveModifier != null;
         public void Set(string sourceSkillId, IEmpowerModifier modifier, AttackImpactProfile impactProfile = null)
         {
             SourceSkillId = sourceSkillId;
             ActiveModifier = modifier;
             ImpactProfile = impactProfile;
+            VisualConsumed = false;
+        }
+
+        public bool TryConsumeVisual()
+        {
+            if (!IsActive || VisualConsumed) return false;
+            VisualConsumed = true;
+            return true;
         }
 
         public void Clear()
@@ -39,6 +48,7 @@ namespace LetterHunter.Combat
             SourceSkillId = null;
             ActiveModifier = null;
             ImpactProfile = null;
+            VisualConsumed = false;
         }
     }
 
@@ -115,7 +125,12 @@ namespace LetterHunter.Combat
 
             var found = _targets.FindTargets(new TargetingQuery(_owner.Transform.position, direction, spec.Shape, spec.MaxTargets, _owner));
             if (found.Count == 0)
+            {
+                // An empower belongs to one attempted auto attack. Do not leave
+                // its icon and damage modifier armed forever when the attack misses.
+                if (_empower.IsActive) _empower.Clear();
                 return Array.Empty<DamageResult>();
+            }
 
             CommitComboStep(comboStepIndex, comboStep);
 

@@ -22,7 +22,14 @@ namespace LetterHunter.Skills
         private ICombatActor _owner;
         private Action<IDamageable> _hit;
         private Sprite _skillIcon;
+        private SpriteRenderer[] _visualRenderers;
+        private Sprite[] _defaultVisualSprites;
         private static Sprite _fallbackSprite;
+
+        private void Awake()
+        {
+            CacheDefaultVisuals();
+        }
 
         public void Launch(ICombatActor owner, PreparedSkillCast cast, float speed, float lifetime,
             Action<IDamageable> hit)
@@ -60,10 +67,41 @@ namespace LetterHunter.Skills
 
         private void ApplySkillIconVisual()
         {
-            if (_skillIcon == null || !useSkillIconVisual) return;
+            if (!useSkillIconVisual) return;
 
-            foreach (var renderer in GetComponentsInChildren<SpriteRenderer>(true))
+            if (_skillIcon == null)
+            {
+                RestoreDefaultVisual();
+                return;
+            }
+
+            foreach (var renderer in GetVisualRenderers())
                 renderer.sprite = _skillIcon;
+        }
+
+        private void CacheDefaultVisuals()
+        {
+            _visualRenderers = GetComponentsInChildren<SpriteRenderer>(true);
+            _defaultVisualSprites = new Sprite[_visualRenderers.Length];
+            for (var i = 0; i < _visualRenderers.Length; i++)
+                _defaultVisualSprites[i] = _visualRenderers[i].sprite;
+        }
+
+        private SpriteRenderer[] GetVisualRenderers()
+        {
+            if (_visualRenderers == null)
+                CacheDefaultVisuals();
+            return _visualRenderers;
+        }
+
+        private void RestoreDefaultVisual()
+        {
+            var renderers = GetVisualRenderers();
+            if (_defaultVisualSprites == null || _defaultVisualSprites.Length != renderers.Length)
+                CacheDefaultVisuals();
+
+            for (var i = 0; i < renderers.Length; i++)
+                renderers[i].sprite = _defaultVisualSprites[i];
         }
 
         private void EnsureFallbackVisual()
