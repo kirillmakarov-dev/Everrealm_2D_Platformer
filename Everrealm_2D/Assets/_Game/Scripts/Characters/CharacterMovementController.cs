@@ -25,8 +25,6 @@ namespace LetterHunter.Characters
             var rate = accelerating ? _config.Acceleration : _config.Deceleration;
             if (!_ground.IsGrounded) rate *= _config.AirControl;
             _motor.SetHorizontalVelocity(Mathf.MoveTowards(_motor.Velocity.x, target, rate * deltaTime));
-            _runtime.CurrentVelocity = _motor.Velocity;
-            _runtime.Grounded = _ground.IsGrounded;
         }
     }
 }

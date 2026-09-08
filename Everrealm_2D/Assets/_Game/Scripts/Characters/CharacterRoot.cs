@@ -41,6 +41,8 @@ namespace LetterHunter.Characters
         private bool _pendingBasicShot;
         private string _pendingSkillId;
         private bool _pendingSkillProjectile;
+        private bool _ignoreGroundUntilDescending;
+        private float _airbornePeakY;
 
         public CharacterRuntime Runtime { get; private set; }
         public CombatStats Stats => combatModule != null ? combatModule.Stats : null;
@@ -70,6 +72,11 @@ namespace LetterHunter.Characters
                 skillBar = FindFirstObjectByType<SkillBarPresenter>();
 
             Runtime = new CharacterRuntime();
+            // Establish the initial airborne baseline as well. Some scenes place the
+            // player above the first platform, so there may be no grounded frame before
+            // gravity starts moving the character.
+            _airbornePeakY = transform.position.y;
+            Runtime.Grounded = groundDetector.IsGrounded;
             motor.ConfigureGravity(movementConfig.GravityScale);
             Stats?.ConfigureJump(movementConfig.JumpForce,
                 Mathf.Abs(Physics2D.gravity.y) * movementConfig.GravityScale);
@@ -78,7 +85,7 @@ namespace LetterHunter.Characters
             _jump = new CharacterJumpController(motor, groundDetector, movementConfig,
                 () => Stats != null ? (float)Stats.JumpVelocity : movementConfig.JumpForce);
             _facing = new CharacterFacingController(Runtime, facingView);
-            _stateMachine = new CharacterStateMachine(Runtime);
+            _stateMachine = new CharacterStateMachine(Runtime, movementConfig.MinimumFallDistance);
             _stateMachine.StateChanged += OnStateChanged;
             inputRouter.MoveRequested += OnMove;
             inputRouter.JumpRequested += OnJump;
@@ -92,8 +99,21 @@ namespace LetterHunter.Characters
             if (hitReaction == null)
                 hitReaction = GetComponent<CharacterHitReaction2D>();
 
-            if (hitReaction == null || !hitReaction.IsMovementLocked)
+            if (Runtime == null) return;
+            if (!Runtime.IsDead && (hitReaction == null || !hitReaction.IsMovementLocked))
+            {
                 _movement?.Tick(Time.fixedDeltaTime);
+                Stats?.ConfigureJump(movementConfig.JumpForce,
+                    Mathf.Abs(Physics2D.gravity.y) * movementConfig.GravityScale);
+                if (_jump.Tick(Time.fixedDeltaTime))
+                {
+                    _ignoreGroundUntilDescending = true;
+                    _airbornePeakY = transform.position.y;
+                    Runtime.Grounded = false;
+                    _stateMachine.NotifyJump();
+                }
+            }
+            SampleMovement();
             if (combatModule != null) combatModule.FacingDirection = Runtime.FacingDirection;
         }
 
@@ -103,11 +123,33 @@ namespace LetterHunter.Characters
                 Mathf.Abs(Physics2D.gravity.y) * movementConfig.GravityScale);
         }
 
+        private void SampleMovement()
+        {
+            Runtime.CurrentVelocity = motor.Velocity;
+            if (motor.Velocity.y <= .01f) _ignoreGroundUntilDescending = false;
+            var grounded = groundDetector.IsGrounded && !_ignoreGroundUntilDescending;
+            if (grounded)
+            {
+                Runtime.AirborneDropDistance = 0f;
+                _airbornePeakY = transform.position.y;
+            }
+            else
+            {
+                // Track the highest point reached during this airborne segment. The
+                // fall threshold therefore measures actual downward travel, whether
+                // the player jumped or simply walked off a ledge.
+                _airbornePeakY = Mathf.Max(_airbornePeakY, transform.position.y);
+                Runtime.AirborneDropDistance = Mathf.Max(0f, _airbornePeakY - transform.position.y);
+            }
+            Runtime.Grounded = grounded;
+        }
+
         private void Update()
         {
             if (Runtime == null) return;
-            Runtime.CurrentVelocity = motor.Velocity;
-            Runtime.Grounded = groundDetector.IsGrounded;
+            // Keep the threshold live so changing the referenced ScriptableObject in the
+            // Inspector while testing immediately affects the state machine.
+            _stateMachine.SetMinimumFallDistance(movementConfig.MinimumFallDistance);
             Runtime.IsDead = combatModule != null && !combatModule.IsAlive;
             _stateMachine.Tick(Time.deltaTime);
             if (Runtime.CurrentState == CharacterStateId.Run)
@@ -128,17 +170,9 @@ namespace LetterHunter.Characters
         private void OnSprintChanged(bool sprintHeld) => _sprintHeld = sprintHeld;
         private void OnJump()
         {
-            var gravity = Mathf.Max(.01f, Mathf.Abs(Physics2D.gravity.y) * movementConfig.GravityScale);
-            // Re-read the asset on every jump so DefaultMovement remains the source of truth.
-            Stats?.ConfigureJump(movementConfig.JumpForce, gravity);
-            if (!_jump.TryJump()) return;
-
-            // GroundDetector refreshes in FixedUpdate. Mark the runtime airborne now so
-            // the state machine cannot overwrite the immediate Jump animation with Idle
-            // during the frame between the input event and the next physics step.
-            Runtime.Grounded = false;
-            // Set the Animator parameter immediately; transition timing stays authored in the Animator.
-            animationController?.PlayJump();
+            if (Runtime == null || Runtime.IsDead ||
+                (hitReaction != null && hitReaction.IsMovementLocked)) return;
+            _jump.RequestJump();
         }
         private void OnAttack()
         {

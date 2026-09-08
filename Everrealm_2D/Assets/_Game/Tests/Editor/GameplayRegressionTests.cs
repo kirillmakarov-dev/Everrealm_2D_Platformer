@@ -336,6 +336,7 @@ namespace LetterHunter.Tests
 
             SetProperty(runtime, "Grounded", false);
             SetProperty(runtime, "CurrentVelocity", new Vector2(0f, 5f));
+            machine.NotifyJump();
             machine.Tick(0.016f);
             Assert.That(runtime.CurrentState, Is.EqualTo(CharacterStateId.Jump));
 
@@ -348,6 +349,100 @@ namespace LetterHunter.Tests
             machine.Tick(0.05f);
             machine.Tick(0.016f);
             Assert.That(runtime.CurrentState, Is.EqualTo(CharacterStateId.Idle));
+        }
+
+        [Test]
+        public void CharacterStateMachine_SuppressesShortFallUntilDistanceThreshold()
+        {
+            var runtime = new CharacterRuntime();
+            SetProperty(runtime, "Grounded", false);
+            SetProperty(runtime, "CurrentVelocity", new Vector2(0f, -1f));
+            SetProperty(runtime, "AirborneDropDistance", .49f);
+            var machine = new CharacterStateMachine(runtime, .5f);
+
+            machine.Tick(.016f);
+            Assert.That(runtime.CurrentState, Is.EqualTo(CharacterStateId.Idle));
+
+            SetProperty(runtime, "AirborneDropDistance", .5f);
+            machine.Tick(.016f);
+            Assert.That(runtime.CurrentState, Is.EqualTo(CharacterStateId.Fall));
+
+            machine.SetMinimumFallDistance(2f);
+            SetProperty(runtime, "AirborneDropDistance", 1f);
+            machine.Tick(.016f);
+            Assert.That(runtime.CurrentState, Is.EqualTo(CharacterStateId.Idle));
+        }
+
+        [Test]
+        public void Jump_KeepsPoseAtApex_AndNeverCreatesJumpOnLedge()
+        {
+            var runtime = new CharacterRuntime();
+            var machine = new CharacterStateMachine(runtime, .5f);
+            SetProperty(runtime, "CurrentVelocity", new Vector2(0f, -.2f));
+            machine.Tick(.02f);
+            Assert.That(runtime.CurrentState, Is.EqualTo(CharacterStateId.Idle));
+            machine.NotifyJump();
+            machine.Tick(.02f);
+            Assert.That(runtime.CurrentState, Is.EqualTo(CharacterStateId.Jump));
+            SetProperty(runtime, "AirborneDropDistance", .6f);
+            machine.Tick(.02f);
+            Assert.That(runtime.CurrentState, Is.EqualTo(CharacterStateId.Fall));
+            SetProperty(runtime, "Grounded", true);
+            machine.Tick(.02f);
+            Assert.That(runtime.CurrentState, Is.EqualTo(CharacterStateId.Idle));
+            SetProperty(runtime, "Grounded", false);
+            SetProperty(runtime, "AirborneDropDistance", .1f);
+            machine.Tick(.02f);
+            Assert.That(runtime.CurrentState, Is.EqualTo(CharacterStateId.Idle));
+        }
+
+        [Test]
+        public void Jump_BufferCoyoteAndSingleImpulse()
+        {
+            var config = CreateAsset<CharacterMovementConfig>();
+            var motor = new JumpTestMotor();
+            var ground = new JumpTestGround { IsGrounded = true };
+            var jump = new CharacterJumpController(motor, ground, config);
+            jump.Tick(.02f);
+            ground.IsGrounded = false;
+            jump.Tick(.02f);
+            jump.RequestJump();
+            Assert.That(jump.Tick(.02f), Is.True, "Coyote jump");
+            Assert.That(jump.TryJump(), Is.False, "No double jump");
+            motor.SetVerticalVelocity(-1f);
+            jump.Tick(.2f);
+            jump.RequestJump();
+            Assert.That(jump.Tick(.02f), Is.False);
+            ground.IsGrounded = true;
+            Assert.That(jump.Tick(.02f), Is.True, "Buffered landing jump");
+        }
+
+        [Test]
+        public void Jump_ExpiredBufferDoesNotFireOnLanding()
+        {
+            var config = CreateAsset<CharacterMovementConfig>();
+            var motor = new JumpTestMotor();
+            var ground = new JumpTestGround();
+            var jump = new CharacterJumpController(motor, ground, config);
+            jump.RequestJump();
+            Assert.That(jump.Tick(.2f), Is.False);
+            ground.IsGrounded = true;
+            Assert.That(jump.Tick(.02f), Is.False);
+        }
+
+        private sealed class JumpTestMotor : ICharacterMotor2D
+        {
+            public Vector2 Velocity { get; private set; }
+            public void SetHorizontalVelocity(float x) => Velocity = new Vector2(x, Velocity.y);
+            public void SetVerticalVelocity(float y) => Velocity = new Vector2(Velocity.x, y);
+            public void ConfigureGravity(float value) { }
+        }
+
+        private sealed class JumpTestGround : IGroundDetector
+        {
+            public bool IsGrounded { get; set; }
+            public event Action Landed { add { } remove { } }
+            public event Action LeftGround { add { } remove { } }
         }
 
         [Test]

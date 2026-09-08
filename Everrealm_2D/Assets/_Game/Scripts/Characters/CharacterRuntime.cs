@@ -11,6 +11,8 @@ namespace LetterHunter.Characters
         public CharacterStateId CurrentState { get; internal set; } = CharacterStateId.Idle;
         public bool Grounded { get; internal set; }
         public bool IsDead { get; internal set; }
+        /// <summary>Distance descended from the highest point of the current airborne segment.</summary>
+        public float AirborneDropDistance { get; internal set; }
         public bool Jumping => CurrentState == CharacterStateId.Jump;
         public bool Falling => CurrentState == CharacterStateId.Fall;
     }

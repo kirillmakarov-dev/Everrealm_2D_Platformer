@@ -38,6 +38,18 @@ active during the root's death cleanup so the non-looping death clip can finish.
 `GolemEnemy.prefab` uses this adapter with explicit references and the five clips
 in `Assets/Anim enemy/Golem Setup`; the original source clips remain unchanged.
 
+### Player jump and fall
+
+CharacterRoot samples movement once per physics step, after CharacterGroundDetector.
+Input queues a jump in CharacterJumpController; it owns the coyote window, input
+buffer and single-impulse guard. Only a successful jump notifies CharacterStateMachine.
+Ground detection is suppressed during takeoff ascent so the old ground overlap
+cannot cancel Jump. The state machine holds the jump pose through the apex, enters
+Fall after the configured descent distance, and clears jump intent on landing.
+A ledge departure does not create Jump. CharacterAnimationController presents these
+states; the Animator only blends clips. Stats supply effective jump velocity, while
+DefaultMovement authors base force, fall distance and input grace windows.
+
 ### Player experience and levels
 
 LevelProgressionDefinition authors cumulative XP thresholds (level 1 starts at 0,

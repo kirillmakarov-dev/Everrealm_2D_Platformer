@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace LetterHunter.Characters
 {
+    [DefaultExecutionOrder(-100)]
     public sealed class CharacterGroundDetector : MonoBehaviour, IGroundDetector
     {
         [SerializeField] private Transform checkPoint;
@@ -20,7 +21,7 @@ namespace LetterHunter.Characters
             var grounded = false;
             foreach (var hit in Physics2D.OverlapCircleAll(position, checkRadius, groundLayers))
             {
-                if (hit.transform.root == transform.root) continue;
+                if (hit.isTrigger || hit.transform.root == transform.root) continue;
                 grounded = true;
                 break;
             }

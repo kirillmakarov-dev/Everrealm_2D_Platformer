@@ -9,16 +9,26 @@ namespace LetterHunter.Characters
         private readonly CharacterRuntime _runtime;
         private readonly StateMachine<CharacterStateId, CharacterRuntime> _machine = new();
         private readonly List<Func<CharacterRuntime, CharacterStateId?>> _transitionRules = new();
+        private float _minimumFallDistance;
         private float _attackRemaining;
+        private bool _jumpStarted;
 
-        public CharacterStateMachine(CharacterRuntime runtime)
+        public void NotifyJump() => _jumpStarted = true;
+
+        public CharacterStateMachine(CharacterRuntime runtime, float minimumFallDistance = .5f)
         {
             _runtime = runtime;
+            _minimumFallDistance = Math.Max(0f, minimumFallDistance);
             foreach (CharacterStateId state in System.Enum.GetValues(typeof(CharacterStateId)))
                 _machine.Register(state, new CharacterState());
             _machine.StateChanged += (_, next) => _runtime.CurrentState = next;
             _machine.ChangeState(CharacterStateId.Idle, _runtime);
             _transitionRules.Add(EvaluateDefaultTransition);
+        }
+
+        public void SetMinimumFallDistance(float distance)
+        {
+            _minimumFallDistance = Math.Max(0f, distance);
         }
 
         public event System.Action<CharacterStateId, CharacterStateId> StateChanged
@@ -36,6 +46,7 @@ namespace LetterHunter.Characters
 
         public void Tick(float deltaTime)
         {
+            if (_runtime.Grounded) _jumpStarted = false;
             foreach (var rule in _transitionRules)
             {
                 var next = rule(_runtime);
@@ -52,8 +63,21 @@ namespace LetterHunter.Characters
         {
             if (runtime.IsDead) return CharacterStateId.Dead;
             if (_attackRemaining > 0f) return CharacterStateId.Attack;
-            if (!runtime.Grounded) return runtime.CurrentVelocity.y > .01f ? CharacterStateId.Jump : CharacterStateId.Fall;
+            if (!runtime.Grounded)
+                return EvaluateAirborneState(runtime);
             return Math.Abs(runtime.CurrentVelocity.x) > .05f ? CharacterStateId.Run : CharacterStateId.Idle;
+        }
+
+        private CharacterStateId EvaluateAirborneState(CharacterRuntime runtime)
+        {
+            if (runtime.CurrentVelocity.y < -.01f &&
+                runtime.AirborneDropDistance >= _minimumFallDistance)
+                return CharacterStateId.Fall;
+            // Retain the takeoff pose through the apex, without replaying Jump.
+            // Walking off an edge must never manufacture a jump.
+            if (_jumpStarted) return CharacterStateId.Jump;
+            return Math.Abs(runtime.CurrentVelocity.x) > .05f
+                ? CharacterStateId.Run : CharacterStateId.Idle;
         }
 
         private sealed class CharacterState : IState<CharacterRuntime>
