@@ -76,7 +76,11 @@ namespace LetterHunter.Skills
             renderer.sprite = _skillIcon != null ? _skillIcon : GetFallbackSprite();
             renderer.color = fallbackColor;
             renderer.sortingOrder = 100;
-            visual.transform.localScale = new Vector3(fallbackLength / .02f, fallbackWidth / .02f, 1f);
+            var spriteSize = renderer.sprite != null ? (Vector2)renderer.sprite.bounds.size : new Vector2(.02f, .02f);
+            var largestDimension = Mathf.Max(spriteSize.x, spriteSize.y, .0001f);
+            var targetDimension = Mathf.Max(fallbackLength, fallbackWidth);
+            var uniformScale = targetDimension / largestDimension;
+            visual.transform.localScale = new Vector3(uniformScale, uniformScale, 1f);
         }
 
         private static Sprite GetFallbackSprite()
