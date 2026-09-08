@@ -83,7 +83,7 @@ namespace LetterHunter.UI.Skills
             }
 
             if (button != null)
-                button.interactable = showSkill;
+                button.interactable = showSkill && model.IsReady;
         }
 
         public void SetDragHidden(bool hidden)

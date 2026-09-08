@@ -209,6 +209,16 @@ namespace LetterHunter.Characters
             var manaBefore = combatModule.Stats?.CurrentMana ?? 0f;
             if (skill == null)
                 return LetterHunter.Skills.SkillUseResult.Failed(LetterHunter.Skills.SkillUseFailure.NotRegistered);
+
+            // A non-empower skill fires from the animation event, so validate its
+            // cooldown before entering Attack. This keeps a cooldown click from
+            // starting the shooting animation while preserving the existing
+            // mana/cast transaction at the Shoot event.
+            if (!combatModule.TryGetSkillRuntimeState(skill.SkillId, out var skillState))
+                return LetterHunter.Skills.SkillUseResult.Failed(LetterHunter.Skills.SkillUseFailure.NotRegistered);
+            if (!skillState.IsReady)
+                return LetterHunter.Skills.SkillUseResult.Failed(LetterHunter.Skills.SkillUseFailure.OnCooldown);
+
             _pendingBasicShot = false;
             if (skill.SkillType == SkillType.Empower)
             {
