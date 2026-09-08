@@ -15,7 +15,7 @@ MonoBehaviour:
   nodeId: focus_slash
   displayName: Focus Slash
   description: Unlock a precise two-hit slash through the existing combat skill system.
-  icon: {fileID: 21300000, guid: 2b52d5ba421e33b4f803ff846716fb8e, type: 3}
+  icon: {fileID: 21300000, guid: e0c75dac61e131241b36bf110c2cf928, type: 3}
   abilityToGrant: {fileID: 11400000, guid: e0d3a0f1a09ffef47ad11cf6269368ff, type: 2}
   requiredLevel: 1
   price: 15
