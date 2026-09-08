@@ -10,6 +10,8 @@ namespace LetterHunter.UI.SkillTree
     [RequireComponent(typeof(CanvasGroup))]
     public sealed class EverrealmSkillTreeVisual : MonoBehaviour
     {
+        public bool IsOpen => _isOpen;
+
         [SerializeField] private RectTransform _nodeLayer;
         [SerializeField] private RectTransform _connectionLayer;
         [SerializeField] private ScrollRect _treeScrollRect;
