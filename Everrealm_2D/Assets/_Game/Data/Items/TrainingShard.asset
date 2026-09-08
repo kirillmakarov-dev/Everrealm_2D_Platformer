@@ -15,7 +15,7 @@ MonoBehaviour:
   itemId: training_shard
   displayName: Training Shard
   description: A simple material used for early upgrades.
-  icon: {fileID: -1617412913, guid: 718ddd7eab6c5c140b0a774b60d4a533, type: 3}
+  icon: {fileID: -8749240086635703305, guid: e8f193ca1bde17f4dae27dc3d7c6739e, type: 3}
   itemType: 0
   rarity: 0
   maxStack: 20

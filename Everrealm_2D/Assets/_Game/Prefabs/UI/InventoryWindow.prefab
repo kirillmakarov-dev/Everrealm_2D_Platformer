@@ -55,7 +55,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0.92, g: 0.69, b: 0.27, a: 1}
@@ -145,7 +145,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0.16, g: 0.13, b: 0.11, a: 0.99}
@@ -187,7 +187,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c291e2e93d4b46a2b79c49b0bafce338, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.UI.Inventory.InventoryWindowPresenter
   inventory: {fileID: 0}
   wallet: {fileID: 0}
@@ -233,7 +233,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Outline
   m_EffectColor: {r: 0, g: 0, b: 0, a: 0.65}
   m_EffectDistance: {x: 12, y: -12}
@@ -293,7 +293,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0.7, g: 0.55, b: 0.32, a: 1}
@@ -368,7 +368,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0.24, g: 0.19, b: 0.14, a: 0.98}
@@ -443,7 +443,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0.68, g: 0.55, b: 0.34, a: 0.9}
@@ -518,7 +518,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0.95, g: 0.72, b: 0.28, a: 1}
@@ -594,7 +594,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -681,7 +681,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0.94, g: 0.78, b: 0.45, a: 1}
@@ -756,7 +756,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -897,7 +897,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0.38, g: 0.3, b: 0.19, a: 1}
@@ -972,7 +972,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -1124,7 +1124,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8a8695521f0d02e499659fee002a26c2, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.GridLayoutGroup
   m_Padding:
     m_Left: 0
@@ -1193,7 +1193,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -1331,7 +1331,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0.93, g: 0.87, b: 0.73, a: 1}
@@ -1361,7 +1361,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
   m_Navigation:
     m_Mode: 3
@@ -1402,10 +1402,10 @@ MonoBehaviour:
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName:
+          m_ObjectArgumentAssemblyTypeName: 
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument:
+          m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!1 &8661952304807076345
@@ -1463,7 +1463,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -1473,7 +1473,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 9dfabae08199fca4dac6be73be77d2ff, type: 3}
+  m_Sprite: {fileID: -3879562748299916871, guid: 2185230d6d087024ab0101ba4a17f7c0, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -1538,7 +1538,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0.95, g: 0.72, b: 0.28, a: 1}
@@ -1613,7 +1613,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -1836,7 +1836,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83b2ebd4f3c14fa5b8d0c319ad21eb2d, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.UI.Inventory.InventorySlotView
 --- !u!1 &4529610345977253999 stripped
 GameObject:
@@ -1853,7 +1853,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cfabb0440166ab443bba8876756fdfa9, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Shadow
   m_EffectColor: {r: 0, g: 0, b: 0, a: 0.45}
   m_EffectDistance: {x: 5, y: -5}
@@ -2004,7 +2004,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83b2ebd4f3c14fa5b8d0c319ad21eb2d, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.UI.Inventory.InventorySlotView
 --- !u!1 &4149094278073125233 stripped
 GameObject:
@@ -2021,7 +2021,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cfabb0440166ab443bba8876756fdfa9, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Shadow
   m_EffectColor: {r: 0, g: 0, b: 0, a: 0.45}
   m_EffectDistance: {x: 5, y: -5}
@@ -2172,7 +2172,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83b2ebd4f3c14fa5b8d0c319ad21eb2d, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.UI.Inventory.InventorySlotView
 --- !u!1 &4244600993923897241 stripped
 GameObject:
@@ -2189,7 +2189,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cfabb0440166ab443bba8876756fdfa9, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Shadow
   m_EffectColor: {r: 0, g: 0, b: 0, a: 0.45}
   m_EffectDistance: {x: 5, y: -5}
@@ -2340,7 +2340,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83b2ebd4f3c14fa5b8d0c319ad21eb2d, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.UI.Inventory.InventorySlotView
 --- !u!1 &3789465371210321827 stripped
 GameObject:
@@ -2357,7 +2357,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cfabb0440166ab443bba8876756fdfa9, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Shadow
   m_EffectColor: {r: 0, g: 0, b: 0, a: 0.45}
   m_EffectDistance: {x: 5, y: -5}
@@ -2508,7 +2508,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83b2ebd4f3c14fa5b8d0c319ad21eb2d, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.UI.Inventory.InventorySlotView
 --- !u!1 &3803401935887393598 stripped
 GameObject:
@@ -2525,7 +2525,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cfabb0440166ab443bba8876756fdfa9, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Shadow
   m_EffectColor: {r: 0, g: 0, b: 0, a: 0.45}
   m_EffectDistance: {x: 5, y: -5}
@@ -2682,7 +2682,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cfabb0440166ab443bba8876756fdfa9, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Shadow
   m_EffectColor: {r: 0, g: 0, b: 0, a: 0.45}
   m_EffectDistance: {x: 5, y: -5}
@@ -2696,7 +2696,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83b2ebd4f3c14fa5b8d0c319ad21eb2d, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.UI.Inventory.InventorySlotView
 --- !u!224 &5613796362314974230 stripped
 RectTransform:
@@ -2850,7 +2850,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cfabb0440166ab443bba8876756fdfa9, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Shadow
   m_EffectColor: {r: 0, g: 0, b: 0, a: 0.45}
   m_EffectDistance: {x: 5, y: -5}
@@ -2864,7 +2864,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83b2ebd4f3c14fa5b8d0c319ad21eb2d, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.UI.Inventory.InventorySlotView
 --- !u!224 &5514002503276982564 stripped
 RectTransform:
@@ -3012,7 +3012,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83b2ebd4f3c14fa5b8d0c319ad21eb2d, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.UI.Inventory.InventorySlotView
 --- !u!1 &2112284396785717284 stripped
 GameObject:
@@ -3029,7 +3029,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cfabb0440166ab443bba8876756fdfa9, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Shadow
   m_EffectColor: {r: 0, g: 0, b: 0, a: 0.45}
   m_EffectDistance: {x: 5, y: -5}
@@ -3180,7 +3180,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83b2ebd4f3c14fa5b8d0c319ad21eb2d, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.UI.Inventory.InventorySlotView
 --- !u!1 &1676831357081828259 stripped
 GameObject:
@@ -3197,7 +3197,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cfabb0440166ab443bba8876756fdfa9, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Shadow
   m_EffectColor: {r: 0, g: 0, b: 0, a: 0.45}
   m_EffectDistance: {x: 5, y: -5}
@@ -3348,7 +3348,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83b2ebd4f3c14fa5b8d0c319ad21eb2d, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.UI.Inventory.InventorySlotView
 --- !u!1 &1194579791886577071 stripped
 GameObject:
@@ -3365,7 +3365,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cfabb0440166ab443bba8876756fdfa9, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Shadow
   m_EffectColor: {r: 0, g: 0, b: 0, a: 0.45}
   m_EffectDistance: {x: 5, y: -5}
@@ -3521,7 +3521,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83b2ebd4f3c14fa5b8d0c319ad21eb2d, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.UI.Inventory.InventorySlotView
 --- !u!1 &9088879454761760211 stripped
 GameObject:
@@ -3538,7 +3538,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cfabb0440166ab443bba8876756fdfa9, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Shadow
   m_EffectColor: {r: 0, g: 0, b: 0, a: 0.45}
   m_EffectDistance: {x: 5, y: -5}
@@ -3689,7 +3689,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83b2ebd4f3c14fa5b8d0c319ad21eb2d, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.UI.Inventory.InventorySlotView
 --- !u!1 &9097289344170788098 stripped
 GameObject:
@@ -3706,7 +3706,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cfabb0440166ab443bba8876756fdfa9, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Shadow
   m_EffectColor: {r: 0, g: 0, b: 0, a: 0.45}
   m_EffectDistance: {x: 5, y: -5}
@@ -3857,7 +3857,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83b2ebd4f3c14fa5b8d0c319ad21eb2d, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.UI.Inventory.InventorySlotView
 --- !u!1 &8847661346456333762 stripped
 GameObject:
@@ -3874,7 +3874,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cfabb0440166ab443bba8876756fdfa9, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Shadow
   m_EffectColor: {r: 0, g: 0, b: 0, a: 0.45}
   m_EffectDistance: {x: 5, y: -5}
@@ -4025,7 +4025,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83b2ebd4f3c14fa5b8d0c319ad21eb2d, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.UI.Inventory.InventorySlotView
 --- !u!1 &8178797099653303926 stripped
 GameObject:
@@ -4042,7 +4042,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cfabb0440166ab443bba8876756fdfa9, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Shadow
   m_EffectColor: {r: 0, g: 0, b: 0, a: 0.45}
   m_EffectDistance: {x: 5, y: -5}
@@ -4193,7 +4193,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83b2ebd4f3c14fa5b8d0c319ad21eb2d, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.UI.Inventory.InventorySlotView
 --- !u!1 &8108209249121071916 stripped
 GameObject:
@@ -4210,7 +4210,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cfabb0440166ab443bba8876756fdfa9, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Shadow
   m_EffectColor: {r: 0, g: 0, b: 0, a: 0.45}
   m_EffectDistance: {x: 5, y: -5}
@@ -4361,7 +4361,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83b2ebd4f3c14fa5b8d0c319ad21eb2d, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.UI.Inventory.InventorySlotView
 --- !u!1 &8342437382554790643 stripped
 GameObject:
@@ -4378,7 +4378,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cfabb0440166ab443bba8876756fdfa9, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Shadow
   m_EffectColor: {r: 0, g: 0, b: 0, a: 0.45}
   m_EffectDistance: {x: 5, y: -5}
@@ -4535,7 +4535,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cfabb0440166ab443bba8876756fdfa9, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Shadow
   m_EffectColor: {r: 0, g: 0, b: 0, a: 0.45}
   m_EffectDistance: {x: 5, y: -5}
@@ -4549,7 +4549,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83b2ebd4f3c14fa5b8d0c319ad21eb2d, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.UI.Inventory.InventorySlotView
 --- !u!1001 &6012071249830334028
 PrefabInstance:
@@ -4703,7 +4703,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cfabb0440166ab443bba8876756fdfa9, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Shadow
   m_EffectColor: {r: 0, g: 0, b: 0, a: 0.45}
   m_EffectDistance: {x: 5, y: -5}
@@ -4717,7 +4717,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83b2ebd4f3c14fa5b8d0c319ad21eb2d, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.UI.Inventory.InventorySlotView
 --- !u!1001 &6380282718718495763
 PrefabInstance:
@@ -4871,7 +4871,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cfabb0440166ab443bba8876756fdfa9, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Shadow
   m_EffectColor: {r: 0, g: 0, b: 0, a: 0.45}
   m_EffectDistance: {x: 5, y: -5}
@@ -4885,7 +4885,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83b2ebd4f3c14fa5b8d0c319ad21eb2d, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.UI.Inventory.InventorySlotView
 --- !u!1001 &7351217595636606824
 PrefabInstance:
@@ -5033,7 +5033,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83b2ebd4f3c14fa5b8d0c319ad21eb2d, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.UI.Inventory.InventorySlotView
 --- !u!1 &6559063033388277560 stripped
 GameObject:
@@ -5050,7 +5050,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cfabb0440166ab443bba8876756fdfa9, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Shadow
   m_EffectColor: {r: 0, g: 0, b: 0, a: 0.45}
   m_EffectDistance: {x: 5, y: -5}
@@ -5201,7 +5201,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83b2ebd4f3c14fa5b8d0c319ad21eb2d, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.UI.Inventory.InventorySlotView
 --- !u!1 &5873862123671411930 stripped
 GameObject:
@@ -5218,7 +5218,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cfabb0440166ab443bba8876756fdfa9, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Shadow
   m_EffectColor: {r: 0, g: 0, b: 0, a: 0.45}
   m_EffectDistance: {x: 5, y: -5}
@@ -5375,7 +5375,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cfabb0440166ab443bba8876756fdfa9, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Shadow
   m_EffectColor: {r: 0, g: 0, b: 0, a: 0.45}
   m_EffectDistance: {x: 5, y: -5}
@@ -5389,7 +5389,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83b2ebd4f3c14fa5b8d0c319ad21eb2d, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.UI.Inventory.InventorySlotView
 --- !u!1001 &8312442669704803821
 PrefabInstance:
@@ -5543,7 +5543,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cfabb0440166ab443bba8876756fdfa9, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Shadow
   m_EffectColor: {r: 0, g: 0, b: 0, a: 0.45}
   m_EffectDistance: {x: 5, y: -5}
@@ -5557,7 +5557,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83b2ebd4f3c14fa5b8d0c319ad21eb2d, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.UI.Inventory.InventorySlotView
 --- !u!1001 &8510552860469185667
 PrefabInstance:
@@ -5711,7 +5711,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cfabb0440166ab443bba8876756fdfa9, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Shadow
   m_EffectColor: {r: 0, g: 0, b: 0, a: 0.45}
   m_EffectDistance: {x: 5, y: -5}
@@ -5725,5 +5725,5 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83b2ebd4f3c14fa5b8d0c319ad21eb2d, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.UI.Inventory.InventorySlotView
