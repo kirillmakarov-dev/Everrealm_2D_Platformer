@@ -11,6 +11,7 @@ namespace LetterHunter.Skills
         [SerializeField] private LayerMask hitLayers = ~0;
         [Header("Fallback Visual")]
         [SerializeField] private bool createFallbackVisual = true;
+        [SerializeField] private bool useSkillIconVisual = true;
         [SerializeField] private Color fallbackColor = new(1f, .8f, .12f, 1f);
         [Min(.01f), SerializeField] private float fallbackLength = .36f;
         [Min(.01f), SerializeField] private float fallbackWidth = .09f;
@@ -52,7 +53,7 @@ namespace LetterHunter.Skills
 
         private void ApplySkillIconVisual()
         {
-            if (_skillIcon == null) return;
+            if (_skillIcon == null || !useSkillIconVisual) return;
 
             foreach (var renderer in GetComponentsInChildren<SpriteRenderer>(true))
                 renderer.sprite = _skillIcon;
