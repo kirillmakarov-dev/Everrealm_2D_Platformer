@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LetterHunter.Skills.SkillDefinition
   skillId: warrior_fire_spin
   displayName: Fire Spin
-  icon: {fileID: 21300000, guid: 8b92adf5062c5f649b28071e5ab7e825, type: 3}
+  icon: {fileID: 21300000, guid: 2fcfb7032d6da9e4d94142171f482ea9, type: 3}
   shortName: Fire Spin
   inputLabel: 
   description: Foundation implementation of Fire Spin.

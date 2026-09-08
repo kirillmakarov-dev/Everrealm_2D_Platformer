@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LetterHunter.Skills.SkillDefinition
   skillId: warrior_ground_slam
   displayName: Ground Slam
-  icon: {fileID: 21300000, guid: 8b92adf5062c5f649b28071e5ab7e825, type: 3}
+  icon: {fileID: 21300000, guid: bab0f9be00c525e4fa7e2c1f3981ac9a, type: 3}
   shortName: Ground Slam
   inputLabel: P
   description: Foundation implementation of Ground Slam.

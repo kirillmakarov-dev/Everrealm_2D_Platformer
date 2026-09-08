@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.Skills.SkillDefinition
   skillId: tree_focus_slash
   displayName: Focus Slash
-  icon: {fileID: 21300000, guid: 358adc923ae38af41b1423425131092b, type: 3}
+  icon: {fileID: 21300000, guid: 13e550bbb8bfdec498bab21440c35450, type: 3}
   shortName: Focus
   inputLabel: Tree
   description: A skill unlocked from the first test skill tree.

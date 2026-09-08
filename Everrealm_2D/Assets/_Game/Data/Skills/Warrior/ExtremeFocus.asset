@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LetterHunter.Skills.SkillDefinition
   skillId: warrior_extreme_focus
   displayName: Extreme Focus
-  icon: {fileID: 21300000, guid: 5d8451e34e268624bb3ad16e9d53a07a, type: 3}
+  icon: {fileID: 21300000, guid: 32f96d8a6ea7e4b4fb0a1bb4613781ab, type: 3}
   shortName: Extreme Fo
   inputLabel: 
   description: Foundation implementation of Extreme Focus.

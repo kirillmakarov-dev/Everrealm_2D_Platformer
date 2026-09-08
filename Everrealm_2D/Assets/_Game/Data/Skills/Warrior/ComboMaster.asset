@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LetterHunter.Skills.SkillDefinition
   skillId: warrior_combo_master
   displayName: Combo Master
-  icon: {fileID: 21300000, guid: 3755acb606a5d7f44927ee243fbf1ee1, type: 3}
+  icon: {fileID: 21300000, guid: 958965728455ac54fb0fe2863fba0b91, type: 3}
   shortName: Combo Mast
   inputLabel: 
   description: Foundation implementation of Combo Master.

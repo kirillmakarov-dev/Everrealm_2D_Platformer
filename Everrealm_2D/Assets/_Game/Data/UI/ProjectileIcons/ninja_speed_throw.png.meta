@@ -1,0 +1,611 @@
+fileFormatVersion: 2
+guid: 30ffd7aece710304a9a9cab1349556f6
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -6885178103511275555
+    second: ninja_speed_throw_0
+  - first:
+      213: -8136878640615146237
+    second: ninja_speed_throw_1
+  - first:
+      213: 7506268828833191977
+    second: ninja_speed_throw_2
+  - first:
+      213: -8701307622210767484
+    second: ninja_speed_throw_3
+  - first:
+      213: 5988664867135042966
+    second: ninja_speed_throw_4
+  - first:
+      213: 5991049404121612458
+    second: ninja_speed_throw_5
+  - first:
+      213: 1892197525939160984
+    second: ninja_speed_throw_6
+  - first:
+      213: -1211656301498744815
+    second: ninja_speed_throw_7
+  - first:
+      213: 266691668670626630
+    second: ninja_speed_throw_8
+  - first:
+      213: -226536227017500353
+    second: ninja_speed_throw_9
+  - first:
+      213: 3954556120803279949
+    second: ninja_speed_throw_10
+  - first:
+      213: -8679561730010613291
+    second: ninja_speed_throw_11
+  - first:
+      213: -8082754588822282147
+    second: ninja_speed_throw_12
+  - first:
+      213: 2603524733482306141
+    second: ninja_speed_throw_13
+  - first:
+      213: -6986413261858544955
+    second: ninja_speed_throw_14
+  - first:
+      213: -177670412850086625
+    second: ninja_speed_throw_15
+  - first:
+      213: 1176895404469288006
+    second: ninja_speed_throw_16
+  - first:
+      213: -2026546137597310210
+    second: ninja_speed_throw_17
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: ninja_speed_throw_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 19
+        width: 1254
+        height: 1215
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dd7a9ec7efee270a0800000000000000
+      internalID: -6885178103511275555
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_speed_throw_1
+      rect:
+        serializedVersion: 2
+        x: 851
+        y: 1157
+        width: 12
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 30dbba5ccfff31f80800000000000000
+      internalID: -8136878640615146237
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_speed_throw_2
+      rect:
+        serializedVersion: 2
+        x: 866
+        y: 1124
+        width: 17
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 928903bdabf9b2860800000000000000
+      internalID: 7506268828833191977
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_speed_throw_3
+      rect:
+        serializedVersion: 2
+        x: 731
+        y: 1134
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4857ab0b1debe3780800000000000000
+      internalID: -8701307622210767484
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_speed_throw_4
+      rect:
+        serializedVersion: 2
+        x: 745
+        y: 1100
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6953274a7f20c1350800000000000000
+      internalID: 5988664867135042966
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_speed_throw_5
+      rect:
+        serializedVersion: 2
+        x: 118
+        y: 1064
+        width: 6
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aa00c7ce0bb742350800000000000000
+      internalID: 5991049404121612458
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_speed_throw_6
+      rect:
+        serializedVersion: 2
+        x: 183
+        y: 1068
+        width: 17
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8970a72ef9f624a10800000000000000
+      internalID: 1892197525939160984
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_speed_throw_7
+      rect:
+        serializedVersion: 2
+        x: 601
+        y: 194
+        width: 9
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 110cd4f63055f2fe0800000000000000
+      internalID: -1211656301498744815
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_speed_throw_8
+      rect:
+        serializedVersion: 2
+        x: 504
+        y: 176
+        width: 12
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 64b3bafd8aa73b300800000000000000
+      internalID: 266691668670626630
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_speed_throw_9
+      rect:
+        serializedVersion: 2
+        x: 665
+        y: 110
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f395dd3708e2bdcf0800000000000000
+      internalID: -226536227017500353
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_speed_throw_10
+      rect:
+        serializedVersion: 2
+        x: 729
+        y: 79
+        width: 6
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d4483d8f6d761e630800000000000000
+      internalID: 3954556120803279949
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_speed_throw_11
+      rect:
+        serializedVersion: 2
+        x: 866
+        y: 87
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5d974a4c7900c8780800000000000000
+      internalID: -8679561730010613291
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_speed_throw_12
+      rect:
+        serializedVersion: 2
+        x: 1188
+        y: 65
+        width: 17
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d50e696968944df80800000000000000
+      internalID: -8082754588822282147
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_speed_throw_13
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 67
+        width: 18
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d5a082773f3912420800000000000000
+      internalID: 2603524733482306141
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_speed_throw_14
+      rect:
+        serializedVersion: 2
+        x: 1174
+        y: 69
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5c2e7d867264b0f90800000000000000
+      internalID: -6986413261858544955
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_speed_throw_15
+      rect:
+        serializedVersion: 2
+        x: 898
+        y: 51
+        width: 15
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f1d39fa63b9c88df0800000000000000
+      internalID: -177670412850086625
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_speed_throw_16
+      rect:
+        serializedVersion: 2
+        x: 1005
+        y: 29
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 64c7e29822c255010800000000000000
+      internalID: 1176895404469288006
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_speed_throw_17
+      rect:
+        serializedVersion: 2
+        x: 1011
+        y: 11
+        width: 43
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: efa8293660340e3e0800000000000000
+      internalID: -2026546137597310210
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      ninja_speed_throw_0: -6885178103511275555
+      ninja_speed_throw_1: -8136878640615146237
+      ninja_speed_throw_10: 3954556120803279949
+      ninja_speed_throw_11: -8679561730010613291
+      ninja_speed_throw_12: -8082754588822282147
+      ninja_speed_throw_13: 2603524733482306141
+      ninja_speed_throw_14: -6986413261858544955
+      ninja_speed_throw_15: -177670412850086625
+      ninja_speed_throw_16: 1176895404469288006
+      ninja_speed_throw_17: -2026546137597310210
+      ninja_speed_throw_2: 7506268828833191977
+      ninja_speed_throw_3: -8701307622210767484
+      ninja_speed_throw_4: 5988664867135042966
+      ninja_speed_throw_5: 5991049404121612458
+      ninja_speed_throw_6: 1892197525939160984
+      ninja_speed_throw_7: -1211656301498744815
+      ninja_speed_throw_8: 266691668670626630
+      ninja_speed_throw_9: -226536227017500353
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

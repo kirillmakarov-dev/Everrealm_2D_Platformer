@@ -1,0 +1,793 @@
+fileFormatVersion: 2
+guid: 73e966716539d9646b580a6f5eb2a697
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 2902455667510551745
+    second: ninja_shadow_training_0
+  - first:
+      213: 3949968317066989285
+    second: ninja_shadow_training_1
+  - first:
+      213: -2204280267127591899
+    second: ninja_shadow_training_2
+  - first:
+      213: -310737071833114838
+    second: ninja_shadow_training_3
+  - first:
+      213: -8525638596004962423
+    second: ninja_shadow_training_4
+  - first:
+      213: 2251754713945742260
+    second: ninja_shadow_training_5
+  - first:
+      213: 8361001677181551891
+    second: ninja_shadow_training_6
+  - first:
+      213: 3858173441426753809
+    second: ninja_shadow_training_7
+  - first:
+      213: -2439357850808157717
+    second: ninja_shadow_training_8
+  - first:
+      213: -4792666058058242566
+    second: ninja_shadow_training_9
+  - first:
+      213: 6679635358056885048
+    second: ninja_shadow_training_10
+  - first:
+      213: 4498458145062806897
+    second: ninja_shadow_training_11
+  - first:
+      213: 4209905096049947438
+    second: ninja_shadow_training_12
+  - first:
+      213: -8727767765209609472
+    second: ninja_shadow_training_13
+  - first:
+      213: -8098139272950106594
+    second: ninja_shadow_training_14
+  - first:
+      213: -7400420894856885921
+    second: ninja_shadow_training_15
+  - first:
+      213: 1106150916969456293
+    second: ninja_shadow_training_16
+  - first:
+      213: 1355269170997844764
+    second: ninja_shadow_training_17
+  - first:
+      213: -6506724095182448933
+    second: ninja_shadow_training_18
+  - first:
+      213: 5701645229345315941
+    second: ninja_shadow_training_19
+  - first:
+      213: -3878012177818598584
+    second: ninja_shadow_training_20
+  - first:
+      213: 2435941132034270029
+    second: ninja_shadow_training_21
+  - first:
+      213: -8578095418982245618
+    second: ninja_shadow_training_22
+  - first:
+      213: 1649991694816340455
+    second: ninja_shadow_training_23
+  - first:
+      213: -2043425577016306434
+    second: ninja_shadow_training_24
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: ninja_shadow_training_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 1241
+        height: 1238
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1c4294e3d08974820800000000000000
+      internalID: 2902455667510551745
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_shadow_training_1
+      rect:
+        serializedVersion: 2
+        x: 20
+        y: 1051
+        width: 112
+        height: 181
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5ee43dca14b11d630800000000000000
+      internalID: 3949968317066989285
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_shadow_training_2
+      rect:
+        serializedVersion: 2
+        x: 311
+        y: 1219
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 52ce47c96c2d861e0800000000000000
+      internalID: -2204280267127591899
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_shadow_training_3
+      rect:
+        serializedVersion: 2
+        x: 311
+        y: 1211
+        width: 6
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a2797de874a00bbf0800000000000000
+      internalID: -310737071833114838
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_shadow_training_4
+      rect:
+        serializedVersion: 2
+        x: 316
+        y: 1209
+        width: 7
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 98f93c12ed8dea980800000000000000
+      internalID: -8525638596004962423
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_shadow_training_5
+      rect:
+        serializedVersion: 2
+        x: 24
+        y: 937
+        width: 102
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4bb1c066bf6df3f10800000000000000
+      internalID: 2251754713945742260
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_shadow_training_6
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 909
+        width: 10
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3150ad61abe380470800000000000000
+      internalID: 8361001677181551891
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_shadow_training_7
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 893
+        width: 14
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1198612bd4cfa8530800000000000000
+      internalID: 3858173441426753809
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_shadow_training_8
+      rect:
+        serializedVersion: 2
+        x: 108
+        y: 907
+        width: 14
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: be9f48e75f8a52ed0800000000000000
+      internalID: -2439357850808157717
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_shadow_training_9
+      rect:
+        serializedVersion: 2
+        x: 80
+        y: 853
+        width: 12
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: af5ed52ec970d7db0800000000000000
+      internalID: -4792666058058242566
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_shadow_training_10
+      rect:
+        serializedVersion: 2
+        x: 90
+        y: 859
+        width: 14
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 83bae1ac7f4d2bc50800000000000000
+      internalID: 6679635358056885048
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_shadow_training_11
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 618
+        width: 92
+        height: 235
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1756e6d59dbbd6e30800000000000000
+      internalID: 4498458145062806897
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_shadow_training_12
+      rect:
+        serializedVersion: 2
+        x: 72
+        y: 751
+        width: 56
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e23f92c31669c6a30800000000000000
+      internalID: 4209905096049947438
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_shadow_training_13
+      rect:
+        serializedVersion: 2
+        x: 110
+        y: 646
+        width: 16
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 00b8390957db0e680800000000000000
+      internalID: -8727767765209609472
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_shadow_training_14
+      rect:
+        serializedVersion: 2
+        x: 118
+        y: 785
+        width: 22
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e163b2eac31ad9f80800000000000000
+      internalID: -8098139272950106594
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_shadow_training_15
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 705
+        width: 8
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f594dadb76c6c4990800000000000000
+      internalID: -7400420894856885921
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_shadow_training_16
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 521
+        width: 47
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5a2efe9f566d95f00800000000000000
+      internalID: 1106150916969456293
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_shadow_training_17
+      rect:
+        serializedVersion: 2
+        x: 30
+        y: 499
+        width: 13
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c1b5d586122eec210800000000000000
+      internalID: 1355269170997844764
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_shadow_training_18
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 497
+        width: 15
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bd6dc27d8e873b5a0800000000000000
+      internalID: -6506724095182448933
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_shadow_training_19
+      rect:
+        serializedVersion: 2
+        x: 94
+        y: 481
+        width: 20
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 56c9d62a020502f40800000000000000
+      internalID: 5701645229345315941
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_shadow_training_20
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 441
+        width: 11
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 843cb7a88788e2ac0800000000000000
+      internalID: -3878012177818598584
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_shadow_training_21
+      rect:
+        serializedVersion: 2
+        x: 88
+        y: 409
+        width: 14
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d436aacad833ec120800000000000000
+      internalID: 2435941132034270029
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_shadow_training_22
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 182
+        width: 61
+        height: 207
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e0b58264aab74f880800000000000000
+      internalID: -8578095418982245618
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_shadow_training_23
+      rect:
+        serializedVersion: 2
+        x: 1236
+        y: 320
+        width: 13
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7e96fd354b2f5e610800000000000000
+      internalID: 1649991694816340455
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ninja_shadow_training_24
+      rect:
+        serializedVersion: 2
+        x: 922
+        y: 39
+        width: 10
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ef4def4a34b44a3e0800000000000000
+      internalID: -2043425577016306434
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      ninja_shadow_training_0: 2902455667510551745
+      ninja_shadow_training_1: 3949968317066989285
+      ninja_shadow_training_10: 6679635358056885048
+      ninja_shadow_training_11: 4498458145062806897
+      ninja_shadow_training_12: 4209905096049947438
+      ninja_shadow_training_13: -8727767765209609472
+      ninja_shadow_training_14: -8098139272950106594
+      ninja_shadow_training_15: -7400420894856885921
+      ninja_shadow_training_16: 1106150916969456293
+      ninja_shadow_training_17: 1355269170997844764
+      ninja_shadow_training_18: -6506724095182448933
+      ninja_shadow_training_19: 5701645229345315941
+      ninja_shadow_training_2: -2204280267127591899
+      ninja_shadow_training_20: -3878012177818598584
+      ninja_shadow_training_21: 2435941132034270029
+      ninja_shadow_training_22: -8578095418982245618
+      ninja_shadow_training_23: 1649991694816340455
+      ninja_shadow_training_24: -2043425577016306434
+      ninja_shadow_training_3: -310737071833114838
+      ninja_shadow_training_4: -8525638596004962423
+      ninja_shadow_training_5: 2251754713945742260
+      ninja_shadow_training_6: 8361001677181551891
+      ninja_shadow_training_7: 3858173441426753809
+      ninja_shadow_training_8: -2439357850808157717
+      ninja_shadow_training_9: -4792666058058242566
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
