@@ -20,6 +20,7 @@ namespace LetterHunter.Characters
         [SerializeField] private AttackImpactProfile defaultAutoAttackImpact;
         [SerializeField] private AutoAttackComboDefinition autoAttackCombo;
         [SerializeField] private FloatingDamageTextController damageTextController;
+        [SerializeField] private PlayerFeedbackVfx feedbackVfx;
         [SerializeField] private Vector2 facingDirection = Vector2.right;
         [Header("Audio")]
         [SerializeField] private SoundManager soundManager;
@@ -67,6 +68,10 @@ namespace LetterHunter.Characters
                 Stats.Heal(item.HealthRestore);
             if (canRestoreMana)
                 Stats.RestoreMana(item.ManaRestore);
+            if (canRestoreHealth)
+                feedbackVfx?.PlayHealthPotion();
+            if (canRestoreMana)
+                feedbackVfx?.PlayManaPotion();
             return true;
         }
 
@@ -81,6 +86,8 @@ namespace LetterHunter.Characters
                 damageTextController = GetComponent<FloatingDamageTextController>();
             if (damageTextController == null)
                 damageTextController = gameObject.AddComponent<FloatingDamageTextController>();
+            if (feedbackVfx == null)
+                feedbackVfx = GetComponent<PlayerFeedbackVfx>();
             if (hitReaction == null)
                 hitReaction = GetComponent<CharacterHitReaction2D>();
             if (hitReaction == null)

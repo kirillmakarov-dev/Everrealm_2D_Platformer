@@ -22,9 +22,9 @@ MonoBehaviour:
     attackSpeed: 1
     moveSpeed: 5
   startingSkills:
-  - {fileID: 11400000, guid: b1151502fcc4f22478722d4506880a4b, type: 2}
-  - {fileID: 11400000, guid: e0d3a0f1a09ffef47ad11cf6269368ff, type: 2}
-  - {fileID: 11400000, guid: d4c409278fde27149a10a3757eb7fd04, type: 2}
   - {fileID: 11400000, guid: 6fc377613b650324195469ca5ab1198e, type: 2}
+  - {fileID: 11400000, guid: d4c409278fde27149a10a3757eb7fd04, type: 2}
+  - {fileID: 11400000, guid: 67dead6a450941b4d992a194784336dd, type: 2}
   - {fileID: 11400000, guid: 69fd8d0dfcd3e3743ad720162854bd2e, type: 2}
+  - {fileID: 11400000, guid: b1151502fcc4f22478722d4506880a4b, type: 2}
   - {fileID: 11400000, guid: b6711d9d7638318499bc0252272eb067, type: 2}

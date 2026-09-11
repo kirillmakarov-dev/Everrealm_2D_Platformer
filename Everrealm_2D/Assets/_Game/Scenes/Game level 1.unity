@@ -791,6 +791,10 @@ PrefabInstance:
       value: GolemEnemy (3)
       objectReference: {fileID: 0}
     - target: {fileID: 6251792803596527438, guid: 7beb6805fa780264f92dbf7079d2483b, type: 3}
+      propertyPath: autoAttack
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6251792803596527438, guid: 7beb6805fa780264f92dbf7079d2483b, type: 3}
       propertyPath: attackRange
       value: 2
       objectReference: {fileID: 0}
@@ -65704,6 +65708,10 @@ PrefabInstance:
       value: GolemEnemy (1)
       objectReference: {fileID: 0}
     - target: {fileID: 6251792803596527438, guid: 7beb6805fa780264f92dbf7079d2483b, type: 3}
+      propertyPath: autoAttack
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6251792803596527438, guid: 7beb6805fa780264f92dbf7079d2483b, type: 3}
       propertyPath: attackRange
       value: 2
       objectReference: {fileID: 0}
@@ -66369,6 +66377,10 @@ PrefabInstance:
     - target: {fileID: 5264834034769700866, guid: 7beb6805fa780264f92dbf7079d2483b, type: 3}
       propertyPath: m_Name
       value: GolemEnemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 6251792803596527438, guid: 7beb6805fa780264f92dbf7079d2483b, type: 3}
+      propertyPath: autoAttack
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6251792803596527438, guid: 7beb6805fa780264f92dbf7079d2483b, type: 3}
       propertyPath: attackRange
@@ -67482,6 +67494,10 @@ PrefabInstance:
     - target: {fileID: 5264834034769700866, guid: 7beb6805fa780264f92dbf7079d2483b, type: 3}
       propertyPath: m_Name
       value: GolemEnemy (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 6251792803596527438, guid: 7beb6805fa780264f92dbf7079d2483b, type: 3}
+      propertyPath: autoAttack
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6251792803596527438, guid: 7beb6805fa780264f92dbf7079d2483b, type: 3}
       propertyPath: attackRange
@@ -69871,6 +69887,22 @@ PrefabInstance:
       propertyPath: inventory
       value:
       objectReference: {fileID: 782793005}
+    - target: {fileID: 442817090554883073, guid: cc840f3e2d0a8cf4c8222b422f3d5b72, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4290963189
+      objectReference: {fileID: 0}
+    - target: {fileID: 442817090554883073, guid: cc840f3e2d0a8cf4c8222b422f3d5b72, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 442817090554883099, guid: cc840f3e2d0a8cf4c8222b422f3d5b72, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4290963189
+      objectReference: {fileID: 0}
+    - target: {fileID: 442817090554883099, guid: cc840f3e2d0a8cf4c8222b422f3d5b72, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
     - target: {fileID: 771013455751514748, guid: cc840f3e2d0a8cf4c8222b422f3d5b72, type: 3}
       propertyPath: m_Name
       value: Inventory canvas
@@ -70624,6 +70656,10 @@ PrefabInstance:
       propertyPath: dropService
       value:
       objectReference: {fileID: 227423448}
+    - target: {fileID: 2489057794710668725, guid: 3cebb8a8782efef43862fcbe5bb745f6, type: 3}
+      propertyPath: autoAttack
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5681902298256087528, guid: 3cebb8a8782efef43862fcbe5bb745f6, type: 3}
       propertyPath: m_Name
       value: SkeletonEnemy

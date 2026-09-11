@@ -88,6 +88,7 @@ GameObject:
   - component: {fileID: 6761741343340414465}
   - component: {fileID: 8410342960815434796}
   - component: {fileID: 260214258132478401}
+  - component: {fileID: 2778268154505138462}
   m_Layer: 3
   m_Name: Player
   m_TagString: Untagged
@@ -110,6 +111,7 @@ Transform:
   m_Children:
   - {fileID: 1505513599692894104}
   - {fileID: 3951761201512472940}
+  - {fileID: 5495285751611671089}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!50 &5038521135501147107
@@ -149,7 +151,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 23b0b5d26388f21409922fe327e32670, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::LetterHunter.Infrastructure.Physics2DTargetProvider
   targetLayers:
     serializedVersion: 2
@@ -164,13 +166,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0bf56792beab7d24c8152ef880dfe337, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::LetterHunter.Characters.PlayerClassController
   classDefinition: {fileID: 11400000, guid: 306f8073e8a1cc44092e3fd981c35ac5, type: 2}
   targetProviderComponent: {fileID: 8250469710235693088}
   defaultAutoAttackImpact: {fileID: 11400000, guid: 7af14e6c391737d498d66b75a4f12379, type: 2}
   autoAttackCombo: {fileID: 11400000, guid: efc9b8a0e6e97004692852327231da4b, type: 2}
   damageTextController: {fileID: 0}
+  feedbackVfx: {fileID: 2778268154505138462}
   facingDirection: {x: 1, y: 0}
   soundManager: {fileID: 0}
   hitReaction: {fileID: 0}
@@ -188,7 +191,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ac350807e65772c458a59b72acf442fa, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::LetterHunter.Characters.CharacterMotor2D
 --- !u!114 &7614520510053897001
 MonoBehaviour:
@@ -200,7 +203,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2ae796f444f7d3f41acd0272d938e6a4, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::LetterHunter.Characters.CharacterGroundDetector
   checkPoint: {fileID: 3951761201512472940}
   checkRadius: 0.18
@@ -218,7 +221,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a6d4e51cb338b894f824cf4c890d4a26, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::LetterHunter.Characters.CharacterFacingView2D
   visualRoot: {fileID: 1505513599692894104}
 --- !u!114 &3838125004882503361
@@ -231,7 +234,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c705a3feb4acc5f49b7f87697e6eb9a7, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::LetterHunter.Characters.CharacterAnimationController
   animator: {fileID: 1169588267108191893}
 --- !u!114 &2069947226667483305
@@ -244,14 +247,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d2ed79a58bd9b2b478c6fd8ef0811fb5, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::LetterHunter.Characters.CharacterInputRouter
   moveLeftKey: 15
   moveRightKey: 18
   jumpKey: 1
   sprintKey: 51
   attackKey: 31
-  skillKeys: 
+  interactKey: 23
+  skillKeys:
   secondarySkillKeys: 290000002a0000002b0000002c0000002d0000002e0000002f000000300000003100000032000000
 --- !u!114 &3938477324567451320
 MonoBehaviour:
@@ -263,7 +267,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 219278e831f3d584ab143a4069164d19, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::LetterHunter.Characters.CharacterRoot
   motor: {fileID: 693764388565117165}
   groundDetector: {fileID: 7614520510053897001}
@@ -292,7 +296,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 82928b07805445643ae917e6e6a9f656, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::LetterHunter.UI.Skills.PlayerSkillLoadout
   slots:
   - slotIndex: 0
@@ -322,7 +326,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8fbcf3aef7bd44a9ab26379b3df670c2, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::LetterHunter.Characters.CharacterHitReaction2D
   visualRoot: {fileID: 1505513599692894104}
   defaultMovementLockDuration: 0.18
@@ -337,7 +341,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9cb83eb46c031b44dbcce67ad08ebcc8, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.Items.PlayerInventory
   capacity: 24
   startingItems:
@@ -355,7 +359,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 00a6aaf0fc267924a949d2ff6384c769, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.Economy.CurrencyWallet
   startingGold: 1000
 --- !u!114 &4350223909893477675
@@ -368,7 +372,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6cb39bd35a934f3ba0831d6a9efccfb5, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.SkillTree.PlayerSkillTreeController
   startingProfession: {fileID: 11400000, guid: 1e5ca91eff15be34e9f0e1ac65b222b5, type: 2}
   availableProfessions:
@@ -387,7 +391,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 61b9355f01864f06b52f1fdca6a7f764, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.Save.PlayerSaveController
   itemDatabase: {fileID: 11400000, guid: aae39ff1b70867d43baf8d64535d114b, type: 2}
   skillDatabase: {fileID: 11400000, guid: 688d5be9357c72440a934b6698ae9dbb, type: 2}
@@ -411,7 +415,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 00b7f98ba8ae1bb4d9ce4415c07dc6ee, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.Stats.PlayerLevelProgression
   definition: {fileID: 11400000, guid: 2bc5e03c394674f4594ddd8878c51339, type: 2}
   player: {fileID: 3611650117584733670}
@@ -453,6 +457,56 @@ CapsuleCollider2D:
   m_Offset: {x: 0.043100357, y: 1.8798492}
   m_Size: {x: 0.78512573, y: 3.4335265}
   m_Direction: 0
+--- !u!114 &2778268154505138462
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7373540772549458930}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30cecd155904a464d8b1edb58144fd76, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.Feedback.PlayerFeedbackVfx
+  progression: {fileID: 8410342960815434796}
+  effectAnchor: {fileID: 5495285751611671089}
+  levelUpPrefab: {fileID: 120572179073667994, guid: 375d3e273328aa7439a10c17439f08e8, type: 3}
+  healthPotionPrefab: {fileID: 1918067428462646563, guid: 7a38043582ac5fc4aa646924674aadf5, type: 3}
+  manaPotionPrefab: {fileID: 372761736256069475, guid: a4899a0885c611e4cbade9496bfd2ba7, type: 3}
+  levelUpLifetime: 2.2
+  potionLifetime: 1.5
+--- !u!1 &7588976422395950447
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5495285751611671089}
+  m_Layer: 0
+  m_Name: Player Feedback VFX Anchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5495285751611671089
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7588976422395950447}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1.15, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4717279679241563740}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7748583246768527373
 GameObject:
   m_ObjectHideFlags: 0
@@ -1302,7 +1356,7 @@ Animator:
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
   m_AnimatePhysics: 0
-  m_WarningMessage: 
+  m_WarningMessage:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
@@ -1317,5 +1371,5 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a12f41b5d5614bc4f9785bcea0d9c948, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.Characters.CharacterAnimationEventRelay

@@ -19,7 +19,6 @@ namespace LetterHunter.UI.Shop
         [SerializeField] private CanvasGroup windowGroup;
         [SerializeField] private RectTransform rowRoot;
         [SerializeField] private ShopItemRowView rowPrefab;
-        [SerializeField] private List<ShopItemRowView> authoredRows = new();
         [SerializeField] private TMP_Text emptyText;
         [SerializeField] private TMP_Text goldText;
         [SerializeField] private TMP_Text feedbackText;
@@ -137,7 +136,7 @@ namespace LetterHunter.UI.Shop
             if (!IsVisible || rowRoot == null)
                 return;
 
-            ClearRows();
+            HideRowsFrom(0);
             if (_buyMode)
             {
                 RenderBuyRows();
@@ -159,22 +158,18 @@ namespace LetterHunter.UI.Shop
             var rowIndex = 0;
             foreach (var entry in _catalog.Entries)
             {
-                if (rowIndex >= authoredRows.Count)
-                    break;
-
                 if (entry == null || entry.Item == null)
                     continue;
 
-                var row = authoredRows[rowIndex++];
+                var row = GetOrCreateRow(rowIndex++);
                 if (row == null)
                     continue;
 
                 row.gameObject.SetActive(true);
                 row.RenderBuy(entry.Item, entry.BuyPrice, Buy);
-                _rows.Add(row);
             }
 
-            HideUnusedRows(rowIndex);
+            HideRowsFrom(rowIndex);
         }
 
         private void RenderSellRows()
@@ -190,26 +185,35 @@ namespace LetterHunter.UI.Shop
             var rowIndex = 0;
             foreach (var pair in sellableItems)
             {
-                if (rowIndex >= authoredRows.Count)
-                    break;
-
-                var row = authoredRows[rowIndex++];
+                var row = GetOrCreateRow(rowIndex++);
                 if (row == null)
                     continue;
 
                 row.gameObject.SetActive(true);
                 row.Render(pair.Key, pair.Value, Sell);
-                _rows.Add(row);
             }
 
-            HideUnusedRows(rowIndex);
+            HideRowsFrom(rowIndex);
         }
 
-        private void HideUnusedRows(int rowIndex)
+        private ShopItemRowView GetOrCreateRow(int index)
         {
-            for (; rowIndex < authoredRows.Count; rowIndex++)
-                if (authoredRows[rowIndex] != null)
-                    authoredRows[rowIndex].gameObject.SetActive(false);
+            if (index < _rows.Count)
+                return _rows[index];
+            if (rowPrefab == null || rowRoot == null)
+                return null;
+
+            var row = Instantiate(rowPrefab, rowRoot, false);
+            row.name = $"ShopItemRow_{index + 1:00}";
+            _rows.Add(row);
+            return row;
+        }
+
+        private void HideRowsFrom(int startIndex)
+        {
+            for (var i = startIndex; i < _rows.Count; i++)
+                if (_rows[i] != null)
+                    _rows[i].gameObject.SetActive(false);
         }
 
         private void RenderGold(int gold)
@@ -306,14 +310,6 @@ namespace LetterHunter.UI.Shop
             SellFailureReason.NotInCatalog => "Item is not accepted here",
             _ => "Could not sell"
         };
-
-        private void ClearRows()
-        {
-            foreach (var row in _rows)
-                if (row != null)
-                    row.gameObject.SetActive(false);
-            _rows.Clear();
-        }
 
         private void SetEmptyState(bool isEmpty, string message)
         {

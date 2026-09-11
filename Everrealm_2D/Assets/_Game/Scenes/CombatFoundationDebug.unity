@@ -119,7 +119,7 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &64898482
+--- !u!1 &252229224
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -127,102 +127,77 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 64898487}
-  - component: {fileID: 64898486}
-  - component: {fileID: 64898485}
-  - component: {fileID: 64898484}
-  - component: {fileID: 64898483}
-  m_Layer: 7
-  m_Name: Dummy_3
+  - component: {fileID: 252229229}
+  - component: {fileID: 252229228}
+  - component: {fileID: 252229227}
+  - component: {fileID: 252229226}
+  - component: {fileID: 252229225}
+  m_Layer: 3
+  m_Name: Player_Warrior
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &64898483
+--- !u!114 &252229225
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 64898482}
+  m_GameObject: {fileID: 252229224}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e9b7b27034c589640bc7150bd80d1494, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.Debugging.DummyEnemy2D
-  stats:
-    maxHealth: 0
-    maxMana: 0
-    attackPower: 0
-    defense: 0
-    attackSpeed: 0
-    moveSpeed: 0
-  classType: 0
+  m_Script: {fileID: 11500000, guid: 1537cf4c6a782844196875a3697839ae, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.Debugging.PlayerDebugInput2D
+--- !u!114 &252229226
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 252229224}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0bf56792beab7d24c8152ef880dfe337, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.Characters.PlayerClassController
+  classDefinition: {fileID: 11400000, guid: 306f8073e8a1cc44092e3fd981c35ac5, type: 2}
+  targetProviderComponent: {fileID: 252229227}
+  defaultAutoAttackImpact: {fileID: 0}
+  autoAttackCombo: {fileID: 0}
   damageTextController: {fileID: 0}
-  deathUpwardVelocity: 5.5
-  deathHorizontalVelocity: 1.25
-  deathGravityScale: 3.5
-  destroyAfterDeath: 1.6
-  disableCollidersOnDeath: 1
+  feedbackVfx: {fileID: 0}
+  facingDirection: {x: 1, y: 0}
+  soundManager: {fileID: 0}
   hitReaction: {fileID: 0}
-  hitKnockbackHorizontal: 3.75
-  hitKnockbackVertical: 1.25
-  hitMovementLockDuration: 0.16
-  monsterLoot: {fileID: 0}
---- !u!114 &64898484
+  damageKnockbackHorizontal: 5
+  damageKnockbackVertical: 2.5
+  damageMovementLockDuration: 0.22
+  invulnerabilityDuration: 1.25
+--- !u!114 &252229227
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 64898482}
+  m_GameObject: {fileID: 252229224}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a4de3173f4d18944689da725f9d59902, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.Feedback.FloatingDamageTextController
-  damageTextType: 0
-  spawnPoint: {fileID: 0}
-  localOffset: {x: 0, y: 1.25}
-  roundDamage: 1
-  showZeroDamageAsBlocked: 1
-  logSpawns: 0
-  testDamage: 12
---- !u!50 &64898485
-Rigidbody2D:
-  serializedVersion: 5
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 64898482}
-  m_BodyType: 0
-  m_Simulated: 1
-  m_UseFullKinematicContacts: 0
-  m_UseAutoMass: 0
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
-  m_GravityScale: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
+  m_Script: {fileID: 11500000, guid: 23b0b5d26388f21409922fe327e32670, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.Infrastructure.Physics2DTargetProvider
+  targetLayers:
     serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_Interpolate: 0
-  m_SleepingMode: 1
-  m_CollisionDetection: 0
-  m_Constraints: 0
---- !u!61 &64898486
+    m_Bits: 384
+--- !u!61 &252229228
 BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 64898482}
+  m_GameObject: {fileID: 252229224}
   m_Enabled: 1
   serializedVersion: 3
   m_Density: 1
@@ -262,22 +237,22 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
---- !u!4 &64898487
+--- !u!4 &252229229
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 64898482}
+  m_GameObject: {fileID: 252229224}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 4, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &226089469
+--- !u!1 &458764078
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -285,11 +260,11 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 226089474}
-  - component: {fileID: 226089473}
-  - component: {fileID: 226089472}
-  - component: {fileID: 226089471}
-  - component: {fileID: 226089470}
+  - component: {fileID: 458764083}
+  - component: {fileID: 458764082}
+  - component: {fileID: 458764081}
+  - component: {fileID: 458764080}
+  - component: {fileID: 458764079}
   m_Layer: 7
   m_Name: Dummy_1
   m_TagString: Untagged
@@ -297,17 +272,17 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &226089470
+--- !u!114 &458764079
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 226089469}
+  m_GameObject: {fileID: 458764078}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e9b7b27034c589640bc7150bd80d1494, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.Debugging.DummyEnemy2D
   stats:
     maxHealth: 0
@@ -328,17 +303,18 @@ MonoBehaviour:
   hitKnockbackVertical: 1.25
   hitMovementLockDuration: 0.16
   monsterLoot: {fileID: 0}
---- !u!114 &226089471
+  experienceReward: 25
+--- !u!114 &458764080
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 226089469}
+  m_GameObject: {fileID: 458764078}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a4de3173f4d18944689da725f9d59902, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.Feedback.FloatingDamageTextController
   damageTextType: 0
   spawnPoint: {fileID: 0}
@@ -347,14 +323,14 @@ MonoBehaviour:
   showZeroDamageAsBlocked: 1
   logSpawns: 0
   testDamage: 12
---- !u!50 &226089472
+--- !u!50 &458764081
 Rigidbody2D:
   serializedVersion: 5
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 226089469}
+  m_GameObject: {fileID: 458764078}
   m_BodyType: 0
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
@@ -374,13 +350,13 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!61 &226089473
+--- !u!61 &458764082
 BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 226089469}
+  m_GameObject: {fileID: 458764078}
   m_Enabled: 1
   serializedVersion: 3
   m_Density: 1
@@ -420,13 +396,13 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
---- !u!4 &226089474
+--- !u!4 &458764083
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 226089469}
+  m_GameObject: {fileID: 458764078}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 1.5, y: 0, z: 0}
@@ -435,7 +411,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &325608779
+--- !u!1 &779572835
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -443,11 +419,11 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 325608784}
-  - component: {fileID: 325608783}
-  - component: {fileID: 325608782}
-  - component: {fileID: 325608781}
-  - component: {fileID: 325608780}
+  - component: {fileID: 779572840}
+  - component: {fileID: 779572839}
+  - component: {fileID: 779572838}
+  - component: {fileID: 779572837}
+  - component: {fileID: 779572836}
   m_Layer: 7
   m_Name: Dummy_4
   m_TagString: Untagged
@@ -455,17 +431,17 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &325608780
+--- !u!114 &779572836
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 325608779}
+  m_GameObject: {fileID: 779572835}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e9b7b27034c589640bc7150bd80d1494, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.Debugging.DummyEnemy2D
   stats:
     maxHealth: 0
@@ -486,17 +462,18 @@ MonoBehaviour:
   hitKnockbackVertical: 1.25
   hitMovementLockDuration: 0.16
   monsterLoot: {fileID: 0}
---- !u!114 &325608781
+  experienceReward: 25
+--- !u!114 &779572837
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 325608779}
+  m_GameObject: {fileID: 779572835}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a4de3173f4d18944689da725f9d59902, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.Feedback.FloatingDamageTextController
   damageTextType: 0
   spawnPoint: {fileID: 0}
@@ -505,14 +482,14 @@ MonoBehaviour:
   showZeroDamageAsBlocked: 1
   logSpawns: 0
   testDamage: 12
---- !u!50 &325608782
+--- !u!50 &779572838
 Rigidbody2D:
   serializedVersion: 5
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 325608779}
+  m_GameObject: {fileID: 779572835}
   m_BodyType: 0
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
@@ -532,13 +509,13 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!61 &325608783
+--- !u!61 &779572839
 BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 325608779}
+  m_GameObject: {fileID: 779572835}
   m_Enabled: 1
   serializedVersion: 3
   m_Density: 1
@@ -578,13 +555,13 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
---- !u!4 &325608784
+--- !u!4 &779572840
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 325608779}
+  m_GameObject: {fileID: 779572835}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 5.25, y: 1, z: 0}
@@ -593,7 +570,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &664196516
+--- !u!1 &1079478613
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -601,11 +578,11 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 664196521}
-  - component: {fileID: 664196520}
-  - component: {fileID: 664196519}
-  - component: {fileID: 664196518}
-  - component: {fileID: 664196517}
+  - component: {fileID: 1079478618}
+  - component: {fileID: 1079478617}
+  - component: {fileID: 1079478616}
+  - component: {fileID: 1079478615}
+  - component: {fileID: 1079478614}
   m_Layer: 7
   m_Name: Dummy_2
   m_TagString: Untagged
@@ -613,17 +590,17 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &664196517
+--- !u!114 &1079478614
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 664196516}
+  m_GameObject: {fileID: 1079478613}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e9b7b27034c589640bc7150bd80d1494, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.Debugging.DummyEnemy2D
   stats:
     maxHealth: 0
@@ -644,17 +621,18 @@ MonoBehaviour:
   hitKnockbackVertical: 1.25
   hitMovementLockDuration: 0.16
   monsterLoot: {fileID: 0}
---- !u!114 &664196518
+  experienceReward: 25
+--- !u!114 &1079478615
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 664196516}
+  m_GameObject: {fileID: 1079478613}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a4de3173f4d18944689da725f9d59902, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.Feedback.FloatingDamageTextController
   damageTextType: 0
   spawnPoint: {fileID: 0}
@@ -663,14 +641,14 @@ MonoBehaviour:
   showZeroDamageAsBlocked: 1
   logSpawns: 0
   testDamage: 12
---- !u!50 &664196519
+--- !u!50 &1079478616
 Rigidbody2D:
   serializedVersion: 5
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 664196516}
+  m_GameObject: {fileID: 1079478613}
   m_BodyType: 0
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
@@ -690,13 +668,13 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!61 &664196520
+--- !u!61 &1079478617
 BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 664196516}
+  m_GameObject: {fileID: 1079478613}
   m_Enabled: 1
   serializedVersion: 3
   m_Density: 1
@@ -736,13 +714,13 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
---- !u!4 &664196521
+--- !u!4 &1079478618
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 664196516}
+  m_GameObject: {fileID: 1079478613}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 2.75, y: 1, z: 0}
@@ -751,7 +729,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &745118462
+--- !u!1 &1581717268
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -759,8 +737,167 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 745118464}
-  - component: {fileID: 745118463}
+  - component: {fileID: 1581717273}
+  - component: {fileID: 1581717272}
+  - component: {fileID: 1581717271}
+  - component: {fileID: 1581717270}
+  - component: {fileID: 1581717269}
+  m_Layer: 7
+  m_Name: Dummy_3
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1581717269
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1581717268}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9b7b27034c589640bc7150bd80d1494, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.Debugging.DummyEnemy2D
+  stats:
+    maxHealth: 0
+    maxMana: 0
+    attackPower: 0
+    defense: 0
+    attackSpeed: 0
+    moveSpeed: 0
+  classType: 0
+  damageTextController: {fileID: 0}
+  deathUpwardVelocity: 5.5
+  deathHorizontalVelocity: 1.25
+  deathGravityScale: 3.5
+  destroyAfterDeath: 1.6
+  disableCollidersOnDeath: 1
+  hitReaction: {fileID: 0}
+  hitKnockbackHorizontal: 3.75
+  hitKnockbackVertical: 1.25
+  hitMovementLockDuration: 0.16
+  monsterLoot: {fileID: 0}
+  experienceReward: 25
+--- !u!114 &1581717270
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1581717268}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a4de3173f4d18944689da725f9d59902, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.Feedback.FloatingDamageTextController
+  damageTextType: 0
+  spawnPoint: {fileID: 0}
+  localOffset: {x: 0, y: 1.25}
+  roundDamage: 1
+  showZeroDamageAsBlocked: 1
+  logSpawns: 0
+  testDamage: 12
+--- !u!50 &1581717271
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1581717268}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
+--- !u!61 &1581717272
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1581717268}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 1, y: 1}
+  m_EdgeRadius: 0
+--- !u!4 &1581717273
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1581717268}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 4, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1771175722
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1771175724}
+  - component: {fileID: 1771175723}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -768,13 +905,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!20 &745118463
+--- !u!20 &1771175723
 Camera:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 745118462}
+  m_GameObject: {fileID: 1771175722}
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 1
@@ -819,147 +956,16 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
---- !u!4 &745118464
+--- !u!4 &1771175724
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 745118462}
+  m_GameObject: {fileID: 1771175722}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: -10}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1575724836
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1575724841}
-  - component: {fileID: 1575724840}
-  - component: {fileID: 1575724839}
-  - component: {fileID: 1575724838}
-  - component: {fileID: 1575724837}
-  m_Layer: 3
-  m_Name: Player_Warrior
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1575724837
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1575724836}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1537cf4c6a782844196875a3697839ae, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.Debugging.PlayerDebugInput2D
---- !u!114 &1575724838
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1575724836}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0bf56792beab7d24c8152ef880dfe337, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.Characters.PlayerClassController
-  classDefinition: {fileID: 11400000, guid: 306f8073e8a1cc44092e3fd981c35ac5, type: 2}
-  targetProviderComponent: {fileID: 1575724839}
-  defaultAutoAttackImpact: {fileID: 0}
-  autoAttackCombo: {fileID: 0}
-  damageTextController: {fileID: 0}
-  facingDirection: {x: 1, y: 0}
-  hitReaction: {fileID: 0}
-  damageKnockbackHorizontal: 5
-  damageKnockbackVertical: 2.5
-  damageMovementLockDuration: 0.22
-  invulnerabilityDuration: 1.25
---- !u!114 &1575724839
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1575724836}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 23b0b5d26388f21409922fe327e32670, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.Infrastructure.Physics2DTargetProvider
-  targetLayers:
-    serializedVersion: 2
-    m_Bits: 384
---- !u!61 &1575724840
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1575724836}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_CompositeOperation: 0
-  m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0, y: 0}
-    oldSize: {x: 0, y: 0}
-    newSize: {x: 0, y: 0}
-    adaptiveTilingThreshold: 0
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
-  m_EdgeRadius: 0
---- !u!4 &1575724841
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1575724836}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -969,9 +975,9 @@ Transform:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 745118464}
-  - {fileID: 1575724841}
-  - {fileID: 226089474}
-  - {fileID: 664196521}
-  - {fileID: 64898487}
-  - {fileID: 325608784}
+  - {fileID: 1771175724}
+  - {fileID: 252229229}
+  - {fileID: 458764083}
+  - {fileID: 1079478618}
+  - {fileID: 1581717273}
+  - {fileID: 779572840}

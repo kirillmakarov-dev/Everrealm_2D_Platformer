@@ -29,6 +29,8 @@ namespace LetterHunter.EditorTools
         private const string CurrencyPath = "Assets/SoftKitty/InventoryEngine/Textures/Currency/Currency0.png";
         private const string InventoryWindowPrefabPath = "Assets/_Game/Prefabs/UI/InventoryWindow.prefab";
         private const string ShopWindowPrefabPath = "Assets/_Game/Prefabs/UI/ShopWindow.prefab";
+        private const string ShopItemRowPrefabPath = "Assets/_Game/Prefabs/UI/ShopItemRow.prefab";
+        private const string ShopActionButtonPrefabPath = "Assets/_Game/Prefabs/UI/ShopActionButton.prefab";
 
         private static readonly Color Parchment = new(0.93f, 0.87f, 0.73f, 1f);
         private static readonly Color Gold = new(0.92f, 0.69f, 0.27f, 1f);
@@ -144,7 +146,7 @@ namespace LetterHunter.EditorTools
                 return;
             }
 
-            SkinPrefab("Assets/_Game/Prefabs/UI/ShopItemRow.prefab", SkinShopRow);
+            BuildShopPrefabs();
             foreach (var shop in Resources.FindObjectsOfTypeAll<ShopWindowPresenter>())
             {
                 if (shop != null && shop.gameObject.scene.path == scene.path)
@@ -178,7 +180,7 @@ namespace LetterHunter.EditorTools
                 return;
 
             SkinPrefab("Assets/_Game/Prefabs/UI/InventorySlot.prefab", SkinInventorySlot);
-            SkinPrefab("Assets/_Game/Prefabs/UI/ShopItemRow.prefab", SkinShopRow);
+            BuildShopPrefabs();
 
             var inventory = UnityEngine.Object.FindFirstObjectByType<InventoryWindowPresenter>(FindObjectsInactive.Include);
             if (inventory != null)
@@ -238,9 +240,108 @@ namespace LetterHunter.EditorTools
             SkinPrefab("Assets/_Game/Prefabs/UI/InventorySlot.prefab", SkinInventorySlot);
             SkinPrefab("Assets/_Game/Prefabs/UI/SkillSlot.prefab", SkinSkillSlot);
             SkinPrefab("Assets/_Game/Prefabs/UI/SkillTreeNode.prefab", SkinSkillTreeNode);
-            SkinPrefab("Assets/_Game/Prefabs/UI/ShopItemRow.prefab", SkinShopRow);
+            BuildShopPrefabs();
             SkinPrefab("Assets/_Game/Prefabs/UI/PlayerStatsPanel.prefab", root => StylePanel(root, "bg2"));
             SkinPrefab("Assets/_Game/Prefabs/UI/PlayerVitalsHud.prefab", PolishVitals);
+        }
+
+        private static void BuildShopPrefabs()
+        {
+            var actionButtonPrefab = EnsureShopActionButtonPrefab();
+            if (actionButtonPrefab == null || AssetDatabase.LoadAssetAtPath<GameObject>(ShopItemRowPrefabPath) == null)
+                return;
+
+            var root = PrefabUtility.LoadPrefabContents(ShopItemRowPrefabPath);
+            try
+            {
+                var oneButton = EnsureNestedShopButton(root.transform, "SellOneButton", actionButtonPrefab);
+                var stackButton = EnsureNestedShopButton(root.transform, "SellStackButton", actionButtonPrefab);
+                var view = root.GetComponent<ShopItemRowView>();
+                if (view != null)
+                {
+                    var so = new SerializedObject(view);
+                    so.FindProperty("sellOneButton").objectReferenceValue = oneButton;
+                    so.FindProperty("sellStackButton").objectReferenceValue = stackButton;
+                    so.ApplyModifiedPropertiesWithoutUndo();
+                }
+
+                SkinShopRow(root.transform);
+                PrefabUtility.SaveAsPrefabAsset(root, ShopItemRowPrefabPath);
+            }
+            finally
+            {
+                PrefabUtility.UnloadPrefabContents(root);
+            }
+
+            RemoveAuthoredRowsFromShopWindowPrefab();
+        }
+
+        private static void RemoveAuthoredRowsFromShopWindowPrefab()
+        {
+            if (AssetDatabase.LoadAssetAtPath<GameObject>(ShopWindowPrefabPath) == null)
+                return;
+
+            var root = PrefabUtility.LoadPrefabContents(ShopWindowPrefabPath);
+            try
+            {
+                var presenter = root.GetComponent<ShopWindowPresenter>();
+                if (presenter == null)
+                    return;
+
+                var so = new SerializedObject(presenter);
+                var rowRoot = so.FindProperty("rowRoot").objectReferenceValue as Transform;
+                if (rowRoot != null)
+                {
+                    foreach (var row in rowRoot.GetComponentsInChildren<ShopItemRowView>(true))
+                        UnityEngine.Object.DestroyImmediate(row.gameObject);
+                }
+
+                so.FindProperty("rowPrefab").objectReferenceValue =
+                    AssetDatabase.LoadAssetAtPath<ShopItemRowView>(ShopItemRowPrefabPath);
+                so.ApplyModifiedPropertiesWithoutUndo();
+                PrefabUtility.SaveAsPrefabAsset(root, ShopWindowPrefabPath);
+            }
+            finally
+            {
+                PrefabUtility.UnloadPrefabContents(root);
+            }
+        }
+
+        private static Button EnsureShopActionButtonPrefab()
+        {
+            if (AssetDatabase.LoadAssetAtPath<GameObject>(ShopActionButtonPrefabPath) == null)
+            {
+                var root = new GameObject("ShopActionButton", typeof(RectTransform), typeof(CanvasRenderer),
+                    typeof(Image), typeof(Button), typeof(LayoutElement));
+                var label = new GameObject("Label", typeof(RectTransform), typeof(CanvasRenderer),
+                    typeof(TextMeshProUGUI));
+                label.transform.SetParent(root.transform, false);
+                SkinShopActionButton(root.transform);
+                PrefabUtility.SaveAsPrefabAsset(root, ShopActionButtonPrefabPath);
+                UnityEngine.Object.DestroyImmediate(root);
+            }
+
+            return AssetDatabase.LoadAssetAtPath<Button>(ShopActionButtonPrefabPath);
+        }
+
+        private static Button EnsureNestedShopButton(Transform parent, string name, Button prefab)
+        {
+            var existing = parent.Find(name);
+            if (existing != null)
+            {
+                var sourcePath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(existing.gameObject);
+                if (sourcePath == ShopActionButtonPrefabPath)
+                    return existing.GetComponent<Button>();
+
+                UnityEngine.Object.DestroyImmediate(existing.gameObject);
+            }
+
+            var created = PrefabUtility.InstantiatePrefab(prefab.gameObject, parent) as GameObject;
+            if (created == null)
+                return null;
+
+            created.name = name;
+            return created.GetComponent<Button>();
         }
 
         private static void SkinPrefab(string path, Action<Transform> action)
@@ -666,11 +767,10 @@ namespace LetterHunter.EditorTools
         {
             var so = new SerializedObject(presenter);
             var rowRoot = so.FindProperty("rowRoot").objectReferenceValue as Transform;
-            var prefab = AssetDatabase.LoadAssetAtPath<ShopItemRowView>("Assets/_Game/Prefabs/UI/ShopItemRow.prefab");
+            var prefab = AssetDatabase.LoadAssetAtPath<ShopItemRowView>(ShopItemRowPrefabPath);
             if (rowRoot == null || prefab == null)
                 return;
-            var authored = so.FindProperty("authoredRows");
-            const int rowCount = 12;
+            so.FindProperty("rowPrefab").objectReferenceValue = prefab;
             var layout = rowRoot.GetComponent<VerticalLayoutGroup>() ?? rowRoot.gameObject.AddComponent<VerticalLayoutGroup>();
             layout.padding = new RectOffset(8, 8, 8, 8);
             layout.spacing = 4f;
@@ -679,16 +779,6 @@ namespace LetterHunter.EditorTools
             layout.childControlHeight = false;
             layout.childForceExpandWidth = true;
             layout.childForceExpandHeight = false;
-            authored.arraySize = rowCount;
-            for (var i = 0; i < rowCount; i++)
-            {
-                var row = FindOrCreateChild(rowRoot, $"AuthoredShopRow_{i + 1:00}", prefab);
-                if (row == null)
-                    continue;
-                row.gameObject.SetActive(false);
-                authored.GetArrayElementAtIndex(i).objectReferenceValue = row;
-                SkinShopRow(row.transform);
-            }
             so.ApplyModifiedPropertiesWithoutUndo();
             LayoutShopWindow(presenter, rowRoot);
             AssignCurrencySprites(presenter.transform);
@@ -804,7 +894,6 @@ namespace LetterHunter.EditorTools
                 empty.transform.SetAsLastSibling();
             }
 
-            StyleText(root);
         }
 
         private static void ConfigureShopTab(Button button, Vector2 position, string label, Color color)
@@ -920,8 +1009,6 @@ namespace LetterHunter.EditorTools
             ConfigureLayoutElement(FindDeep(root, "NameText"), 120f, 30f, 1f);
             ConfigureLayoutElement(FindDeep(root, "AmountText"), 44f, 30f);
             ConfigureLayoutElement(FindDeep(root, "PriceText"), 58f, 30f);
-            ConfigureLayoutElement(FindDeep(root, "SellOneButton"), 70f, 30f);
-            ConfigureLayoutElement(FindDeep(root, "SellStackButton"), 76f, 30f);
             var view = root.GetComponent<ShopItemRowView>();
             if (view != null)
             {
@@ -930,9 +1017,66 @@ namespace LetterHunter.EditorTools
                 viewSo.ApplyModifiedPropertiesWithoutUndo();
             }
 
-            StyleButtons(root);
-            StyleText(root);
+            StyleShopRowText(root);
             AddShadow(root.gameObject, 2f);
+        }
+
+        private static void SkinShopActionButton(Transform root)
+        {
+            if (root is RectTransform rect)
+                rect.sizeDelta = new Vector2(76f, 30f);
+
+            var layout = root.GetComponent<LayoutElement>() ?? root.gameObject.AddComponent<LayoutElement>();
+            layout.minWidth = 76f;
+            layout.preferredWidth = 76f;
+            layout.minHeight = 30f;
+            layout.preferredHeight = 30f;
+            layout.flexibleWidth = 0f;
+            layout.flexibleHeight = 0f;
+
+            var image = root.GetComponent<Image>() ?? root.gameObject.AddComponent<Image>();
+            SetImage(image, "button", Color.white, true);
+            image.raycastTarget = true;
+
+            var button = root.GetComponent<Button>() ?? root.gameObject.AddComponent<Button>();
+            button.targetGraphic = image;
+            button.transition = Selectable.Transition.ColorTint;
+            var colors = button.colors;
+            colors.normalColor = Color.white;
+            colors.highlightedColor = new Color(1f, 0.88f, 0.58f, 1f);
+            colors.pressedColor = new Color(0.65f, 0.5f, 0.28f, 1f);
+            colors.selectedColor = colors.highlightedColor;
+            colors.disabledColor = new Color(0.35f, 0.34f, 0.32f, 0.65f);
+            button.colors = colors;
+
+            var label = FindDeep(root, "Label")?.GetComponent<TMP_Text>();
+            if (label != null)
+            {
+                SetRect(label.rectTransform, Vector2.zero, Vector2.one, new Vector2(0.5f, 0.5f),
+                    Vector2.zero, Vector2.zero);
+                label.text = "Action";
+                label.fontSize = 14f;
+                label.fontStyle = FontStyles.Bold;
+                label.alignment = TextAlignmentOptions.Center;
+                label.color = Parchment;
+                label.raycastTarget = false;
+                label.textWrappingMode = TextWrappingModes.NoWrap;
+                label.overflowMode = TextOverflowModes.Ellipsis;
+            }
+
+            AddShadow(root.gameObject, 2f);
+        }
+
+        private static void StyleShopRowText(Transform root)
+        {
+            foreach (var name in new[] { "NameText", "AmountText", "PriceText" })
+            {
+                var text = FindDeep(root, name)?.GetComponent<TMP_Text>();
+                if (text == null)
+                    continue;
+                text.color = Parchment;
+                text.raycastTarget = false;
+            }
         }
 
         private static void ConfigureLayoutElement(Transform target, float preferredWidth, float preferredHeight,

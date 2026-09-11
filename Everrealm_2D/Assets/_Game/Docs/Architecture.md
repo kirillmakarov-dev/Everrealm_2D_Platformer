@@ -363,6 +363,8 @@ Current responsibilities:
 - `FloatingDamageTextPopup`: animates a single text instance.
 - `ImpactEffectPool`: pools hit effects.
 - `ImpactEffectInstance`: controls one spawned impact effect.
+- `PlayerFeedbackVfx`: plays authored one-shot prefabs for level-up and successful consumable restoration.
+- `LevelUpBannerView`: animates the authored screen-space banner nested inside the level-up VFX prefab.
 
 Rules:
 
@@ -370,6 +372,8 @@ Rules:
 - Feedback must not mutate gameplay state.
 - Combat can provide enough data for feedback through `DamageResult` and profile references.
 - Pooling should stay local to presentation systems.
+- Progress restoration must not present a level-up celebration; `PlayerLevelProgression.LevelIncreased`
+  is published only by live level gains and explicit level increases, not by save restoration.
 
 ## UI Architecture
 
@@ -511,6 +515,10 @@ views and never build visible UI controls. Each `ShopInteraction2D` owns its
 `ShopCatalogDefinition` and creates the transaction service for that shop; the shared shop UI
 receives the active shop context when opened, so different world shops can expose different
 buy and sell assortments without duplicating the canvas prefab.
+Shop row actions are nested instances of the shared `ShopActionButton.prefab`; visual state,
+font, and button colors are authored once there and inherited by every Buy and Sell row.
+`ShopWindow.prefab` stores one serialized `ShopItemRow.prefab` reference instead of authored row
+copies; its presenter instantiates and reuses only the number of rows required by the active shop.
 
 Consumables remain `ItemDefinition` data with `healthRestore` and `manaRestore` values.
 `LootPickup2D` places them in the normal runtime `Inventory`; `SkillBarPresenter` accepts a

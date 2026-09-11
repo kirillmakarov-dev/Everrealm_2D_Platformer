@@ -9,6 +9,9 @@ namespace LetterHunter.Tests.EditMode
 {
     public sealed class ShopUiRegressionTests
     {
+        private const string ActionButtonPrefabPath = "Assets/_Game/Prefabs/UI/ShopActionButton.prefab";
+        private const string RowPrefabPath = "Assets/_Game/Prefabs/UI/ShopItemRow.prefab";
+
         [Test]
         public void ShopRowPrefab_HasClickableSellButtons()
         {
@@ -17,6 +20,31 @@ namespace LetterHunter.Tests.EditMode
 
             AssertClickable(prefab.transform.Find("SellOneButton")?.GetComponent<Button>());
             AssertClickable(prefab.transform.Find("SellStackButton")?.GetComponent<Button>());
+        }
+
+        [Test]
+        public void ShopRowButtons_AreInstancesOfSharedActionButtonPrefab()
+        {
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(RowPrefabPath);
+            Assert.That(prefab, Is.Not.Null);
+
+            AssertSharedButtonPrefab(prefab.transform.Find("SellOneButton")?.GetComponent<Button>());
+            AssertSharedButtonPrefab(prefab.transform.Find("SellStackButton")?.GetComponent<Button>());
+        }
+
+        [Test]
+        public void ShopWindow_ReferencesOneRowPrefab_WithoutAuthoredRowCopies()
+        {
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Game/Prefabs/UI/ShopWindow.prefab");
+            Assert.That(prefab, Is.Not.Null);
+
+            var presenter = prefab.GetComponent<ShopWindowPresenter>();
+            Assert.That(presenter, Is.Not.Null);
+            Assert.That(prefab.GetComponentsInChildren<ShopItemRowView>(true), Is.Empty);
+
+            var so = new SerializedObject(presenter);
+            var rowPrefab = so.FindProperty("rowPrefab").objectReferenceValue;
+            Assert.That(AssetDatabase.GetAssetPath(rowPrefab), Is.EqualTo(RowPrefabPath));
         }
 
         [Test]
@@ -51,6 +79,13 @@ namespace LetterHunter.Tests.EditMode
             Assert.That(layout, Is.Not.Null);
             Assert.That(layout.preferredWidth, Is.GreaterThan(0f));
             Assert.That(layout.preferredHeight, Is.GreaterThan(0f));
+        }
+
+        private static void AssertSharedButtonPrefab(Button button)
+        {
+            Assert.That(button, Is.Not.Null);
+            Assert.That(PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(button.gameObject),
+                Is.EqualTo(ActionButtonPrefabPath));
         }
     }
 }
