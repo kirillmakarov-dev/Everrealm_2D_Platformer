@@ -50,6 +50,12 @@ A ledge departure does not create Jump. CharacterAnimationController presents th
 states; the Animator only blends clips. Stats supply effective jump velocity, while
 DefaultMovement authors base force, fall distance and input grace windows.
 
+The layered player Animator reads `LocomotionState` independently of the attack
+`CharacterState`, so jumps, landings and `MoveSpeed` continue updating during
+upper-body shooting. Ground transitions have no clip exit-time requirement.
+The skeleton keeps its solid collider during death, has no death launch impulse,
+and remains for five seconds so its 3.5-second death clip can finish on the floor.
+
 ### Player experience and levels
 
 LevelProgressionDefinition authors cumulative XP thresholds (level 1 starts at 0,

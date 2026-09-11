@@ -15,6 +15,11 @@ namespace LetterHunter.Characters
 
         public void NotifyJump() => _jumpStarted = true;
 
+        // Lower-body motion must keep following physics while the upper body shoots.
+        public CharacterStateId LocomotionState => _runtime.IsDead ? CharacterStateId.Dead
+            : !_runtime.Grounded ? EvaluateAirborneState(_runtime)
+            : Math.Abs(_runtime.CurrentVelocity.x) > .05f ? CharacterStateId.Run : CharacterStateId.Idle;
+
         public CharacterStateMachine(CharacterRuntime runtime, float minimumFallDistance = .5f)
         {
             _runtime = runtime;

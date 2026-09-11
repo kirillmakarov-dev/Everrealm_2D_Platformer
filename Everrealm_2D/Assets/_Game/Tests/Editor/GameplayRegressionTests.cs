@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Linq;
+using UnityEditor;
+using UnityEditor.Animations;
 using LetterHunter.Characters;
 using LetterHunter.Classes;
 using LetterHunter.Combat;
@@ -436,6 +439,70 @@ namespace LetterHunter.Tests
             public void SetHorizontalVelocity(float x) => Velocity = new Vector2(x, Velocity.y);
             public void SetVerticalVelocity(float y) => Velocity = new Vector2(Velocity.x, y);
             public void ConfigureGravity(float value) { }
+        }
+
+        [Test]
+        public void Shooting_DoesNotHideJumpFallOrLandingFromLocomotion()
+        {
+            var runtime = new CharacterRuntime();
+            var machine = new CharacterStateMachine(runtime);
+            machine.BeginAttack(1f);
+            machine.NotifyJump();
+            SetProperty(runtime, "CurrentVelocity", new Vector2(2f, 5f));
+            machine.Tick(.02f);
+            Assert.That(runtime.CurrentState, Is.EqualTo(CharacterStateId.Attack));
+            Assert.That(machine.LocomotionState, Is.EqualTo(CharacterStateId.Jump));
+            SetProperty(runtime, "CurrentVelocity", new Vector2(2f, -5f));
+            SetProperty(runtime, "AirborneDropDistance", 1f);
+            machine.Tick(.02f);
+            Assert.That(machine.LocomotionState, Is.EqualTo(CharacterStateId.Fall));
+            SetProperty(runtime, "Grounded", true);
+            machine.Tick(.02f);
+            Assert.That(machine.LocomotionState, Is.EqualTo(CharacterStateId.Run));
+            SetProperty(runtime, "CurrentVelocity", Vector2.zero);
+            machine.Tick(.02f);
+            Assert.That(machine.LocomotionState, Is.EqualTo(CharacterStateId.Idle));
+            Assert.That(runtime.CurrentState, Is.EqualTo(CharacterStateId.Attack));
+        }
+
+        [Test]
+        public void PlayerAnimator_LandingAndFallUsePhysics_AndShootingCannotRestartItself()
+        {
+            var controller = AssetDatabase.LoadAssetAtPath<AnimatorController>("Assets/Player model/Walking.controller");
+            var states = controller.layers[0].stateMachine.states.Select(s => s.state).ToArray();
+            foreach (var name in new[] { "Jump", "Fall" })
+            {
+                var state = states.Single(s => s.name == name);
+                var landing = state.transitions.Single(t => t.destinationState.name == "Blend Tree");
+                Assert.That(landing.hasExitTime, Is.False, name + " must land immediately");
+                Assert.That(landing.conditions.Any(c => c.parameter == "LocomotionState" && c.threshold == 0), Is.True);
+                Assert.That(landing.duration, Is.LessThanOrEqualTo(.08f));
+            }
+            var falling = states.Single(s => s.name == "Jump").transitions.Single(t => t.destinationState.name == "Fall");
+            Assert.That(falling.hasExitTime, Is.False);
+            Assert.That(falling.conditions.Any(c => c.parameter == "LocomotionState" && c.threshold == 3), Is.True);
+            Assert.That(states.Single(s => s.name == "Fall").transitions.Any(t => t.destinationState.name == "Jump"), Is.True);
+            var shot = controller.layers[1].stateMachine.anyStateTransitions.Single();
+            Assert.That(shot.canTransitionToSelf, Is.False);
+            Assert.That(shot.duration, Is.LessThanOrEqualTo(.05f));
+        }
+
+        [Test]
+        public void SkeletonDeath_KeepsFloorCollision_AndOutlivesDeathClip()
+        {
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Game/Prefabs/Enemies/SkeletonEnemy.prefab");
+            var enemy = new SerializedObject(prefab.GetComponent<LetterHunter.Debugging.DummyEnemy2D>());
+            Assert.That(enemy.FindProperty("disableCollidersOnDeath").boolValue, Is.False);
+            Assert.That(enemy.FindProperty("deathUpwardVelocity").floatValue, Is.Zero);
+            Assert.That(enemy.FindProperty("deathHorizontalVelocity").floatValue, Is.Zero);
+            Assert.That(prefab.GetComponentsInChildren<Collider2D>().Any(c => c.enabled && !c.isTrigger), Is.True);
+            var clip = AssetDatabase.LoadAssetAtPath<AnimationClip>("Assets/_Game/Enemy model/skeleton Death.anim");
+            Assert.That(enemy.FindProperty("destroyAfterDeath").floatValue, Is.GreaterThan(clip.length));
+            var controller = AssetDatabase.LoadAssetAtPath<AnimatorController>("Assets/_Game/Enemy model/SkeletonEnemy.controller");
+            var death = controller.layers[0].stateMachine.anyStateTransitions.Single(t =>
+                t.conditions.Any(c => c.parameter == "Dead"));
+            Assert.That(death.canTransitionToSelf, Is.False, "Dead stays true; self-transition would restart the clip every frame");
+            Assert.That(death.hasExitTime, Is.False);
         }
 
         private sealed class JumpTestGround : IGroundDetector

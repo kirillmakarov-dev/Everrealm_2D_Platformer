@@ -8,6 +8,8 @@ namespace LetterHunter.Characters
         private static readonly int StateHash = Animator.StringToHash("CharacterState");
         private static readonly int SpeedHash = Animator.StringToHash("MoveSpeed");
         private static readonly int DeadHash = Animator.StringToHash("IsDead");
+        private static readonly int LocomotionHash = Animator.StringToHash("LocomotionState");
+        private bool _hasLocomotionParameter;
 
         private void Awake()
         {
@@ -16,6 +18,10 @@ namespace LetterHunter.Characters
 
             if (animator == null)
                 Debug.LogWarning("CharacterAnimationController could not find an Animator on the character or its visual child.", this);
+            else
+                foreach (var parameter in animator.parameters)
+                    if (parameter.nameHash == LocomotionHash && parameter.type == AnimatorControllerParameterType.Int)
+                        _hasLocomotionParameter = true;
         }
 
         private void OnValidate()
@@ -40,6 +46,12 @@ namespace LetterHunter.Characters
         {
             if (animator != null)
                 animator.SetFloat(SpeedHash, Mathf.Clamp01(normalizedSpeed));
+        }
+        public void UpdateLocomotion(CharacterStateId state, float normalizedSpeed)
+        {
+            SetMoveSpeed(state == CharacterStateId.Dead ? 0f : normalizedSpeed);
+            if (animator != null && _hasLocomotionParameter)
+                animator.SetInteger(LocomotionHash, (int)(state == CharacterStateId.Run ? CharacterStateId.Idle : state));
         }
         public void PlayJump() => SetState(CharacterStateId.Jump);
 

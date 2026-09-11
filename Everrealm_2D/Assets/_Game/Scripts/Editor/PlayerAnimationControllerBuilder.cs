@@ -61,10 +61,8 @@ namespace LetterHunter.Editor
             Add(locomotion, shootingState, 0f, Condition(StateParameter, AnimatorConditionMode.Equals, 4));
             Add(locomotion, deathState, 0f, Condition(DeadParameter, AnimatorConditionMode.If));
 
-            // The jump clip owns the takeoff phase. When it reaches its end, the
-            // base layer always continues into the airborne fall phase; landing is
-            // handled by the existing Jump -> locomotion transition.
-            Add(jumpState, fallState, .08f, true, .95f);
+            // Physics owns ascent/descent; clip exit time must not start a fall early.
+            Add(jumpState, fallState, .08f, Condition(StateParameter, AnimatorConditionMode.Equals, 3));
             Add(jumpState, locomotion, .04f, Condition(StateParameter, AnimatorConditionMode.Equals, 0));
             Add(jumpState, shootingState, 0f, Condition(StateParameter, AnimatorConditionMode.Equals, 4));
             Add(jumpState, deathState, 0f, Condition(DeadParameter, AnimatorConditionMode.If));

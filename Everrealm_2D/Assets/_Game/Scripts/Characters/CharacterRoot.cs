@@ -152,8 +152,7 @@ namespace LetterHunter.Characters
             _stateMachine.SetMinimumFallDistance(movementConfig.MinimumFallDistance);
             Runtime.IsDead = combatModule != null && !combatModule.IsAlive;
             _stateMachine.Tick(Time.deltaTime);
-            if (Runtime.CurrentState == CharacterStateId.Run)
-                animationController?.SetMoveSpeed(GetAnimationMoveSpeed());
+            animationController?.UpdateLocomotion(_stateMachine.LocomotionState, GetAnimationMoveSpeed());
         }
 
         private void OnDestroy()
