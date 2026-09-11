@@ -179,14 +179,19 @@ namespace LetterHunter.Characters
             projectile = instance.GetComponent<SkillProjectile2D>() ?? instance.AddComponent<SkillProjectile2D>();
             var resolvedSpeed = skill.ProjectileSpeed > 0f ? skill.ProjectileSpeed : speed;
             var resolvedLifetime = skill.ProjectileLifetime > 0f ? skill.ProjectileLifetime : lifetime;
+            var launchedProjectile = projectile;
             projectile.Launch(this, cast, resolvedSpeed, resolvedLifetime,
                 target =>
                 {
                     var hitResult = _skillService.ResolveProjectileHit(cast, target);
                     if (hitResult.Success)
-                        soundManager?.PlayImpact();
+                        soundManager?.PlayImpact(skill.ProjectileImpactSound != null
+                            ? skill.ProjectileImpactSound
+                            : launchedProjectile.ImpactSound);
                 });
-            soundManager?.PlayShot();
+            soundManager?.PlayShot(skill.ProjectileLaunchSound != null
+                ? skill.ProjectileLaunchSound
+                : launchedProjectile.LaunchSound);
             return result;
         }
 
@@ -200,15 +205,16 @@ namespace LetterHunter.Characters
                 : new GameObject("Basic Skill Projectile");
             instance.transform.SetPositionAndRotation(new Vector3(position.x, position.y, 0f), Quaternion.identity);
             projectile = instance.GetComponent<SkillProjectile2D>() ?? instance.AddComponent<SkillProjectile2D>();
+            var launchedProjectile = projectile;
             projectile.Launch(this, FacingDirection, speed, lifetime,
                 target =>
                 {
                     var result = _autoAttackService.ExecuteOnTarget(FacingDirection, target);
                     if (result.AppliedSuccessfully)
-                        soundManager?.PlayImpact();
+                        soundManager?.PlayImpact(launchedProjectile.ImpactSound);
                 },
                 GetEmpowerVisualIcon());
-            soundManager?.PlayShot();
+            soundManager?.PlayShot(launchedProjectile.LaunchSound);
             return true;
         }
 

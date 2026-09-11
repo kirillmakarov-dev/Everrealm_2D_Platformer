@@ -50,6 +50,8 @@ MonoBehaviour:
   hitLayers:
     serializedVersion: 2
     m_Bits: 4294967295
+  launchSound: {fileID: 8300000, guid: 762bf412213c66942889af42f2a308d3, type: 3}
+  impactSound: {fileID: 0}
   createFallbackVisual: 0
   fallbackColor: {r: 1, g: 0.8, b: 0.12, a: 1}
   fallbackLength: 0.36

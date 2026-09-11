@@ -62,6 +62,12 @@ namespace LetterHunter.Debugging
                 monsterLoot = GetComponent<MonsterLoot>();
         }
 
+        private void FixedUpdate()
+        {
+            if (_defeated)
+                StopDeathHorizontalMovement();
+        }
+
         public void ReceiveDamage(DamageResult result)
         {
             if (_defeated)
@@ -99,13 +105,32 @@ namespace LetterHunter.Debugging
                     collider.enabled = false;
             }
 
-            _body.gravityScale = deathGravityScale;
-            // Death is a vertical fall onto the current surface. Do not carry
-            // patrol or hit-reaction velocity into the corpse, otherwise it slides
-            // across the platform while the death animation is playing.
-            _body.linearVelocity = new Vector2(0f, deathUpwardVelocity);
+            ConfigureDeathPhysics();
 
             Destroy(gameObject, destroyAfterDeath);
+        }
+
+        private void ConfigureDeathPhysics()
+        {
+            _body.gravityScale = deathGravityScale;
+            // Keep vertical physics active so the corpse lands on the platform,
+            // while preventing collision resolution or a late hit from restoring
+            // horizontal movement during the death animation.
+            _body.constraints |= RigidbodyConstraints2D.FreezePositionX | RigidbodyConstraints2D.FreezeRotation;
+            _body.linearVelocity = new Vector2(0f, deathUpwardVelocity);
+            _body.angularVelocity = 0f;
+        }
+
+        private void StopDeathHorizontalMovement()
+        {
+            if (_body == null)
+                return;
+
+            var velocity = _body.linearVelocity;
+            if (!Mathf.Approximately(velocity.x, 0f))
+                _body.linearVelocity = new Vector2(0f, velocity.y);
+            if (!Mathf.Approximately(_body.angularVelocity, 0f))
+                _body.angularVelocity = 0f;
         }
     }
 }

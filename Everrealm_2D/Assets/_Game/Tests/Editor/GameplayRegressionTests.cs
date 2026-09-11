@@ -505,6 +505,83 @@ namespace LetterHunter.Tests
             Assert.That(death.hasExitTime, Is.False);
         }
 
+        [Test]
+        public void SkeletonDeath_LocksHorizontalPositionAndClearsResidualMotion()
+        {
+            var root = new GameObject("Death movement test");
+            _objects.Add(root);
+            var body = root.AddComponent<Rigidbody2D>();
+            root.AddComponent<BoxCollider2D>();
+            var enemy = root.AddComponent<LetterHunter.Debugging.DummyEnemy2D>();
+            SetField(enemy, "_body", body);
+            SetField(enemy, "deathUpwardVelocity", 0f);
+            SetField(enemy, "deathGravityScale", 3.5f);
+
+            body.constraints = RigidbodyConstraints2D.FreezeRotation;
+            body.linearVelocity = new Vector2(4f, -2f);
+            body.angularVelocity = 5f;
+            InvokePrivate(enemy, "ConfigureDeathPhysics");
+
+            Assert.That(body.constraints.HasFlag(RigidbodyConstraints2D.FreezePositionX), Is.True);
+            Assert.That(body.gravityScale, Is.EqualTo(3.5f));
+
+            body.linearVelocity = new Vector2(3f, -2f);
+            body.angularVelocity = 5f;
+            InvokePrivate(enemy, "StopDeathHorizontalMovement");
+
+            Assert.That(body.linearVelocity.x, Is.Zero);
+            Assert.That(body.linearVelocity.y, Is.EqualTo(-2f));
+            Assert.That(body.angularVelocity, Is.Zero);
+        }
+
+        [Test]
+        public void EnemyPatrol_IgnoresTargetsSeparatedByAnotherPlatform()
+        {
+            var enemyObject = new GameObject("Patrol vertical range test");
+            _objects.Add(enemyObject);
+            enemyObject.transform.position = Vector3.zero;
+            enemyObject.AddComponent<Rigidbody2D>();
+            var enemyCollider = enemyObject.AddComponent<BoxCollider2D>();
+            enemyCollider.size = new Vector2(1f, 2f);
+            var patrol = enemyObject.AddComponent<EnemyPatrolAI2D>();
+
+            var targetObject = new GameObject("Target");
+            _objects.Add(targetObject);
+            targetObject.transform.position = new Vector3(0f, 4f, 0f);
+            var targetCollider = targetObject.AddComponent<BoxCollider2D>();
+            targetCollider.size = new Vector2(1f, 2f);
+            Physics2D.SyncTransforms();
+
+            SetField(patrol, "_collider", enemyCollider);
+            SetField(patrol, "maxTargetVerticalGap", 1.25f);
+            Assert.That((bool)InvokePrivate(patrol, "IsWithinTargetVerticalRange", targetObject.transform, targetCollider), Is.False);
+
+            targetObject.transform.position = new Vector3(2f, 0f, 0f);
+            Physics2D.SyncTransforms();
+            Assert.That((bool)InvokePrivate(patrol, "IsWithinTargetVerticalRange", targetObject.transform, targetCollider), Is.True);
+        }
+
+        [Test]
+        public void ProjectileAudio_UsesPrefabOverrides_AndBasicPrefabFallsBackToManager()
+        {
+            var fire = AssetDatabase.LoadAssetAtPath<GameObject>(
+                "Assets/_Game/Prefabs/Projectiles/Skills/Projectile_warrior_fire_spin.prefab");
+            var basic = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Game/Prefabs/SkillProjectile.prefab");
+            var fireProjectile = fire.GetComponent<SkillProjectile2D>();
+            var basicProjectile = basic.GetComponent<SkillProjectile2D>();
+            var bouncingStar = AssetDatabase.LoadAssetAtPath<SkillDefinition>(
+                "Assets/_Game/Data/Skills/Ninja/BouncingStar.asset");
+
+            Assert.That(fireProjectile.LaunchSound, Is.Not.Null);
+            Assert.That(fireProjectile.ImpactSound, Is.Not.Null);
+            Assert.That(bouncingStar.ProjectileLaunchSound, Is.Not.Null,
+                "A skill definition can override the projectile prefab launch sound.");
+            Assert.That(basicProjectile.LaunchSound, Is.Null,
+                "The default projectile must use SoundManager's default shot when no override is authored.");
+            Assert.That(basicProjectile.ImpactSound, Is.Null,
+                "The default projectile must use SoundManager's default impact when no override is authored.");
+        }
+
         private sealed class JumpTestGround : IGroundDetector
         {
             public bool IsGrounded { get; set; }
@@ -629,6 +706,14 @@ namespace LetterHunter.Tests
                 BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
             if (property == null) throw new MissingMemberException(target.GetType().Name, propertyName);
             property.SetValue(target, value);
+        }
+
+        private static object InvokePrivate(object target, string methodName, params object[] arguments)
+        {
+            var method = target.GetType().GetMethod(methodName,
+                BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+            if (method == null) throw new MissingMethodException(target.GetType().Name, methodName);
+            return method.Invoke(target, arguments);
         }
 
         private sealed class TestCombatActor : ICombatActor

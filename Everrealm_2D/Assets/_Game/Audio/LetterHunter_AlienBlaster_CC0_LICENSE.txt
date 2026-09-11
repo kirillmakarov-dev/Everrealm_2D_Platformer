@@ -1,0 +1,8 @@
+Letter Hunter - Alien Blaster shot sound
+
+Source: https://opengameart.org/content/alien-blaster
+Direct asset: https://opengameart.org/sites/default/files/alien-blaster.wav
+Author: cyklon698
+License: CC0 1.0 Universal (public domain dedication)
+
+The sound is used as the player's basic weapon shot in Letter Hunter.

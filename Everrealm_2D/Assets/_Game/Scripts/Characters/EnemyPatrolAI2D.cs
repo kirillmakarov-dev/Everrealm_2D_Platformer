@@ -4,7 +4,7 @@ using UnityEngine;
 namespace LetterHunter.Characters
 {
     [DisallowMultipleComponent]
-    //[RequireComponent(typeof(Rigidbody2D))]
+    [RequireComponent(typeof(Rigidbody2D))]
     public sealed class EnemyPatrolAI2D : MonoBehaviour
     {
         [Header("Patrol Zone")]
@@ -19,6 +19,8 @@ namespace LetterHunter.Characters
         [SerializeField] private bool requirePlayerTarget = true;
         [Min(0f), SerializeField] private float detectionRange = 5f;
         [Min(0f), SerializeField] private float loseTargetDistance = 7f;
+        [Tooltip("Maximum vertical gap between the enemy and target colliders. Targets on another platform are ignored.")]
+        [Min(0f), SerializeField] private float maxTargetVerticalGap = 1.25f;
         [Min(0f), SerializeField] private float chaseSpeed = 2.25f;
         [Min(0.1f), SerializeField] private float attackStopDistance = 1.2f;
         [Min(0.05f), SerializeField] private float targetRefreshInterval = 0.2f;
@@ -163,6 +165,13 @@ namespace LetterHunter.Characters
 
         private void ChaseTarget()
         {
+            if (!IsWithinTargetVerticalRange(_targetTransform, _targetCollider))
+            {
+                ClearTarget();
+                Patrol();
+                return;
+            }
+
             var targetPosition = _targetTransform.position;
             var direction = Mathf.Sign(targetPosition.x - transform.position.x);
             if (Mathf.Approximately(direction, 0f))
@@ -212,7 +221,7 @@ namespace LetterHunter.Characters
             {
                 var targetPosition = _targetTransform.position;
                 var distance = Vector2.Distance(transform.position, targetPosition);
-                if (distance <= loseTargetDistance)
+                if (distance <= loseTargetDistance && IsWithinTargetVerticalRange(_targetTransform, _targetCollider))
                     return;
             }
 
@@ -235,6 +244,9 @@ namespace LetterHunter.Characters
                     continue;
 
                 if (ReferenceEquals(damageable, _self) || !damageable.IsAlive)
+                    continue;
+
+                if (!IsWithinTargetVerticalRange(targetTransform, targetCollider))
                     continue;
 
                 var targetPosition = targetTransform.position;
@@ -312,6 +324,28 @@ namespace LetterHunter.Characters
                 return selfBounds.min.x - targetBounds.max.x;
 
             return 0f;
+        }
+
+        private bool IsWithinTargetVerticalRange(Transform targetTransform, Collider2D targetCollider)
+        {
+            if (targetTransform == null)
+                return false;
+
+            if (_collider == null || targetCollider == null)
+                return Mathf.Abs(targetTransform.position.y - transform.position.y) <= maxTargetVerticalGap;
+
+            var selfBounds = _collider.bounds;
+            var targetBounds = targetCollider.bounds;
+            float verticalGap;
+
+            if (selfBounds.max.y < targetBounds.min.y)
+                verticalGap = targetBounds.min.y - selfBounds.max.y;
+            else if (targetBounds.max.y < selfBounds.min.y)
+                verticalGap = selfBounds.min.y - targetBounds.max.y;
+            else
+                verticalGap = 0f;
+
+            return verticalGap <= maxTargetVerticalGap;
         }
 
         private void SetHorizontalVelocity(float velocity)

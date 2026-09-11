@@ -18,6 +18,7 @@ namespace LetterHunter.EditorTools
         private const string AudioFolder = "Assets/_Game/Audio";
         private const string MixerPath = AudioFolder + "/LetterHunterAudio.mixer";
         private const string MusicPath = "Assets/2D Dungeon Tilemap/Musics & Sounds CC0/Music 1.wav";
+        private const string ShotPath = AudioFolder + "/LetterHunter_LaserShot_CC0.wav";
         private const string SoundFolder = "Assets/SoftKitty/InventoryEngine/Resources/Sounds/";
 
         [MenuItem("Tools/Letter Hunter/Audio/Build Scene Audio")]
@@ -170,7 +171,7 @@ namespace LetterHunter.EditorTools
             serialized.FindProperty("sfxSource").objectReferenceValue = sfx;
             serialized.FindProperty("uiSource").objectReferenceValue = ui;
             serialized.FindProperty("sceneMusic").objectReferenceValue = Clip(MusicPath);
-            serialized.FindProperty("shotClip").objectReferenceValue = Clip(SoundFolder + "Attack.wav");
+            serialized.FindProperty("shotClip").objectReferenceValue = Clip(ShotPath);
             serialized.FindProperty("impactClip").objectReferenceValue = Clip(SoundFolder + "ItemDrop.wav");
             serialized.FindProperty("buttonHoverClip").objectReferenceValue = Clip(SoundFolder + "bt_hover.wav");
             serialized.FindProperty("buttonClickClip").objectReferenceValue = Clip(SoundFolder + "bt_up.wav");

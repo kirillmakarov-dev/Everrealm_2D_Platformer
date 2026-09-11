@@ -64126,7 +64126,7 @@ MonoBehaviour:
   sfxSource: {fileID: 136606270}
   uiSource: {fileID: 402377221}
   sceneMusic: {fileID: 8300000, guid: 50a97a97d379a104ca51ac8e01e47706, type: 3}
-  shotClip: {fileID: 8300000, guid: 763f219685a795e478c3eec047fd9901, type: 3}
+  shotClip: {fileID: 8300000, guid: 1ecd86c53eef5574da9fb107d3186d1a, type: 3}
   impactClip: {fileID: 8300000, guid: c0c361de91ab7024f8b09b11987bf7d6, type: 3}
   buttonHoverClip: {fileID: 8300000, guid: 57836cd276c67704180fc8fd97911165, type: 3}
   buttonClickClip: {fileID: 8300000, guid: 0cfd1796a2e31be4cb8616e4474941ec, type: 3}

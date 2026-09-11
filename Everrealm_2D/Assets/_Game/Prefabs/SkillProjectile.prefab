@@ -140,6 +140,8 @@ MonoBehaviour:
   hitLayers:
     serializedVersion: 2
     m_Bits: 4294967295
+  launchSound: {fileID: 0}
+  impactSound: {fileID: 0}
   createFallbackVisual: 1
   useSkillIconVisual: 1
   fallbackColor: {r: 1, g: 0.8, b: 0.12, a: 1}

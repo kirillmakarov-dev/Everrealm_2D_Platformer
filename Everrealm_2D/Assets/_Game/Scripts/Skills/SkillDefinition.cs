@@ -34,6 +34,11 @@ namespace LetterHunter.Skills
         [Min(0f), SerializeField] private float projectileSpeed;
         [Min(0f), SerializeField] private float projectileLifetime;
         [SerializeField] private DamageTag projectileDamageTags = DamageTag.Skill | DamageTag.Ranged;
+        [Header("Projectile Audio")]
+        [Tooltip("Optional sound for this skill's projectile/ammunition. Overrides the projectile prefab, then falls back to SoundManager.")]
+        [SerializeField] private AudioClip projectileLaunchSound;
+        [Tooltip("Optional impact sound for this skill. Overrides the projectile prefab, then falls back to SoundManager.")]
+        [SerializeField] private AudioClip projectileImpactSound;
 
         public string SkillId => string.IsNullOrWhiteSpace(skillId) ? name : skillId;
         public string DisplayName => string.IsNullOrWhiteSpace(displayName) ? name : displayName;
@@ -57,5 +62,7 @@ namespace LetterHunter.Skills
         public float ProjectileSpeed => Mathf.Max(0f, projectileSpeed);
         public float ProjectileLifetime => Mathf.Max(0f, projectileLifetime);
         public DamageTag ProjectileDamageTags => projectileDamageTags | DamageTag.Skill | DamageTag.Ranged;
+        public AudioClip ProjectileLaunchSound => projectileLaunchSound;
+        public AudioClip ProjectileImpactSound => projectileImpactSound;
     }
 }

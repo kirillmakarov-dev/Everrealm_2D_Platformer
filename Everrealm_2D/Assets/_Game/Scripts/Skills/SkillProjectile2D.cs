@@ -9,6 +9,11 @@ namespace LetterHunter.Skills
         [Header("Hit")]
         [Min(.01f), SerializeField] private float hitRadius = .12f;
         [SerializeField] private LayerMask hitLayers = ~0;
+        [Header("Audio")]
+        [Tooltip("Optional launch sound for this projectile prefab. SoundManager's default shot is used when empty.")]
+        [SerializeField] private AudioClip launchSound;
+        [Tooltip("Optional impact sound for this projectile prefab. SoundManager's default impact is used when empty.")]
+        [SerializeField] private AudioClip impactSound;
         [Header("Fallback Visual")]
         [SerializeField] private bool createFallbackVisual = true;
         [SerializeField] private bool useSkillIconVisual = true;
@@ -25,6 +30,9 @@ namespace LetterHunter.Skills
         private SpriteRenderer[] _visualRenderers;
         private Sprite[] _defaultVisualSprites;
         private static Sprite _fallbackSprite;
+
+        public AudioClip LaunchSound => launchSound;
+        public AudioClip ImpactSound => impactSound;
 
         private void Awake()
         {

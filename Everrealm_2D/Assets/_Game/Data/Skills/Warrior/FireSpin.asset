@@ -34,3 +34,5 @@ MonoBehaviour:
   projectileSpeed: 13.05
   projectileLifetime: 2.8000002
   projectileDamageTags: 26
+  projectileLaunchSound: {fileID: 0}
+  projectileImpactSound: {fileID: 0}

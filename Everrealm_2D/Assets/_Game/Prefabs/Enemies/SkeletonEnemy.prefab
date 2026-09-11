@@ -240,6 +240,7 @@ MonoBehaviour:
   requirePlayerTarget: 1
   detectionRange: 5
   loseTargetDistance: 7
+  maxTargetVerticalGap: 1.25
   chaseSpeed: 2.25
   attackStopDistance: 1.2
   targetRefreshInterval: 0.2

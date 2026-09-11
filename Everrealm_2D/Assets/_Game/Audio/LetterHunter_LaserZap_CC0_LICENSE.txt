@@ -1,0 +1,8 @@
+Letter Hunter - Laser zap sound
+
+Source: https://opengameart.org/content/laser
+Direct asset: https://opengameart.org/sites/default/files/laserthing2.wav
+Author: frosty ham
+License: CC0 1.0 Universal (public domain dedication)
+
+This clip is an optional projectile launch or impact sound.

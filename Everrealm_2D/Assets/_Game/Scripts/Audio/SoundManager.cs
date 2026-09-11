@@ -71,8 +71,10 @@ namespace LetterHunter.Audio
             SavePreference(SfxPreference, SfxVolume);
         }
 
-        public void PlayShot() => Play(sfxSource, shotClip, shotLevel);
-        public void PlayImpact() => Play(sfxSource, impactClip, impactLevel);
+        public void PlayShot(AudioClip overrideClip = null) =>
+            Play(sfxSource, overrideClip != null ? overrideClip : shotClip, shotLevel);
+        public void PlayImpact(AudioClip overrideClip = null) =>
+            Play(sfxSource, overrideClip != null ? overrideClip : impactClip, impactLevel);
         public void PlayButtonHover() => Play(uiSource, buttonHoverClip, uiLevel);
         public void PlayButtonClick() => Play(uiSource, buttonClickClip, uiLevel);
         public void PlayMenuOpen() => Play(uiSource, menuOpenClip, uiLevel);
