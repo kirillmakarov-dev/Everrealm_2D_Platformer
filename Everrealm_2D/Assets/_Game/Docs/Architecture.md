@@ -494,6 +494,18 @@ Rules:
 - Future skill-tree unlocks should spend money from `CurrencyWallet` and optional materials from `Inventory`, not depend on loot generation directly.
 - Random loot rolls should use an injectable random source so drop behavior can be tested deterministically.
 
+World rewards are spawned separately for each rolled coin bundle or item row. `LootDropService`
+gives every spawned pickup an independent horizontal offset and vertical launch speed;
+`LootPickup2D` keeps a dynamic Rigidbody2D and a solid landing collider alongside its trigger
+collection collider, so rewards fall onto platforms and remain there until collected.
+
+The world shop is an authored scene object with a trigger interaction zone. `CharacterInputRouter`
+publishes the Interact command on `I`; `ShopInteraction2D` presents an on-screen interaction hint,
+using an authored World Space Canvas child on the shop object, and opens the existing
+`ShopWindowPresenter` and `InventoryWindowPresenter` together, while
+`ShopService` remains the only owner of sell transactions. Closing the shop also closes the
+inventory view and releases player input.
+
 Initial implementation files:
 
 - `ItemDefinition`, `ItemStack`, `InventorySlot`, `Inventory`, `InventoryAddResult`, and `PlayerInventory`.

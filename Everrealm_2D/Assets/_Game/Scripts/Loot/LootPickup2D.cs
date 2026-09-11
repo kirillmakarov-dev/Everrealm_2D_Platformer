@@ -7,6 +7,7 @@ namespace LetterHunter.Loot
     public enum LootPickupKind { Coins, ItemStack }
 
     [RequireComponent(typeof(Collider2D))]
+    [RequireComponent(typeof(Rigidbody2D))]
     public sealed class LootPickup2D : MonoBehaviour
     {
         [SerializeField] private LootPickupKind pickupKind;
@@ -15,11 +16,23 @@ namespace LetterHunter.Loot
         [Min(1), SerializeField] private int amount = 1;
         [SerializeField] private SpriteRenderer visual;
         [SerializeField] private bool destroyAfterCollect = true;
+        [Min(0f), SerializeField] private float collectionDelayAfterDrop = 0.35f;
+        private float _collectableAt;
+        private Component _pendingCollector;
 
         private void Awake()
         {
+            var body = GetComponent<Rigidbody2D>();
+            body.bodyType = RigidbodyType2D.Dynamic;
+            body.gravityScale = Mathf.Max(.01f, body.gravityScale);
+            body.interpolation = RigidbodyInterpolation2D.Interpolate;
+            body.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+
+            // The trigger is used for collection; additional solid colliders remain
+            // solid so the reward can land and stay on a platform.
             var pickupCollider = GetComponent<Collider2D>();
             pickupCollider.isTrigger = true;
+            EnsureLandingCollider();
             ResolveVisual();
             RefreshItemVisual();
         }
@@ -48,6 +61,27 @@ namespace LetterHunter.Loot
             RefreshItemVisual();
         }
 
+        public void LaunchFromDrop(Vector2 velocity, float angularVelocity)
+        {
+            var body = GetComponent<Rigidbody2D>();
+            if (body == null) return;
+
+            body.bodyType = RigidbodyType2D.Dynamic;
+            body.linearVelocity = velocity;
+            body.angularVelocity = angularVelocity;
+            _collectableAt = Time.time + Mathf.Max(0f, collectionDelayAfterDrop);
+        }
+
+        private void EnsureLandingCollider()
+        {
+            foreach (var collider in GetComponents<Collider2D>())
+                if (!collider.isTrigger)
+                    return;
+
+            var landingCollider = gameObject.AddComponent<BoxCollider2D>();
+            landingCollider.size = new Vector2(.55f, .55f);
+        }
+
         private void ResolveVisual()
         {
             if (visual == null)
@@ -67,10 +101,27 @@ namespace LetterHunter.Loot
             TryCollect(other);
         }
 
+        private void OnTriggerExit2D(Collider2D other)
+        {
+            if (_pendingCollector == other)
+                _pendingCollector = null;
+        }
+
+        private void Update()
+        {
+            if (_pendingCollector != null && Time.time >= _collectableAt)
+                TryCollect(_pendingCollector);
+        }
+
         public bool TryCollect(Component collector)
         {
             if (collector == null)
                 return false;
+            if (Time.time < _collectableAt)
+            {
+                _pendingCollector = collector;
+                return false;
+            }
 
             var collected = pickupKind == LootPickupKind.Coins
                 ? TryCollectCoins(collector)

@@ -187,7 +187,7 @@ namespace LetterHunter.UI.Inventory
                 goldText.text = gold.ToString();
         }
 
-        private void SetVisible(bool visible)
+        public void SetVisible(bool visible)
         {
             if (!visible && _dragGhost != null)
                 EndSlotDrag();

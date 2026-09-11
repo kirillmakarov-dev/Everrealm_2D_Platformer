@@ -9,6 +9,8 @@ namespace LetterHunter.Loot
         [SerializeField] private LootPickup2D coinPickupPrefab;
         [SerializeField] private LootPickup2D itemPickupPrefab;
         [Min(0f), SerializeField] private float scatterRadius = 0.6f;
+        [Min(0f), SerializeField] private float dropHeight = 0.8f;
+        [Min(0f), SerializeField] private float upwardLaunchSpeed = 3.8f;
 
         public void Drop(LootRoll roll, Vector3 origin)
         {
@@ -37,16 +39,30 @@ namespace LetterHunter.Loot
 
         private LootPickup2D CreatePickup(LootPickup2D prefab, string fallbackName, Vector3 origin)
         {
-            var position = origin + (Vector3)(Random.insideUnitCircle * scatterRadius);
+            // Give every reward its own start point and launch impulse. The loot table
+            // decides what drops; this only controls the physical presentation.
+            var offset = Random.insideUnitCircle * scatterRadius;
+            var position = origin + new Vector3(offset.x, dropHeight + Mathf.Max(0f, offset.y * .25f), 0f);
+            // Vary the upward hop while keeping horizontal velocity at zero. This
+            // makes rewards look individually spawned without letting them slide.
+            var launchSpeed = Random.Range(upwardLaunchSpeed * .85f, upwardLaunchSpeed);
             if (prefab != null)
-                return Instantiate(prefab, position, Quaternion.identity);
+            {
+                var pickup = Instantiate(prefab, position, Quaternion.identity);
+                pickup.LaunchFromDrop(Vector2.up * launchSpeed, 0f);
+                return pickup;
+            }
 
             var pickupObject = new GameObject(fallbackName);
             pickupObject.transform.position = position;
             var collider = pickupObject.AddComponent<CircleCollider2D>();
             collider.isTrigger = true;
             collider.radius = 0.35f;
-            return pickupObject.AddComponent<LootPickup2D>();
+            var landingCollider = pickupObject.AddComponent<BoxCollider2D>();
+            landingCollider.size = new Vector2(.55f, .55f);
+            var fallbackPickup = pickupObject.AddComponent<LootPickup2D>();
+            fallbackPickup.LaunchFromDrop(Vector2.up * launchSpeed, 0f);
+            return fallbackPickup;
         }
     }
 }

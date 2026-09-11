@@ -72,6 +72,10 @@ namespace LetterHunter.UI.Shop
                 SetVisible(!IsVisible);
         }
 
+        public bool IsVisible => windowGroup == null ? gameObject.activeSelf : windowGroup.alpha > 0.01f;
+
+        public event System.Action<bool> VisibilityChanged;
+
         public void SetVisible(bool visible)
         {
             characterInput?.SetBlocked(visible);
@@ -80,6 +84,7 @@ namespace LetterHunter.UI.Shop
                 gameObject.SetActive(visible);
                 if (visible)
                     Render();
+                VisibilityChanged?.Invoke(visible);
                 return;
             }
 
@@ -92,6 +97,8 @@ namespace LetterHunter.UI.Shop
                 Cursor.lockState = CursorLockMode.None;
                 Render();
             }
+
+            VisibilityChanged?.Invoke(visible);
         }
 
         public void CloseShop()
@@ -201,6 +208,5 @@ namespace LetterHunter.UI.Shop
             }
         }
 
-        private bool IsVisible => windowGroup == null ? gameObject.activeSelf : windowGroup.alpha > 0.01f;
     }
 }

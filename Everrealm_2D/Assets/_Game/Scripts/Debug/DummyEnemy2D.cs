@@ -18,7 +18,11 @@ namespace LetterHunter.Debugging
         [SerializeField] private FloatingDamageTextController damageTextController;
         [Header("Death Feedback")]
         [Min(0f), SerializeField] private float deathUpwardVelocity = 5.5f;
+        // Kept for backwards-compatible prefab/scene serialization. Death movement
+        // is intentionally vertical now, so this legacy value is never applied.
+#pragma warning disable CS0414
         [Min(0f), SerializeField] private float deathHorizontalVelocity = 1.25f;
+#pragma warning restore CS0414
         [Min(0f), SerializeField] private float deathGravityScale = 3.5f;
         [Min(0.05f), SerializeField] private float destroyAfterDeath = 1.6f;
         [SerializeField] private bool disableCollidersOnDeath = true;
@@ -70,7 +74,7 @@ namespace LetterHunter.Debugging
             if (!IsAlive)
             {
                 Debug.Log($"{name} has been defeated.", this);
-                BeginDeath(result.AttackDirection);
+                BeginDeath();
                 return;
             }
 
@@ -78,7 +82,7 @@ namespace LetterHunter.Debugging
                 hitKnockbackVertical, hitMovementLockDuration);
         }
 
-        private void BeginDeath(Vector2 attackDirection)
+        private void BeginDeath()
         {
             _defeated = true;
             monsterLoot?.DropLoot();
@@ -95,9 +99,11 @@ namespace LetterHunter.Debugging
                     collider.enabled = false;
             }
 
-            var horizontalDirection = attackDirection.x < -0.001f ? -1f : 1f;
             _body.gravityScale = deathGravityScale;
-            _body.linearVelocity = new Vector2(horizontalDirection * deathHorizontalVelocity, deathUpwardVelocity);
+            // Death is a vertical fall onto the current surface. Do not carry
+            // patrol or hit-reaction velocity into the corpse, otherwise it slides
+            // across the platform while the death animation is playing.
+            _body.linearVelocity = new Vector2(0f, deathUpwardVelocity);
 
             Destroy(gameObject, destroyAfterDeath);
         }

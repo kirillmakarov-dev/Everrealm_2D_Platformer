@@ -15,15 +15,18 @@ namespace LetterHunter.Characters
 
         [Header("Combat")]
         [SerializeField] private Key attackKey = Key.J;
+        [SerializeField] private Key interactKey = Key.I;
         [SerializeField] private Key[] skillKeys = Array.Empty<Key>();
         [SerializeField] private Key[] secondarySkillKeys = { Key.Digit1, Key.Digit2, Key.Digit3, Key.Digit4 };
 
         public event Action<Vector2> MoveRequested;
         public event Action JumpRequested;
         public event Action AttackRequested;
+        public event Action InteractRequested;
         public event Action<bool> SprintChanged;
         public event Action<int> SkillRequested;
         public bool IsBlocked { get; private set; }
+        public Key InteractKey => interactKey;
 
         public void SetBlocked(bool blocked)
         {
@@ -47,6 +50,7 @@ namespace LetterHunter.Characters
             if (IsPressed(keyboard, moveRightKey)) move.x += 1f;
             MoveRequested?.Invoke(move);
             if (WasPressedThisFrame(keyboard, jumpKey)) JumpRequested?.Invoke();
+            if (WasPressedThisFrame(keyboard, interactKey)) InteractRequested?.Invoke();
             var mouse = Mouse.current;
             var mouseAttackPressed = mouse?.leftButton.wasPressedThisFrame == true && !IsPointerOverUi();
             if (WasPressedThisFrame(keyboard, attackKey) || mouseAttackPressed)
