@@ -25,6 +25,8 @@ namespace LetterHunter.Characters
 
         [Header("Facing")]
         [SerializeField] private Transform visualRoot;
+        [Tooltip("Enabled for SpriteRenderer visuals. Disabled for a 3D model that must rotate around Y.")]
+        [SerializeField] private bool useSpriteFlip = true;
         [SerializeField] private bool visualFacesRightByDefault;
 
         private readonly Collider2D[] _hits = new Collider2D[8];
@@ -38,6 +40,7 @@ namespace LetterHunter.Characters
         private Collider2D _targetCollider;
         private ContactFilter2D _targetFilter;
         private Vector3 _initialScale;
+        private Quaternion _initialRotation;
         private float _spawnX;
         private float _edgeWaitRemaining;
         private float _targetRefreshRemaining;
@@ -64,6 +67,7 @@ namespace LetterHunter.Characters
             if (visualRoot == null)
                 visualRoot = transform;
             _initialScale = visualRoot.localScale;
+            _initialRotation = visualRoot.localRotation;
         }
 
         private void OnDisable()
@@ -321,11 +325,21 @@ namespace LetterHunter.Characters
             if (Mathf.Abs(direction) < 0.001f || visualRoot == null)
                 return;
 
-            var scale = _initialScale;
-            var defaultFacingSign = visualFacesRightByDefault ? 1f : -1f;
-            scale.x = Mathf.Abs(_initialScale.x) * defaultFacingSign * (direction < 0f ? -1f : 1f);
-            visualRoot.localScale = scale;
-            _patrolDirection = direction < 0f ? -1 : 1;
+            var requestedFacingSign = direction < 0f ? -1 : 1;
+            var defaultFacingSign = visualFacesRightByDefault ? 1 : -1;
+            var reverseVisual = requestedFacingSign != defaultFacingSign;
+
+            if (useSpriteFlip)
+            {
+                var scale = _initialScale;
+                scale.x = Mathf.Abs(_initialScale.x) * defaultFacingSign * requestedFacingSign;
+                visualRoot.localScale = scale;
+            }
+            else
+            {
+                visualRoot.localRotation = _initialRotation * Quaternion.Euler(0f, reverseVisual ? 180f : 0f, 0f);
+            }
+            _patrolDirection = requestedFacingSign;
         }
 
         private void OnDrawGizmosSelected()

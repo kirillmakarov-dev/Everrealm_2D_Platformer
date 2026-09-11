@@ -1325,7 +1325,7 @@ Transform:
   m_GameObject: {fileID: 270510397}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -47.83, y: 4.5, z: -10}
+  m_LocalPosition: {x: -47.64, y: 4.39, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1825,7 +1825,7 @@ Transform:
   m_GameObject: {fileID: 339686738}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -47.83, y: 4.5, z: -10}
+  m_LocalPosition: {x: -47.64, y: 4.39, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -65128,7 +65128,7 @@ Transform:
   m_GameObject: {fileID: 782792991}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -47.83, y: 0, z: 0}
+  m_LocalPosition: {x: 100, y: 100, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -71411,26 +71411,6 @@ PrefabInstance:
     - target: {fileID: 5681902298256087528, guid: 3cebb8a8782efef43862fcbe5bb745f6, type: 3}
       propertyPath: m_Name
       value: SkeletonEnemy
-      objectReference: {fileID: 0}
-    - target: {fileID: 6223311032597382679, guid: 3cebb8a8782efef43862fcbe5bb745f6, type: 3}
-      propertyPath: m_Size.y
-      value: 3.588977
-      objectReference: {fileID: 0}
-    - target: {fileID: 6223311032597382679, guid: 3cebb8a8782efef43862fcbe5bb745f6, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6223311032597382679, guid: 3cebb8a8782efef43862fcbe5bb745f6, type: 3}
-      propertyPath: m_Offset.x
-      value: -0.12377155
-      objectReference: {fileID: 0}
-    - target: {fileID: 6223311032597382679, guid: 3cebb8a8782efef43862fcbe5bb745f6, type: 3}
-      propertyPath: m_Offset.y
-      value: 2.0939195
-      objectReference: {fileID: 0}
-    - target: {fileID: 7245305272492647266, guid: 3cebb8a8782efef43862fcbe5bb745f6, type: 3}
-      propertyPath: m_GravityScale
-      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

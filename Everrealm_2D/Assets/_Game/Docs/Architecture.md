@@ -63,6 +63,15 @@ per monster; PlayerClassController forwards it to the player progression adapter
 PlayerVitalsHudPresenter only displays level/XP using the existing Soft Kitty strip.
 The last authored threshold is the level cap; excess XP is retained and the bar is full.
 
+### Audio presentation
+
+`Audio/SoundManager` is a scene-level presentation adapter with explicit music,
+combat SFX and UI sources routed through the authored `LetterHunterAudio` mixer.
+Player combat reports successful projectile launches and hits to this adapter without
+changing damage resolution. `UiButtonSound` handles pointer and submit feedback for
+authored buttons. Pause Settings changes the exposed Master, Music and SFX mixer
+parameters and persists normalized user preferences through `PlayerPrefs`.
+
 - Keep gameplay code understandable, testable, and easy to extend.
 - Avoid global state and hidden dependencies. Do not introduce gameplay singletons.
 - Keep ScriptableObjects as authoring-time data, not runtime state containers.

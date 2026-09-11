@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using LetterHunter.UI.Pause;
+using LetterHunter.Audio;
 using TMPro;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -86,18 +87,15 @@ namespace LetterHunter.EditorTools
                 new Vector2(0f, -156f), new Vector2(360f, 36f));
 
             var settingsPanel = NewUi("SettingsPanel", card.transform);
-            SetRect((RectTransform)settingsPanel.transform, new Vector2(0.5f, 0.5f), new Vector2(0f, -42f), new Vector2(420f, 360f));
+            SetRect((RectTransform)settingsPanel.transform, new Vector2(0.5f, 0.5f), new Vector2(0f, -50f), new Vector2(420f, 430f));
             settingsPanel.SetActive(false);
             Text("SettingsTitle", settingsPanel.transform, "SETTINGS", 27f, Ivory, FontStyles.Bold, TextAlignmentOptions.Center,
-                new Vector2(0f, 145f), new Vector2(380f, 44f));
-            var volumePanel = Panel("VolumePanel", settingsPanel.transform, new Vector2(0f, 66f), new Vector2(380f, 108f));
-            Text("VolumeLabel", volumePanel.transform, "MASTER VOLUME", 16f, Ivory, FontStyles.Bold, TextAlignmentOptions.Left,
-                new Vector2(-55f, 24f), new Vector2(240f, 32f));
-            var volumeValue = Text("VolumeValue", volumePanel.transform, "100%", 16f, Gold, FontStyles.Bold, TextAlignmentOptions.Right,
-                new Vector2(143f, 24f), new Vector2(70f, 32f));
-            var slider = Slider(volumePanel.transform, new Vector2(0f, -24f));
-            var fullscreen = Toggle(settingsPanel.transform, new Vector2(0f, -38f));
-            var back = Button("BackButton", settingsPanel.transform, "BACK", "arrow2", new Vector2(0f, -142f));
+                new Vector2(0f, 192f), new Vector2(380f, 44f));
+            var master = VolumePanel("MasterVolumePanel", settingsPanel.transform, "MASTER", "100%", new Vector2(0f, 137f));
+            var music = VolumePanel("MusicVolumePanel", settingsPanel.transform, "MUSIC", "65%", new Vector2(0f, 61f));
+            var sfx = VolumePanel("SfxVolumePanel", settingsPanel.transform, "SOUND FX", "80%", new Vector2(0f, -15f));
+            var fullscreen = Toggle(settingsPanel.transform, new Vector2(0f, -91f));
+            var back = Button("BackButton", settingsPanel.transform, "BACK", "arrow2", new Vector2(0f, -174f));
 
             var serialized = new SerializedObject(controller);
             serialized.FindProperty("windowGroup").objectReferenceValue = group;
@@ -106,8 +104,12 @@ namespace LetterHunter.EditorTools
             serialized.FindProperty("exitButton").objectReferenceValue = exit;
             serialized.FindProperty("restartButton").objectReferenceValue = restart;
             serialized.FindProperty("settingsButton").objectReferenceValue = settings;
-            serialized.FindProperty("masterVolumeSlider").objectReferenceValue = slider;
-            serialized.FindProperty("masterVolumeValueText").objectReferenceValue = volumeValue;
+            serialized.FindProperty("masterVolumeSlider").objectReferenceValue = master.slider;
+            serialized.FindProperty("masterVolumeValueText").objectReferenceValue = master.value;
+            serialized.FindProperty("musicVolumeSlider").objectReferenceValue = music.slider;
+            serialized.FindProperty("musicVolumeValueText").objectReferenceValue = music.value;
+            serialized.FindProperty("sfxVolumeSlider").objectReferenceValue = sfx.slider;
+            serialized.FindProperty("sfxVolumeValueText").objectReferenceValue = sfx.value;
             serialized.FindProperty("fullscreenToggle").objectReferenceValue = fullscreen;
             serialized.FindProperty("backButton").objectReferenceValue = back;
             serialized.ApplyModifiedPropertiesWithoutUndo();
@@ -153,6 +155,7 @@ namespace LetterHunter.EditorTools
             SetImageType(hover);
 
             var button = image.gameObject.AddComponent<Button>();
+            image.gameObject.AddComponent<UiButtonSound>();
             button.targetGraphic = hover;
             var colors = button.colors;
             colors.normalColor = new Color(1f, 1f, 1f, 0f);
@@ -197,22 +200,34 @@ namespace LetterHunter.EditorTools
             return panel;
         }
 
+        private static (Slider slider, TMP_Text value) VolumePanel(string name, Transform parent,
+            string label, string initialValue, Vector2 position)
+        {
+            var panel = Panel(name, parent, position, new Vector2(380f, 70f));
+            Text("Label", panel.transform, label, 14f, Ivory, FontStyles.Bold, TextAlignmentOptions.Left,
+                new Vector2(-58f, 18f), new Vector2(230f, 28f));
+            var value = Text("Value", panel.transform, initialValue, 14f, Gold, FontStyles.Bold,
+                TextAlignmentOptions.Right, new Vector2(145f, 18f), new Vector2(68f, 28f));
+            var slider = Slider(panel.transform, new Vector2(0f, -18f));
+            return (slider, value);
+        }
+
         private static Slider Slider(Transform parent, Vector2 position)
         {
             var root = NewUi("MasterVolumeSlider", parent);
-            SetRect((RectTransform)root.transform, new Vector2(0.5f, 0.5f), position, new Vector2(334f, 42f));
+            SetRect((RectTransform)root.transform, new Vector2(0.5f, 0.5f), position, new Vector2(334f, 34f));
             var background = Image("Background", root.transform, Sprite("field1", "bar1"), new Color(0.1f, 0.11f, 0.11f, 1f));
-            Stretch(background.rectTransform, 0f, 12f);
+            Stretch(background.rectTransform, 0f, 9f);
             SetImageType(background);
             var fillArea = NewUi("Fill Area", root.transform);
-            Stretch((RectTransform)fillArea.transform, 12f, 15f);
+            Stretch((RectTransform)fillArea.transform, 12f, 12f);
             var fill = Image("Fill", fillArea.transform, Sprite("bar1", "line2"), Gold);
             Stretch(fill.rectTransform);
             SetImageType(fill);
             var handleArea = NewUi("Handle Slide Area", root.transform);
             Stretch((RectTransform)handleArea.transform, 15f, 0f);
             var handle = Image("Handle", handleArea.transform, Sprite("circle_item", "item"), Gold);
-            SetRect(handle.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(30f, 30f));
+            SetRect(handle.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(26f, 26f));
             var handleFrame = Image("Frame", handle.transform, Sprite("item_frame"), Ivory);
             Stretch(handleFrame.rectTransform);
             handleFrame.raycastTarget = false;

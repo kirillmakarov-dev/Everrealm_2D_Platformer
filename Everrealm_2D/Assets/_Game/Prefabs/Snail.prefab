@@ -164,7 +164,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: -0.05651343, y: -0.21118152}
+  m_Offset: {x: 0.30904394, y: -0.028402567}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -174,7 +174,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 2.1481144, y: 1.0178459}
+  m_Size: {x: 2.940156, y: 2.2059083}
   m_EdgeRadius: 0
 --- !u!114 &8021947382051461251
 MonoBehaviour:
@@ -207,6 +207,7 @@ MonoBehaviour:
   hitKnockbackVertical: 1.25
   hitMovementLockDuration: 0.16
   monsterLoot: {fileID: 0}
+  experienceReward: 25
 --- !u!114 &7916438927054816058
 MonoBehaviour:
   m_ObjectHideFlags: 0

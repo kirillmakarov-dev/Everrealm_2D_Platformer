@@ -6,6 +6,7 @@ using LetterHunter.Effects;
 using LetterHunter.Feedback;
 using LetterHunter.Skills;
 using LetterHunter.Stats;
+using LetterHunter.Audio;
 using UnityEngine;
 
 namespace LetterHunter.Characters
@@ -19,6 +20,8 @@ namespace LetterHunter.Characters
         [SerializeField] private AutoAttackComboDefinition autoAttackCombo;
         [SerializeField] private FloatingDamageTextController damageTextController;
         [SerializeField] private Vector2 facingDirection = Vector2.right;
+        [Header("Audio")]
+        [SerializeField] private SoundManager soundManager;
         [Header("Hit Reaction")]
         [SerializeField] private CharacterHitReaction2D hitReaction;
         [Min(0f), SerializeField] private float damageKnockbackHorizontal = 5f;
@@ -62,6 +65,8 @@ namespace LetterHunter.Characters
                 hitReaction = GetComponent<CharacterHitReaction2D>();
             if (hitReaction == null)
                 hitReaction = gameObject.AddComponent<CharacterHitReaction2D>();
+            if (soundManager == null)
+                soundManager = FindFirstObjectByType<SoundManager>();
 
             RebuildSkillRuntime(targetProvider);
         }
@@ -148,7 +153,13 @@ namespace LetterHunter.Characters
             var resolvedSpeed = skill.ProjectileSpeed > 0f ? skill.ProjectileSpeed : speed;
             var resolvedLifetime = skill.ProjectileLifetime > 0f ? skill.ProjectileLifetime : lifetime;
             projectile.Launch(this, cast, resolvedSpeed, resolvedLifetime,
-                target => _skillService.ResolveProjectileHit(cast, target));
+                target =>
+                {
+                    var hitResult = _skillService.ResolveProjectileHit(cast, target);
+                    if (hitResult.Success)
+                        soundManager?.PlayImpact();
+                });
+            soundManager?.PlayShot();
             return result;
         }
 
@@ -163,8 +174,14 @@ namespace LetterHunter.Characters
             instance.transform.SetPositionAndRotation(new Vector3(position.x, position.y, 0f), Quaternion.identity);
             projectile = instance.GetComponent<SkillProjectile2D>() ?? instance.AddComponent<SkillProjectile2D>();
             projectile.Launch(this, FacingDirection, speed, lifetime,
-                target => _autoAttackService.ExecuteOnTarget(FacingDirection, target),
+                target =>
+                {
+                    var result = _autoAttackService.ExecuteOnTarget(FacingDirection, target);
+                    if (result.AppliedSuccessfully)
+                        soundManager?.PlayImpact();
+                },
                 GetEmpowerVisualIcon());
+            soundManager?.PlayShot();
             return true;
         }
 

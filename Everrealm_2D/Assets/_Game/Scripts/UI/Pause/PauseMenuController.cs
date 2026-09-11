@@ -1,4 +1,5 @@
 using LetterHunter.UI.SkillTree;
+using LetterHunter.Audio;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -25,10 +26,15 @@ namespace LetterHunter.UI.Pause
         [Header("Settings")]
         [SerializeField] private Slider masterVolumeSlider;
         [SerializeField] private TMP_Text masterVolumeValueText;
+        [SerializeField] private Slider musicVolumeSlider;
+        [SerializeField] private TMP_Text musicVolumeValueText;
+        [SerializeField] private Slider sfxVolumeSlider;
+        [SerializeField] private TMP_Text sfxVolumeValueText;
         [SerializeField] private Toggle fullscreenToggle;
         [SerializeField] private Button backButton;
 
         private EverrealmSkillTreeVisual _skillTreeVisual;
+        private SoundManager _soundManager;
 
         private bool _isOpen;
         private float _timeScaleBeforePause = 1f;
@@ -42,19 +48,28 @@ namespace LetterHunter.UI.Pause
             if (windowGroup == null)
                 windowGroup = GetComponent<CanvasGroup>();
             _skillTreeVisual = FindFirstObjectByType<EverrealmSkillTreeVisual>();
+            _soundManager = FindFirstObjectByType<SoundManager>();
 
             exitButton?.onClick.AddListener(ExitGame);
             restartButton?.onClick.AddListener(RestartLevel);
             settingsButton?.onClick.AddListener(OpenSettings);
             backButton?.onClick.AddListener(ShowMainMenu);
             masterVolumeSlider?.onValueChanged.AddListener(SetMasterVolume);
+            musicVolumeSlider?.onValueChanged.AddListener(SetMusicVolume);
+            sfxVolumeSlider?.onValueChanged.AddListener(SetSfxVolume);
             fullscreenToggle?.onValueChanged.AddListener(SetFullscreen);
 
-            if (masterVolumeSlider != null)
-                masterVolumeSlider.SetValueWithoutNotify(AudioListener.volume);
+            var masterVolume = _soundManager != null ? _soundManager.MasterVolume : AudioListener.volume;
+            var musicVolume = _soundManager != null ? _soundManager.MusicVolume : 0.65f;
+            var sfxVolume = _soundManager != null ? _soundManager.SfxVolume : 0.8f;
+            masterVolumeSlider?.SetValueWithoutNotify(masterVolume);
+            musicVolumeSlider?.SetValueWithoutNotify(musicVolume);
+            sfxVolumeSlider?.SetValueWithoutNotify(sfxVolume);
             if (fullscreenToggle != null)
                 fullscreenToggle.SetIsOnWithoutNotify(Screen.fullScreen);
-            UpdateVolumeLabel(AudioListener.volume);
+            UpdateVolumeLabel(masterVolumeValueText, masterVolume);
+            UpdateVolumeLabel(musicVolumeValueText, musicVolume);
+            UpdateVolumeLabel(sfxVolumeValueText, sfxVolume);
             SetWindowVisible(false);
         }
 
@@ -100,6 +115,7 @@ namespace LetterHunter.UI.Pause
             Cursor.lockState = CursorLockMode.None;
             SetWindowVisible(true);
             ShowMainMenu();
+            _soundManager?.PlayMenuOpen();
         }
 
         public void Close()
@@ -107,6 +123,7 @@ namespace LetterHunter.UI.Pause
             if (!_isOpen)
                 return;
 
+            _soundManager?.PlayMenuClose();
             RestoreGameState();
             SetWindowVisible(false);
         }
@@ -147,8 +164,26 @@ namespace LetterHunter.UI.Pause
 
         public void SetMasterVolume(float value)
         {
-            AudioListener.volume = Mathf.Clamp01(value);
-            UpdateVolumeLabel(AudioListener.volume);
+            var normalized = Mathf.Clamp01(value);
+            if (_soundManager != null)
+                _soundManager.SetMasterVolume(normalized);
+            else
+                AudioListener.volume = normalized;
+            UpdateVolumeLabel(masterVolumeValueText, normalized);
+        }
+
+        public void SetMusicVolume(float value)
+        {
+            var normalized = Mathf.Clamp01(value);
+            _soundManager?.SetMusicVolume(normalized);
+            UpdateVolumeLabel(musicVolumeValueText, normalized);
+        }
+
+        public void SetSfxVolume(float value)
+        {
+            var normalized = Mathf.Clamp01(value);
+            _soundManager?.SetSfxVolume(normalized);
+            UpdateVolumeLabel(sfxVolumeValueText, normalized);
         }
 
         public void SetFullscreen(bool value) => Screen.fullScreen = value;
@@ -171,10 +206,10 @@ namespace LetterHunter.UI.Pause
             windowGroup.blocksRaycasts = visible;
         }
 
-        private void UpdateVolumeLabel(float value)
+        private static void UpdateVolumeLabel(TMP_Text label, float value)
         {
-            if (masterVolumeValueText != null)
-                masterVolumeValueText.text = $"{Mathf.RoundToInt(value * 100f)}%";
+            if (label != null)
+                label.text = $"{Mathf.RoundToInt(value * 100f)}%";
         }
 
         private static void Select(GameObject target)
