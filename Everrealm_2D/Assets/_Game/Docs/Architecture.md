@@ -490,7 +490,7 @@ Rules:
 - `ItemDefinition` assets describe item data; runtime quantity belongs in `ItemStack`.
 - `LootTable` assets describe possible drops; runtime roll results belong in `LootRoll`.
 - `Inventory` should merge stacks, enforce capacity, and expose read-only slot state to UI.
-- `ShopService` should sell items by removing them from `Inventory` and adding gold to `CurrencyWallet`.
+- `ShopService` owns both shop transactions: selling removes items from `Inventory` and adds gold to `CurrencyWallet`, while buying validates a `ShopCatalogDefinition`, spends gold, and adds the configured item to `Inventory` transactionally.
 - Future skill-tree unlocks should spend money from `CurrencyWallet` and optional materials from `Inventory`, not depend on loot generation directly.
 - Random loot rolls should use an injectable random source so drop behavior can be tested deterministically.
 
@@ -503,8 +503,20 @@ The world shop is an authored scene object with a trigger interaction zone. `Cha
 publishes the Interact command on `I`; `ShopInteraction2D` presents an on-screen interaction hint,
 using an authored World Space Canvas child on the shop object, and opens the existing
 `ShopWindowPresenter` and `InventoryWindowPresenter` together, while
-`ShopService` remains the only owner of sell transactions. Closing the shop also closes the
-inventory view and releases player input.
+`ShopService` remains the only owner of shop transactions. The shop window uses authored Buy
+and Sell tab buttons from `ShopWindow.prefab`; `ShopCatalogDefinition` is the ScriptableObject
+source of purchasable items/prices and accepted sellable items, while the Sell tab is populated
+from the player's matching inventory. Runtime presenters only bind state to these authored
+views and never build visible UI controls. Each `ShopInteraction2D` owns its
+`ShopCatalogDefinition` and creates the transaction service for that shop; the shared shop UI
+receives the active shop context when opened, so different world shops can expose different
+buy and sell assortments without duplicating the canvas prefab.
+
+Consumables remain `ItemDefinition` data with `healthRestore` and `manaRestore` values.
+`LootPickup2D` places them in the normal runtime `Inventory`; `SkillBarPresenter` accepts a
+dragged `InventorySlotView` item into an authored skill slot, renders the current inventory
+quantity, and consumes one item only after `PlayerClassController` applies its configured effect.
+An empty stack clears the consumable from that bar slot.
 
 Initial implementation files:
 

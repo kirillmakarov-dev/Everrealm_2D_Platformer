@@ -1,4 +1,6 @@
 using LetterHunter.Characters;
+using LetterHunter.Economy;
+using LetterHunter.Items;
 using LetterHunter.UI.Inventory;
 using TMPro;
 using UnityEngine;
@@ -10,12 +12,19 @@ namespace LetterHunter.UI.Shop
     public sealed class ShopInteraction2D : MonoBehaviour
     {
         [SerializeField] private ShopWindowPresenter shopWindow;
+        [SerializeField] private ShopCatalogDefinition shopCatalog;
         [SerializeField] private InventoryWindowPresenter inventoryWindow;
+        [SerializeField] private PlayerInventory playerInventory;
+        [SerializeField] private CurrencyWallet wallet;
         [SerializeField] private CanvasGroup interactionPrompt;
         [SerializeField] private TMP_Text interactionPromptText;
 
         private CharacterInputRouter _playerInput;
+        private ShopService _shopService;
         private bool _playerInRange;
+
+        public ShopCatalogDefinition Catalog => shopCatalog;
+        public ShopService Service => _shopService;
 
         private void Awake()
         {
@@ -25,8 +34,15 @@ namespace LetterHunter.UI.Shop
                 shopWindow = FindFirstObjectByType<ShopWindowPresenter>(FindObjectsInactive.Include);
             if (inventoryWindow == null)
                 inventoryWindow = FindFirstObjectByType<InventoryWindowPresenter>(FindObjectsInactive.Include);
+            if (playerInventory == null)
+                playerInventory = FindFirstObjectByType<PlayerInventory>();
+            if (wallet == null)
+                wallet = FindFirstObjectByType<CurrencyWallet>();
+            RebuildShopService();
             if (shopWindow != null)
+            {
                 shopWindow.VisibilityChanged += OnShopVisibilityChanged;
+            }
             SetPromptVisible(false);
         }
 
@@ -75,6 +91,11 @@ namespace LetterHunter.UI.Shop
                 return;
 
             var shouldOpen = !shopWindow.IsVisible;
+            if (shouldOpen)
+            {
+                RebuildShopService();
+                shopWindow.SetShop(this);
+            }
             shopWindow.SetVisible(shouldOpen);
             inventoryWindow?.SetVisible(shouldOpen);
             SetPromptVisible(!shouldOpen);
@@ -85,6 +106,14 @@ namespace LetterHunter.UI.Shop
             if (!visible)
                 inventoryWindow?.SetVisible(false);
             SetPromptVisible(_playerInRange && !visible);
+        }
+
+        private void RebuildShopService()
+        {
+            _shopService = new ShopService(
+                playerInventory != null ? playerInventory.RuntimeInventory : null,
+                wallet,
+                shopCatalog);
         }
 
         private void UpdatePromptText()

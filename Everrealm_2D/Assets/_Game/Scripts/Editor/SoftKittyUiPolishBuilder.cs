@@ -145,7 +145,6 @@ namespace LetterHunter.EditorTools
             }
 
             SkinPrefab("Assets/_Game/Prefabs/UI/ShopItemRow.prefab", SkinShopRow);
-            ReserveShopToggleKey(scene);
             foreach (var shop in Resources.FindObjectsOfTypeAll<ShopWindowPresenter>())
             {
                 if (shop != null && shop.gameObject.scene.path == scene.path)
@@ -155,23 +154,7 @@ namespace LetterHunter.EditorTools
             EditorSceneManager.MarkSceneDirty(scene);
             AssetDatabase.SaveAssets();
             EditorSceneManager.SaveScene(scene);
-            Debug.Log("SoftKitty shop visuals built. Shop logic and the O toggle were preserved.");
-        }
-
-        private static void ReserveShopToggleKey(Scene scene)
-        {
-            foreach (var router in Resources.FindObjectsOfTypeAll<CharacterInputRouter>())
-            {
-                if (router == null || router.gameObject.scene.path != scene.path)
-                    continue;
-                var routerSo = new SerializedObject(router);
-                var legacySkillKeys = routerSo.FindProperty("skillKeys");
-                if (legacySkillKeys == null)
-                    continue;
-                legacySkillKeys.arraySize = 0;
-                routerSo.ApplyModifiedPropertiesWithoutUndo();
-                EditorUtility.SetDirty(router);
-            }
+            Debug.Log("SoftKitty shop visuals built. Shop opens only through the authored interaction zone; Buy and Sell are prefab tabs.");
         }
 
         public static void BuildShopDebugScene()
@@ -771,11 +754,16 @@ namespace LetterHunter.EditorTools
             if (rowRoot is RectTransform rowsRect)
             {
                 SetRect(rowsRect, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f),
-                    new Vector2(0.5f, 1f), new Vector2(0f, -110f), new Vector2(490f, 520f));
+                    new Vector2(0.5f, 1f), new Vector2(0f, -164f), new Vector2(490f, 466f));
                 SetImage(rowRoot.GetComponent<Image>() ?? rowRoot.gameObject.AddComponent<Image>(), "bg3",
                     new Color(0.12f, 0.1f, 0.085f, 0.88f), true);
                 AddFrame(rowRoot, "ShopRowsFrame", "frame1", new Color(0.58f, 0.48f, 0.32f, 0.75f));
             }
+
+            ConfigureShopTab(root.Find("BuyTabButton")?.GetComponent<Button>(),
+                new Vector2(-95f, -114f), "Buy", new Color(0.86f, 0.58f, 0.2f, 1f));
+            ConfigureShopTab(root.Find("SellTabButton")?.GetComponent<Button>(),
+                new Vector2(95f, -114f), "Sell", new Color(0.25f, 0.22f, 0.18f, 1f));
 
             var footer = EnsureImage(root, "ShopFooter");
             SetRect(footer.rectTransform, new Vector2(0f, 0f), new Vector2(1f, 0f),
@@ -817,6 +805,27 @@ namespace LetterHunter.EditorTools
             }
 
             StyleText(root);
+        }
+
+        private static void ConfigureShopTab(Button button, Vector2 position, string label, Color color)
+        {
+            if (button == null)
+                return;
+
+            SetRect(button.transform as RectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f),
+                new Vector2(0.5f, 0.5f), position, new Vector2(170f, 42f));
+            var image = button.GetComponent<Image>();
+            if (image != null)
+                image.color = color;
+            var text = button.GetComponentInChildren<TMP_Text>(true);
+            if (text != null)
+            {
+                text.text = label;
+                text.fontSize = 18f;
+                text.alignment = TextAlignmentOptions.Center;
+                text.color = Parchment;
+                text.raycastTarget = false;
+            }
         }
 
         private static void SkinInventorySlot(Transform root)

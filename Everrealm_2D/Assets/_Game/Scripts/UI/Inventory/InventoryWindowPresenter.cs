@@ -17,6 +17,7 @@ namespace LetterHunter.UI.Inventory
         [SerializeField] private Transform slotRoot;
         [SerializeField] private List<InventorySlotView> slotViews = new();
         [SerializeField] private Image dragGhost;
+        [SerializeField] private Canvas dragGhostCanvas;
         [SerializeField] private TMP_Text goldText;
         [SerializeField] private TMP_Text capacityText;
         [SerializeField] private Key toggleKey = Key.B;
@@ -257,6 +258,17 @@ namespace LetterHunter.UI.Inventory
                 rect.pivot = new Vector2(0.5f, 0.5f);
                 rect.localScale = Vector3.one;
             }
+
+            var dragCanvas = dragGhostCanvas;
+            if (dragCanvas == null)
+                dragCanvas = _dragGhost.GetComponent<Canvas>();
+            if (dragCanvas == null)
+            {
+                Debug.LogWarning("Inventory drag ghost requires an authored Canvas component.", this);
+                return;
+            }
+            dragCanvas.overrideSorting = true;
+            dragCanvas.sortingOrder = 1000;
             _dragGhost.sprite = sprite;
             _dragGhost.raycastTarget = false;
             _dragGhost.preserveAspect = true;

@@ -1,4 +1,6 @@
 using System;
+using LetterHunter.Items;
+using LetterHunter.UI.Inventory;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -27,6 +29,7 @@ namespace LetterHunter.UI.Skills
 
         private int _index;
         private bool _hasSkill;
+        private bool _hasConsumable;
         private bool _dragHidden;
 
         public event Action<int> Clicked;
@@ -36,6 +39,7 @@ namespace LetterHunter.UI.Skills
         public event Action<PointerEventData> DragMoved;
         public event Action DragEnded;
         public event Action<int> Dropped;
+        public event Action<int, InventorySlotView> ItemDropped;
 
         private void Awake()
         {
@@ -51,6 +55,7 @@ namespace LetterHunter.UI.Skills
         {
             _index = model.Index;
             _hasSkill = model.HasSkill;
+            _hasConsumable = false;
             var showSkill = model.HasSkill && !_dragHidden;
 
             if (keyText != null) keyText.text = model.InputLabel;
@@ -84,6 +89,34 @@ namespace LetterHunter.UI.Skills
 
             if (button != null)
                 button.interactable = showSkill && model.IsReady;
+        }
+
+        public void RenderConsumable(ItemDefinition item, int amount, string inputLabel)
+        {
+            _hasSkill = false;
+            _hasConsumable = item != null && amount > 0;
+
+            if (keyText != null)
+                keyText.text = inputLabel ?? string.Empty;
+            if (nameText != null)
+                nameText.text = _hasConsumable ? $"{item.DisplayName} x{amount}" : "Empty";
+            if (icon != null)
+            {
+                icon.enabled = _hasConsumable && item.Icon != null;
+                icon.sprite = _hasConsumable ? item.Icon : null;
+                icon.color = Color.white;
+            }
+            if (background != null)
+                background.color = _hasConsumable ? Color.white : emptyColor;
+            if (cooldownOverlay != null)
+                cooldownOverlay.enabled = false;
+            if (cooldownText != null)
+            {
+                cooldownText.enabled = false;
+                cooldownText.text = string.Empty;
+            }
+            if (button != null)
+                button.interactable = _hasConsumable;
         }
 
         public void SetDragHidden(bool hidden)
@@ -139,7 +172,15 @@ namespace LetterHunter.UI.Skills
 
         public void OnDrop(PointerEventData eventData)
         {
-            if (eventData.button == PointerEventData.InputButton.Left)
+            if (eventData.button != PointerEventData.InputButton.Left)
+                return;
+
+            var inventorySlot = eventData.pointerDrag != null
+                ? eventData.pointerDrag.GetComponent<InventorySlotView>()
+                : null;
+            if (inventorySlot != null)
+                ItemDropped?.Invoke(_index, inventorySlot);
+            else
                 Dropped?.Invoke(_index);
         }
     }

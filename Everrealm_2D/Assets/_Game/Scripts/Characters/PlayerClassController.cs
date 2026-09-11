@@ -4,6 +4,7 @@ using LetterHunter.Combat;
 using LetterHunter.Core;
 using LetterHunter.Effects;
 using LetterHunter.Feedback;
+using LetterHunter.Items;
 using LetterHunter.Skills;
 using LetterHunter.Stats;
 using LetterHunter.Audio;
@@ -49,6 +50,25 @@ namespace LetterHunter.Characters
         public PassiveService PassiveService => _passiveService;
         public AutoAttackService AutoAttackService => _autoAttackService;
         public EmpowerState EmpowerState => _empowerState;
+
+        public bool TryUseConsumable(ItemDefinition item)
+        {
+            if (item == null || item.ItemType != ItemType.Consumable || Stats == null)
+                return false;
+            if (item.HealthRestore <= 0f && item.ManaRestore <= 0f)
+                return false;
+
+            var canRestoreHealth = item.HealthRestore > 0f && Stats.CurrentHealth < Stats.MaxHealth;
+            var canRestoreMana = item.ManaRestore > 0f && Stats.CurrentMana < Stats.MaxMana;
+            if (!canRestoreHealth && !canRestoreMana)
+                return false;
+
+            if (canRestoreHealth)
+                Stats.Heal(item.HealthRestore);
+            if (canRestoreMana)
+                Stats.RestoreMana(item.ManaRestore);
+            return true;
+        }
 
         private void Awake()
         {

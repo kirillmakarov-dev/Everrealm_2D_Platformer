@@ -188,6 +188,12 @@ namespace LetterHunter.Characters
             if (skillBar != null && skillBar.IsAssigningSkill)
                 return;
 
+            if (skillBar != null)
+            {
+                skillBar.TryActivateSlot(slot);
+                return;
+            }
+
             TryUseSkillSlot(slot);
         }
 

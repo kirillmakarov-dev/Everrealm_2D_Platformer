@@ -219,6 +219,7 @@ MonoBehaviour:
   - {fileID: 9122826526046268523}
   - {fileID: 3198982019803087924}
   dragGhost: {fileID: 7187680535911788978}
+  dragGhostCanvas: {fileID: 9000000020}
   goldText: {fileID: 120442156061666416}
   capacityText: {fileID: 4980175607872906557}
   toggleKey: 16
@@ -550,6 +551,7 @@ GameObject:
   - component: {fileID: 3968998148711273278}
   - component: {fileID: 7187680535911788978}
   - component: {fileID: 2031893387760081758}
+  - component: {fileID: 9000000020}
   m_Layer: 0
   m_Name: DraggedItemIcon
   m_TagString: Untagged
@@ -614,6 +616,20 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!223 &9000000020
+Canvas:
+  m_ObjectHideFlags: 0
+  m_GameObject: {fileID: 5697434483208103531}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 0
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_OverrideSorting: 1
+  m_OverridePixelPerfect: 0
+  m_SortingOrder: 1000
+  m_TargetDisplay: 0
+  m_AdditionalShaderChannelsFlag: 0
 --- !u!225 &2031893387760081758
 CanvasGroup:
   m_ObjectHideFlags: 0

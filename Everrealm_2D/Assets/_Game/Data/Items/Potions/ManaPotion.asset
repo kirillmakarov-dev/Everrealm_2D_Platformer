@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 847cfd4dcac38ba4693f9d2c20e1aa53, type: 3}
+  m_Name: ManaPotion
+  m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.Items.ItemDefinition
+  itemId: mana_potion
+  displayName: Mana Potion
+  description: Restores 20 mana when used.
+  icon: {fileID: 21300000, guid: 7b5c2d2b1e3f4ab89c2d8e1f5f2b3a42, type: 3}
+  itemType: 1
+  rarity: 0
+  maxStack: 20
+  sellPrice: 10
+  canSell: 1
+  healthRestore: 0
+  manaRestore: 20

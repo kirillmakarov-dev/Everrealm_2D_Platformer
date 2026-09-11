@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f4b9e11d7a8434c9b0d2e6f8a1c5b77, type: 3}
+  m_Name: StarterShopCatalog
+  m_EditorClassIdentifier: LetterHunter.Economy.ShopCatalogDefinition
+  entries:
+  - item: {fileID: 11400000, guid: 4a6d3e3c2f4a4bc99d3e9f2a6a3c4b53, type: 2}
+    buyPrice: 20
+  - item: {fileID: 11400000, guid: 4b7e4d4d3f5b4cdaae4fa3b7b4d5c64f, type: 2}
+    buyPrice: 18
+  - item: {fileID: 11400000, guid: d0cf508e098ccda4b9ba91270d384417, type: 2}
+    buyPrice: 8
+  - item: {fileID: 11400000, guid: 6f6fe7d1ed233c040930e6c0808fcf45, type: 2}
+    buyPrice: 36
+  sellableItems:
+  - {fileID: 11400000, guid: 4a6d3e3c2f4a4bc99d3e9f2a6a3c4b53, type: 2}
+  - {fileID: 11400000, guid: 4b7e4d4d3f5b4cdaae4fa3b7b4d5c64f, type: 2}
+  - {fileID: 11400000, guid: d0cf508e098ccda4b9ba91270d384417, type: 2}
+  - {fileID: 11400000, guid: 6f6fe7d1ed233c040930e6c0808fcf45, type: 2}

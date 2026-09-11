@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System;
 using LetterHunter.Characters;
+using LetterHunter.Items;
+using LetterHunter.UI.Inventory;
 using LetterHunter.Skills;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -14,6 +16,7 @@ namespace LetterHunter.UI.Skills
         [Header("Player")]
         [SerializeField] private PlayerClassController player;
         [SerializeField] private PlayerSkillLoadout loadout;
+        [SerializeField] private PlayerInventory inventory;
 
         [Header("View")]
         [SerializeField] private SkillSlotView slotPrefab;
@@ -35,6 +38,7 @@ namespace LetterHunter.UI.Skills
         private int _hoveredSlotIndex = -1;
         private int _dragSourceIndex = -1;
         private SkillSlotView _dragSourceView;
+        private ItemDefinition[] _consumableSlots = Array.Empty<ItemDefinition>();
 
         public event Action<string> AssignmentFeedbackChanged;
         public bool IsAssigningSkill => _pendingAssignment != null;
@@ -45,6 +49,8 @@ namespace LetterHunter.UI.Skills
                 player = FindFirstObjectByType<PlayerClassController>();
             if (loadout == null && player != null)
                 loadout = player.GetComponent<PlayerSkillLoadout>();
+            if (inventory == null && player != null)
+                inventory = player.GetComponent<PlayerInventory>();
             if (slotRoot == null)
                 slotRoot = transform;
             if (_rootCanvas == null)
@@ -61,6 +67,20 @@ namespace LetterHunter.UI.Skills
 
             foreach (var view in authoredSlots)
                 WireView(view);
+
+            _consumableSlots = new ItemDefinition[Mathf.Max(1, maxSlots)];
+        }
+
+        private void OnEnable()
+        {
+            if (inventory != null)
+                inventory.InventoryChanged += Render;
+        }
+
+        private void OnDisable()
+        {
+            if (inventory != null)
+                inventory.InventoryChanged -= Render;
         }
 
         private void Start()
@@ -164,6 +184,7 @@ namespace LetterHunter.UI.Skills
             view.DragMoved -= UpdateSlotDrag;
             view.DragEnded -= EndSlotDrag;
             view.Dropped -= DropDraggedSlotOn;
+            view.ItemDropped -= DropInventoryItemOn;
             view.Clicked += OnSlotClicked;
             view.PointerEntered += OnSlotPointerEntered;
             view.PointerExited += OnSlotPointerExited;
@@ -171,6 +192,7 @@ namespace LetterHunter.UI.Skills
             view.DragMoved += UpdateSlotDrag;
             view.DragEnded += EndSlotDrag;
             view.Dropped += DropDraggedSlotOn;
+            view.ItemDropped += DropInventoryItemOn;
         }
 
         private void Render()
@@ -180,6 +202,19 @@ namespace LetterHunter.UI.Skills
             for (var i = 0; i < _views.Count && i < _runtimeSlots.Count; i++)
             {
                 var binding = _runtimeSlots[i];
+                if (i < _consumableSlots.Length && _consumableSlots[i] != null)
+                {
+                    var consumable = _consumableSlots[i];
+                    var amount = inventory != null ? inventory.RuntimeInventory.Count(consumable) : 0;
+                    if (amount > 0)
+                    {
+                        _views[i].RenderConsumable(consumable, amount, binding.InputLabel);
+                        continue;
+                    }
+
+                    _consumableSlots[i] = null;
+                }
+
                 var skill = binding.Skill;
                 if (!player.IsSkillAvailable(skill)) skill = null;
                 SkillRuntimeState state = null;
@@ -205,22 +240,34 @@ namespace LetterHunter.UI.Skills
 
         private void OnSlotClicked(int index)
         {
-            if (player == null || _runtimeSlots == null || index < 0 || index >= _runtimeSlots.Count) return;
+            TryActivateSlot(index);
+        }
+
+        public bool TryActivateSlot(int index)
+        {
+            if (player == null || _runtimeSlots == null || index < 0 || index >= _runtimeSlots.Count)
+                return false;
+
+            if (index < _consumableSlots.Length && _consumableSlots[index] != null)
+            {
+                UseConsumable(index);
+                return true;
+            }
 
             if (_pendingAssignment != null)
             {
                 AssignPendingSkillToSlot(index);
-                return;
+                return true;
             }
 
             var skill = _runtimeSlots[index].Skill;
-            if (skill == null) return;
+            if (skill == null) return false;
 
             var characterRoot = player.GetComponent<CharacterRoot>();
             if (characterRoot == null)
             {
                 Debug.LogError("[Skill Bar] Cannot activate a skill: the player has no CharacterRoot projectile route.", this);
-                return;
+                return false;
             }
 
             var result = characterRoot.TryUseSkillSlot(index);
@@ -230,6 +277,8 @@ namespace LetterHunter.UI.Skills
                     ? $"[Skill Bar] Activated {skill.DisplayName}."
                     : $"[Skill Bar] {skill.DisplayName} failed: {result.Failure}.", this);
             }
+
+            return result.Success;
         }
 
         private void HandlePendingAssignmentHotkeys()
@@ -354,6 +403,31 @@ namespace LetterHunter.UI.Skills
                 AssignmentFeedbackChanged?.Invoke(failure ?? "Could not move skill.");
                 FinishSlotDrag(false);
             }
+        }
+
+        private void DropInventoryItemOn(int targetIndex, InventorySlotView source)
+        {
+            if (source == null || source.Item == null || source.Item.ItemType != ItemType.Consumable ||
+                inventory == null || inventory.RuntimeInventory.Count(source.Item) <= 0 ||
+                targetIndex < 0 || targetIndex >= _consumableSlots.Length)
+                return;
+
+            _consumableSlots[targetIndex] = source.Item;
+            Render();
+        }
+
+        private void UseConsumable(int slotIndex)
+        {
+            var item = _consumableSlots[slotIndex];
+            if (item == null || inventory == null || inventory.RuntimeInventory.Count(item) <= 0)
+                return;
+            if (!player.TryUseConsumable(item))
+                return;
+
+            inventory.TryRemove(item, 1);
+            if (inventory.RuntimeInventory.Count(item) <= 0)
+                _consumableSlots[slotIndex] = null;
+            Render();
         }
 
         private void EndSlotDrag()

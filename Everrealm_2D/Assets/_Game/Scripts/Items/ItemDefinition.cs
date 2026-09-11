@@ -17,6 +17,9 @@ namespace LetterHunter.Items
         [Min(1), SerializeField] private int maxStack = 1;
         [Min(0), SerializeField] private int sellPrice;
         [SerializeField] private bool canSell = true;
+        [Header("Consumable Effect")]
+        [Min(0f), SerializeField] private float healthRestore;
+        [Min(0f), SerializeField] private float manaRestore;
 
         public string ItemId => string.IsNullOrWhiteSpace(itemId) ? name : itemId;
         public string DisplayName => string.IsNullOrWhiteSpace(displayName) ? name : displayName;
@@ -27,5 +30,7 @@ namespace LetterHunter.Items
         public int MaxStack => Mathf.Max(1, maxStack);
         public int SellPrice => Mathf.Max(0, sellPrice);
         public bool CanSell => canSell && SellPrice > 0;
+        public float HealthRestore => Mathf.Max(0f, healthRestore);
+        public float ManaRestore => Mathf.Max(0f, manaRestore);
     }
 }

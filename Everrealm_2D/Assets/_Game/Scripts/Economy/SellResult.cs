@@ -1,6 +1,6 @@
 namespace LetterHunter.Economy
 {
-    public enum SellFailureReason { None, InvalidItem, InvalidAmount, CannotSell, NotEnoughItems }
+    public enum SellFailureReason { None, InvalidItem, InvalidAmount, CannotSell, NotEnoughItems, NotInCatalog }
 
     public readonly struct SellResult
     {

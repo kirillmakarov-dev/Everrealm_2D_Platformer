@@ -22,6 +22,7 @@ namespace LetterHunter.UI.Inventory
         private bool _dragHidden;
 
         public Sprite IconSprite => icon != null && icon.enabled ? icon.sprite : null;
+        public ItemDefinition Item { get; private set; }
 
         public void Bind(InventoryWindowPresenter presenter, int index)
         {
@@ -32,6 +33,7 @@ namespace LetterHunter.UI.Inventory
         public void Render(InventorySlot slot)
         {
             _hasItem = slot != null && !slot.IsEmpty;
+            Item = _hasItem ? slot.Item : null;
             if (!_hasItem)
                 _dragHidden = false;
             var showItem = _hasItem && !_dragHidden;
