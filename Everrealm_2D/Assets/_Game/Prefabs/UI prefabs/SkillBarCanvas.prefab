@@ -468,7 +468,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: MANA
+  m_text: Energy
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1442,7 +1442,7 @@ MonoBehaviour:
   fill: {fileID: 3646723301247957043}
   valueText: {fileID: 4212390096833540650}
   labelText: {fileID: 5532850386150711097}
-  label: MANA
+  label: Energy
   showNumbers: 1
 --- !u!114 &5086739123561699967
 MonoBehaviour:
