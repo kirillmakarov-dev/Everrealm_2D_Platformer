@@ -240,7 +240,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   requirePlayerTarget: 1
-  attackRange: 2
+  attackRange: 2.5
   attackOffset: {x: 0, y: 0}
   autoAttack: 1
   logAttacks: 0

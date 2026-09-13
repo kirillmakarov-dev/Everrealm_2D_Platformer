@@ -15,7 +15,7 @@ MonoBehaviour:
   attackId: enemy_basic_hit
   displayName: Enemy Basic Hit
   baseDamage: 8
-  damageMultiplier: 1
+  damageMultiplier: 3
   damageLines: 1
   cooldown: 1.25
   tags: 4

@@ -47,20 +47,19 @@ namespace LetterHunter.Characters
         }
 
         [ContextMenu("Try Attack")]
-        public bool TryAttack()
+        public bool TryAttack() => TryAttack(null);
+
+        public bool TryAttack(IDamageable expectedTarget)
         {
             if (_attacker == null || attackDefinition == null || !_attacker.IsAlive || _cooldownRemaining > 0f)
                 return false;
 
-            var facingSign = CurrentFacingSign();
-            var signedOffset = new Vector2(Mathf.Abs(attackOffset.x) * facingSign, attackOffset.y);
-            var origin = (Vector2)transform.position + signedOffset;
-            _targetFilter.SetLayerMask(targetLayers);
-            var count = Physics2D.OverlapCircle(origin, attackRange, _targetFilter, _hits);
+            var count = CollectTargetsInAttackArea();
             for (var i = 0; i < count; i++)
             {
                 var target = FindDamageable(_hits[i]);
                 if (target == null || ReferenceEquals(target, _attacker) || !target.IsAlive) continue;
+                if (expectedTarget != null && !ReferenceEquals(target, expectedTarget)) continue;
 
                 ApplyAttack(target);
                 _cooldownRemaining = attackDefinition.Cooldown;
@@ -69,6 +68,34 @@ namespace LetterHunter.Characters
             }
 
             return false;
+        }
+
+        public bool IsTargetInRange(IDamageable expectedTarget, Collider2D expectedCollider = null)
+        {
+            if (expectedTarget == null || !expectedTarget.IsAlive)
+                return false;
+
+            var count = CollectTargetsInAttackArea();
+            for (var i = 0; i < count; i++)
+            {
+                if (expectedCollider != null && ReferenceEquals(_hits[i], expectedCollider))
+                    return true;
+
+                var target = FindDamageable(_hits[i]);
+                if (ReferenceEquals(target, expectedTarget) && target.IsAlive)
+                    return true;
+            }
+
+            return false;
+        }
+
+        private int CollectTargetsInAttackArea()
+        {
+            var facingSign = CurrentFacingSign();
+            var signedOffset = new Vector2(Mathf.Abs(attackOffset.x) * facingSign, attackOffset.y);
+            var origin = (Vector2)transform.position + signedOffset;
+            _targetFilter.SetLayerMask(targetLayers);
+            return Physics2D.OverlapCircle(origin, attackRange, _targetFilter, _hits);
         }
 
         private void ApplyAttack(IDamageable target)

@@ -592,6 +592,44 @@ namespace LetterHunter.Tests
         }
 
         [Test]
+        public void EnemyPatrol_StopsWhenTargetEntersActualAttackArea()
+        {
+            var enemyObject = new GameObject("Ranged stop enemy");
+            _objects.Add(enemyObject);
+            var body = enemyObject.AddComponent<Rigidbody2D>();
+            enemyObject.AddComponent<BoxCollider2D>();
+            enemyObject.AddComponent<LetterHunter.Debugging.DummyEnemy2D>();
+            var attack = enemyObject.AddComponent<EnemyAttackController2D>();
+            SetField(attack, "requirePlayerTarget", false);
+            SetField(attack, "targetLayers", (LayerMask)~0);
+            SetField(attack, "attackRange", 2.1f);
+            SetField(attack, "attackOffset", Vector2.zero);
+            var patrol = enemyObject.AddComponent<EnemyPatrolAI2D>();
+            SetField(patrol, "requirePlayerTarget", false);
+            SetField(patrol, "attackStopDistance", 0.25f);
+
+            var targetObject = new GameObject("Target inside attack area");
+            _objects.Add(targetObject);
+            targetObject.transform.position = new Vector2(2.5f, 0f);
+            targetObject.AddComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
+            var targetCollider = targetObject.AddComponent<BoxCollider2D>();
+            var target = new TestCombatActor(targetObject.transform,
+                new CombatStats(CombatStatsData.Default));
+
+            InvokePrivate(attack, "Awake");
+            InvokePrivate(patrol, "Awake");
+            Physics2D.SyncTransforms();
+            Assert.That(patrol.ProvokeTarget(target, targetCollider), Is.True);
+            Assert.That(attack.IsTargetInRange(target, targetCollider), Is.True,
+                "The configured attack area should recognize the target before close-contact distance.");
+
+            InvokePrivate(patrol, "FixedUpdate");
+
+            Assert.That(body.linearVelocity.x, Is.Zero,
+                "The enemy should stop as soon as the target enters its real attack area.");
+        }
+
+        [Test]
         public void ProjectileAudio_UsesPrefabOverrides_AndBasicPrefabFallsBackToManager()
         {
             var fire = AssetDatabase.LoadAssetAtPath<GameObject>(

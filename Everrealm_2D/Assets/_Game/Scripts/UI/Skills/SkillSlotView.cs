@@ -109,19 +109,20 @@ namespace LetterHunter.UI.Skills
         {
             _hasSkill = false;
             _hasConsumable = item != null && amount > 0;
+            var showConsumable = _hasConsumable && !_dragHidden;
 
             if (keyText != null)
                 keyText.text = inputLabel ?? string.Empty;
             if (nameText != null)
-                nameText.text = _hasConsumable ? $"{item.DisplayName} x{amount}" : "Empty";
+                nameText.text = showConsumable ? $"{item.DisplayName} x{amount}" : "Empty";
             if (icon != null)
             {
-                icon.enabled = _hasConsumable && item.Icon != null;
-                icon.sprite = _hasConsumable ? item.Icon : null;
-                icon.color = Color.white;
+                icon.enabled = showConsumable && item.Icon != null;
+                icon.sprite = showConsumable ? item.Icon : null;
+                icon.color = showConsumable ? Color.white : Color.clear;
             }
             if (background != null)
-                background.color = _hasConsumable ? Color.white : emptyColor;
+                background.color = showConsumable ? Color.white : emptyColor;
             if (cooldownOverlay != null)
                 cooldownOverlay.enabled = false;
             if (cooldownText != null)
@@ -130,12 +131,12 @@ namespace LetterHunter.UI.Skills
                 cooldownText.text = string.Empty;
             }
             if (button != null)
-                button.interactable = _hasConsumable;
+                button.interactable = showConsumable;
         }
 
         public void SetDragHidden(bool hidden)
         {
-            _dragHidden = hidden && _hasSkill;
+            _dragHidden = hidden && (_hasSkill || _hasConsumable);
         }
 
         public void SetAssignmentTarget(bool assignmentMode)
@@ -168,7 +169,7 @@ namespace LetterHunter.UI.Skills
 
         public void OnBeginDrag(PointerEventData eventData)
         {
-            if (_hasSkill && eventData.button == PointerEventData.InputButton.Left)
+            if ((_hasSkill || _hasConsumable) && eventData.button == PointerEventData.InputButton.Left)
                 DragBegan?.Invoke(_index, eventData);
         }
 

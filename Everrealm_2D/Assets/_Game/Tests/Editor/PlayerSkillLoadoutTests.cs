@@ -1,8 +1,10 @@
+using LetterHunter.Items;
 using LetterHunter.Skills;
 using LetterHunter.UI.Skills;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace LetterHunter.Tests.EditMode
 {
@@ -105,6 +107,59 @@ namespace LetterHunter.Tests.EditMode
             Assert.That(loadout.Slots.Count, Is.EqualTo(2));
             Object.DestroyImmediate(go);
             Object.DestroyImmediate(skill);
+        }
+
+        [Test]
+        public void TrySwapConsumableSlots_SwapsItemsAndPublishesOneChange()
+        {
+            var go = new GameObject("Skill Bar");
+            var bar = go.AddComponent<SkillBarPresenter>();
+            var healthPotion = CreateConsumable("health_potion", "Health Potion");
+            var energyPotion = CreateConsumable("energy_potion", "Energy Potion");
+            Assert.That(bar.SetConsumableSlot(0, healthPotion), Is.True);
+            Assert.That(bar.SetConsumableSlot(1, energyPotion), Is.True);
+            var changes = 0;
+            bar.ConsumableSlotsChanged += () => changes++;
+
+            Assert.That(bar.TrySwapConsumableSlots(0, 1), Is.True);
+
+            Assert.That(bar.GetConsumableSlot(0), Is.SameAs(energyPotion));
+            Assert.That(bar.GetConsumableSlot(1), Is.SameAs(healthPotion));
+            Assert.That(changes, Is.EqualTo(1));
+            Object.DestroyImmediate(go);
+            Object.DestroyImmediate(healthPotion);
+            Object.DestroyImmediate(energyPotion);
+        }
+
+        [Test]
+        public void ConsumableSlot_BeginsLeftButtonDrag()
+        {
+            var go = new GameObject("Consumable Slot");
+            var view = go.AddComponent<SkillSlotView>();
+            var potion = CreateConsumable("health_potion", "Health Potion");
+            var draggedIndex = -1;
+            view.DragBegan += (index, _) => draggedIndex = index;
+            view.RenderConsumable(potion, 2, "1");
+
+            view.OnBeginDrag(new PointerEventData(null)
+            {
+                button = PointerEventData.InputButton.Left
+            });
+
+            Assert.That(draggedIndex, Is.EqualTo(0));
+            Object.DestroyImmediate(go);
+            Object.DestroyImmediate(potion);
+        }
+
+        private static ItemDefinition CreateConsumable(string id, string displayName)
+        {
+            var item = ScriptableObject.CreateInstance<ItemDefinition>();
+            var so = new SerializedObject(item);
+            so.FindProperty("itemId").stringValue = id;
+            so.FindProperty("displayName").stringValue = displayName;
+            so.FindProperty("itemType").enumValueIndex = (int)ItemType.Consumable;
+            so.ApplyModifiedPropertiesWithoutUndo();
+            return item;
         }
 
         private static SkillDefinition CreateSkill(string id, string displayName)

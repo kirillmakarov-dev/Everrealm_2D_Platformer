@@ -180,10 +180,18 @@ namespace LetterHunter.Characters
             Face(direction);
 
             var horizontalDistance = GetHorizontalDistanceToTarget();
+            if (_attackController != null && _attackController.IsTargetInRange(_target, _targetCollider))
+            {
+                SetHorizontalVelocity(0f);
+                _attackController.TryAttack(_target);
+                return;
+            }
+
+            // This is a collision-safety fallback for unusual attack shapes. The normal
+            // stopping point comes from the attack controller's real overlap area above.
             if (horizontalDistance <= attackStopDistance)
             {
                 SetHorizontalVelocity(0f);
-                _attackController?.TryAttack();
                 return;
             }
 

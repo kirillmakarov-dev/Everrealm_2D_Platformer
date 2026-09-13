@@ -132,7 +132,7 @@ namespace LetterHunter.UI.Skills
             _pendingAssignment = skill;
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.None;
-            CreateAssignmentGhost(skill);
+            CreateAssignmentGhost(skill.Icon);
             AssignmentFeedbackChanged?.Invoke($"Select a skill bar slot for {skill.DisplayName}.");
             Render();
             return true;
@@ -377,15 +377,20 @@ namespace LetterHunter.UI.Skills
         private void OnSlotDragBegan(int index, UnityEngine.EventSystems.PointerEventData eventData)
         {
             if (_pendingAssignment != null || _runtimeSlots == null || index < 0 ||
-                index >= _runtimeSlots.Count || _runtimeSlots[index].Skill == null)
+                index >= _runtimeSlots.Count)
+                return;
+
+            var skill = _runtimeSlots[index].Skill;
+            var consumable = GetConsumableSlot(index);
+            if (skill == null && consumable == null)
                 return;
 
             _dragSourceIndex = index;
             _dragSourceView = index < _views.Count ? _views[index] : null;
             _dragSourceView?.SetDragHidden(true);
-            CreateAssignmentGhost(_runtimeSlots[index].Skill);
+            CreateAssignmentGhost(skill != null ? skill.Icon : consumable.Icon);
             AssignmentFeedbackChanged?.Invoke(
-                $"Move {_runtimeSlots[index].Skill.DisplayName} to another slot.");
+                $"Move {(skill != null ? skill.DisplayName : consumable.DisplayName)} to another slot.");
             UpdateAssignmentGhost();
         }
 
@@ -401,6 +406,27 @@ namespace LetterHunter.UI.Skills
                 targetIndex < 0 || targetIndex >= _runtimeSlots.Count)
                 return;
 
+            var sourceIndex = _dragSourceIndex;
+            var sourceConsumable = GetConsumableSlot(sourceIndex);
+            if (sourceConsumable != null)
+            {
+                if (HasAssignedSkill(targetIndex))
+                {
+                    AssignmentFeedbackChanged?.Invoke($"Slot {targetIndex + 1} is occupied by a skill.");
+                    FinishSlotDrag(false);
+                    return;
+                }
+
+                var moved = TrySwapConsumableSlots(sourceIndex, targetIndex);
+                AssignmentFeedbackChanged?.Invoke(sourceIndex == targetIndex
+                    ? "Consumable position unchanged."
+                    : moved
+                        ? $"Moved {sourceConsumable.DisplayName} to slot {targetIndex + 1}."
+                        : "Could not move consumable.");
+                FinishSlotDrag(false);
+                return;
+            }
+
             if (GetConsumableSlot(targetIndex) != null)
             {
                 AssignmentFeedbackChanged?.Invoke($"Slot {targetIndex + 1} is occupied by a consumable.");
@@ -408,7 +434,6 @@ namespace LetterHunter.UI.Skills
                 return;
             }
 
-            var sourceIndex = _dragSourceIndex;
             var sourceSkill = _runtimeSlots[sourceIndex].Skill;
             var targetSkill = _runtimeSlots[targetIndex].Skill;
             if (loadout.TrySwapSlots(sourceIndex, targetIndex, sourceSkill, targetSkill, out var failure))
@@ -440,6 +465,23 @@ namespace LetterHunter.UI.Skills
         {
             EnsureConsumableSlots();
             return index >= 0 && index < _consumableSlots.Length ? _consumableSlots[index] : null;
+        }
+
+        public bool TrySwapConsumableSlots(int firstIndex, int secondIndex)
+        {
+            EnsureConsumableSlots();
+            if (firstIndex < 0 || firstIndex >= _consumableSlots.Length ||
+                secondIndex < 0 || secondIndex >= _consumableSlots.Length ||
+                _consumableSlots[firstIndex] == null || HasAssignedSkill(secondIndex))
+                return false;
+            if (firstIndex == secondIndex)
+                return true;
+
+            (_consumableSlots[firstIndex], _consumableSlots[secondIndex]) =
+                (_consumableSlots[secondIndex], _consumableSlots[firstIndex]);
+            ConsumableSlotsChanged?.Invoke();
+            Render();
+            return true;
         }
 
         public bool SetConsumableSlot(int index, ItemDefinition item, bool notify = true,
@@ -568,15 +610,15 @@ namespace LetterHunter.UI.Skills
                 Render();
         }
 
-        private void CreateAssignmentGhost(SkillDefinition skill)
+        private void CreateAssignmentGhost(Sprite icon)
         {
             DestroyAssignmentGhost();
             if (assignmentGhost == null)
                 return;
 
             _assignmentGhost = assignmentGhost;
-            _assignmentGhost.sprite = skill.Icon;
-            _assignmentGhost.color = skill.Icon != null ? Color.white : new Color(0.95f, 0.78f, 0.25f, 0.9f);
+            _assignmentGhost.sprite = icon;
+            _assignmentGhost.color = icon != null ? Color.white : new Color(0.95f, 0.78f, 0.25f, 0.9f);
             _assignmentGhost.raycastTarget = false;
             _assignmentGhost.preserveAspect = true;
 
