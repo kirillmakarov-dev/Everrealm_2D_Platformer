@@ -32,7 +32,6 @@ namespace LetterHunter.EditorTools
         private Rect _canvasRect;
 
         [MenuItem("Everrealm/Skill Tree/Editor")]
-        [MenuItem("Tools/Everrealm/Skill Bar Tool")]
         public static void Open()
         {
             var window = GetWindow<SkillTreeEditorWindow>("Everrealm Skill Tree Editor");
