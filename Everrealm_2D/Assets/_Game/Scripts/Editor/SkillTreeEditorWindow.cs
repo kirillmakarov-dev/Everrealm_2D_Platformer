@@ -20,6 +20,7 @@ namespace LetterHunter.EditorTools
         private Vector2 _inspectorScroll;
         private bool _showParents = true;
         private GUIStyle _nodeTitleStyle;
+        private GUIStyle _nodeLevelStyle;
         private Sprite _nodeFrameSprite;
         private Sprite _nodeBackgroundSprite;
         private bool _dragUndoRecorded;
@@ -215,14 +216,15 @@ namespace LetterHunter.EditorTools
                     iconSize, iconSize), sprite.texture, uv);
             }
             string title = node.AbilityToGrant != null ? node.AbilityToGrant.DisplayName : node.DisplayName;
-            GUI.Label(new Rect(rect.x + 3f, rect.y + rect.height * .73f, rect.width - 6f, rect.height * .16f),
+            var previousContentColor = GUI.contentColor;
+            GUI.contentColor = new Color(.96f, .94f, .87f, 1f);
+            GUI.Label(new Rect(rect.x + 3f, rect.y + rect.height * .71f, rect.width - 6f, rect.height * .19f),
                 new GUIContent(title, $"{node.NodeId} | Price {node.Price} | X {node.UiPosition.x:0.##} Y {node.UiPosition.y:0.##}"),
                 _nodeTitleStyle);
-            var oldColor = GUI.contentColor;
             GUI.contentColor = new Color(1f, .6f, .1f);
             GUI.Label(new Rect(rect.x + 3f, rect.y + rect.height * .88f, rect.width - 6f, rect.height * .12f),
-                $"LEVEL {node.RequiredLevel}", _nodeTitleStyle);
-            GUI.contentColor = oldColor;
+                $"LEVEL {node.RequiredLevel}", _nodeLevelStyle);
+            GUI.contentColor = previousContentColor;
         }
 
         private void DrawConnections(IReadOnlyList<SkillNodeDefinitionSO> nodes,
@@ -566,16 +568,39 @@ namespace LetterHunter.EditorTools
             _nodeTitleStyle = new GUIStyle(EditorStyles.miniBoldLabel)
             {
                 alignment = TextAnchor.MiddleCenter,
+                wordWrap = true,
+                fontSize = 10,
+                clipping = TextClipping.Clip
+            };
+            SetNodeTextColors(_nodeTitleStyle, new Color(.96f, .94f, .87f, 1f));
+
+            _nodeLevelStyle = new GUIStyle(EditorStyles.miniBoldLabel)
+            {
+                alignment = TextAnchor.MiddleCenter,
                 wordWrap = false,
                 fontSize = 9,
-                normal = { textColor = Color.white }
+                clipping = TextClipping.Clip
             };
+            SetNodeTextColors(_nodeLevelStyle, new Color(1f, .64f, .16f, 1f));
+        }
+
+        private static void SetNodeTextColors(GUIStyle style, Color color)
+        {
+            style.normal.textColor = color;
+            style.hover.textColor = color;
+            style.active.textColor = color;
+            style.focused.textColor = color;
+            style.onNormal.textColor = color;
+            style.onHover.textColor = color;
+            style.onActive.textColor = color;
+            style.onFocused.textColor = color;
         }
 
         private void OnDisable()
         {
             Undo.undoRedoPerformed -= Repaint;
             _nodeTitleStyle = null;
+            _nodeLevelStyle = null;
         }
 
         private void DrawStatus()
