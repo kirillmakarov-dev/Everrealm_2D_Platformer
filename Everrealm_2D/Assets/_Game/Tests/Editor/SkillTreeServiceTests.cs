@@ -1,8 +1,10 @@
 using System.Collections.Generic;
 using LetterHunter.Economy;
+using LetterHunter.Items;
 using LetterHunter.SkillTree;
 using LetterHunter.Skills;
 using LetterHunter.UI.SkillTree;
+using LetterHunter.UI.Skills;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
@@ -161,6 +163,78 @@ namespace LetterHunter.Tests.EditMode
                 Assert.That(player.IsSkillAvailable(free), Is.True);
             }
             finally { Destroy(playerObject, definition, profession, node, skill, free); }
+        }
+
+        [Test]
+        public void PurchasingActiveSkill_SkipsConsumableSlotAndShowsSkillInNextSlot()
+        {
+            var skill = CreateSkill("purchased_active");
+            var node = CreateNode("purchased_active_node", 1, 10, ability: skill);
+            var profession = CreateProfession(node);
+            var definition = ScriptableObject.CreateInstance<LetterHunter.Classes.ClassDefinition>();
+            var potion = ScriptableObject.CreateInstance<ItemDefinition>();
+            var playerObject = new GameObject("Skill bar purchase player");
+            var barObject = new GameObject("Skill bar");
+            var slotTemplate = new GameObject("Skill slot template").AddComponent<SkillSlotView>();
+            playerObject.SetActive(false);
+            try
+            {
+                var potionData = new SerializedObject(potion);
+                potionData.FindProperty("itemId").stringValue = "health_potion";
+                potionData.FindProperty("itemType").enumValueIndex = (int)ItemType.Consumable;
+                potionData.ApplyModifiedPropertiesWithoutUndo();
+
+                var player = playerObject.AddComponent<LetterHunter.Characters.PlayerClassController>();
+                var targets = playerObject.AddComponent<LetterHunter.Infrastructure.Physics2DTargetProvider>();
+                var wallet = playerObject.AddComponent<CurrencyWallet>();
+                var loadout = playerObject.AddComponent<PlayerSkillLoadout>();
+                var tree = playerObject.AddComponent<PlayerSkillTreeController>();
+                var bar = barObject.AddComponent<SkillBarPresenter>();
+
+                var playerData = new SerializedObject(player);
+                playerData.FindProperty("classDefinition").objectReferenceValue = definition;
+                playerData.FindProperty("targetProviderComponent").objectReferenceValue = targets;
+                playerData.ApplyModifiedPropertiesWithoutUndo();
+                var walletData = new SerializedObject(wallet);
+                walletData.FindProperty("startingGold").intValue = 20;
+                walletData.ApplyModifiedPropertiesWithoutUndo();
+
+                var barData = new SerializedObject(bar);
+                barData.FindProperty("player").objectReferenceValue = player;
+                barData.FindProperty("loadout").objectReferenceValue = loadout;
+                barData.FindProperty("slotPrefab").objectReferenceValue = slotTemplate;
+                barData.FindProperty("maxSlots").intValue = 4;
+                barData.ApplyModifiedPropertiesWithoutUndo();
+
+                var treeData = new SerializedObject(tree);
+                treeData.FindProperty("startingProfession").objectReferenceValue = profession;
+                treeData.FindProperty("player").objectReferenceValue = player;
+                treeData.FindProperty("wallet").objectReferenceValue = wallet;
+                treeData.FindProperty("skillBar").objectReferenceValue = bar;
+                treeData.ApplyModifiedPropertiesWithoutUndo();
+
+                playerObject.SetActive(true);
+                Assert.That(bar.SetConsumableSlot(0, potion), Is.True);
+                Assert.That(tree.TryPurchase(node).Success, Is.True);
+
+                Assert.That(bar.GetConsumableSlot(0), Is.SameAs(potion));
+                Assert.That(loadout.ResolveSkill(player, 0, out _), Is.Null);
+                Assert.That(loadout.ResolveSkill(player, 1, out _), Is.SameAs(skill));
+
+                // Legacy saves could contain both records at the same index. Rebuild must keep
+                // the consumable assignment and move the active skill to another visible slot.
+                bar.ClearConsumableSlots(false);
+                Assert.That(bar.SetConsumableSlot(1, potion, false, true), Is.True);
+                bar.Rebuild();
+
+                Assert.That(bar.GetConsumableSlot(1), Is.SameAs(potion));
+                Assert.That(loadout.ResolveSkill(player, 1, out _), Is.Null);
+                Assert.That(loadout.ResolveSkill(player, 0, out _), Is.SameAs(skill));
+            }
+            finally
+            {
+                Destroy(playerObject, barObject, slotTemplate.gameObject, definition, profession, node, skill, potion);
+            }
         }
 
         [Test]

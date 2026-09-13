@@ -399,7 +399,7 @@ namespace LetterHunter.Save
                     inventory.RuntimeInventory.Count(item) <= 0)
                     continue;
 
-                skillBar.SetConsumableSlot(savedSlot.slotIndex, item, false);
+                skillBar.SetConsumableSlot(savedSlot.slotIndex, item, false, true);
             }
         }
 

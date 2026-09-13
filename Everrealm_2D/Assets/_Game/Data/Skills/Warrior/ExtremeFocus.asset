@@ -23,7 +23,7 @@ MonoBehaviour:
   manaCost: 10
   cooldown: 10
   duration: 6
-  baseDamageMultiplier: 0
+  baseDamageMultiplier: 1.5
   damageLines: 1
   maxTargets: 1
   rank: 1

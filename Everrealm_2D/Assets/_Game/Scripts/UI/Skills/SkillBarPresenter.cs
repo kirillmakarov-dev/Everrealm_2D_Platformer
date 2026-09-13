@@ -112,6 +112,8 @@ namespace LetterHunter.UI.Skills
                 loadout = player.gameObject.AddComponent<PlayerSkillLoadout>();
 
             _runtimeSlots = loadout.BuildRuntimeSlots(player, maxSlots);
+            ResolveConsumableSkillConflicts();
+            _runtimeSlots = loadout.BuildRuntimeSlots(player, maxSlots);
             EnsureViews();
             Render();
         }
@@ -150,13 +152,15 @@ namespace LetterHunter.UI.Skills
 
             for (var i = 0; i < _runtimeSlots.Count; i++)
             {
-                if (_runtimeSlots[i].Skill != null)
+                if (_runtimeSlots[i].Skill != null || GetConsumableSlot(i) != null)
                     continue;
                 if (!loadout.TryAssignSkill(i, skill, out _))
                     return false;
                 Rebuild();
                 return true;
             }
+
+            AssignmentFeedbackChanged?.Invoke($"No empty skill bar slot is available for {skill.DisplayName}.");
             return false;
         }
 
@@ -339,6 +343,12 @@ namespace LetterHunter.UI.Skills
 
         private void AssignPendingSkillToSlot(int index)
         {
+            if (GetConsumableSlot(index) != null)
+            {
+                AssignmentFeedbackChanged?.Invoke($"Slot {index + 1} is occupied by a consumable.");
+                return;
+            }
+
             var failure = "Skill loadout is missing.";
             if (loadout != null && _pendingAssignment != null && loadout.TryAssignSkill(index, _pendingAssignment, out failure))
             {
@@ -391,6 +401,13 @@ namespace LetterHunter.UI.Skills
                 targetIndex < 0 || targetIndex >= _runtimeSlots.Count)
                 return;
 
+            if (GetConsumableSlot(targetIndex) != null)
+            {
+                AssignmentFeedbackChanged?.Invoke($"Slot {targetIndex + 1} is occupied by a consumable.");
+                FinishSlotDrag(false);
+                return;
+            }
+
             var sourceIndex = _dragSourceIndex;
             var sourceSkill = _runtimeSlots[sourceIndex].Skill;
             var targetSkill = _runtimeSlots[targetIndex].Skill;
@@ -415,8 +432,8 @@ namespace LetterHunter.UI.Skills
                 targetIndex < 0 || targetIndex >= _consumableSlots.Length)
                 return;
 
-            SetConsumableSlot(targetIndex, source.Item);
-            Render();
+            if (!SetConsumableSlot(targetIndex, source.Item))
+                AssignmentFeedbackChanged?.Invoke($"Slot {targetIndex + 1} is occupied by a skill.");
         }
 
         public ItemDefinition GetConsumableSlot(int index)
@@ -425,11 +442,14 @@ namespace LetterHunter.UI.Skills
             return index >= 0 && index < _consumableSlots.Length ? _consumableSlots[index] : null;
         }
 
-        public bool SetConsumableSlot(int index, ItemDefinition item, bool notify = true)
+        public bool SetConsumableSlot(int index, ItemDefinition item, bool notify = true,
+            bool allowSkillConflict = false)
         {
             EnsureConsumableSlots();
             if (index < 0 || index >= _consumableSlots.Length ||
                 (item != null && item.ItemType != ItemType.Consumable))
+                return false;
+            if (item != null && !allowSkillConflict && HasAssignedSkill(index))
                 return false;
 
             if (_consumableSlots[index] == item)
@@ -461,6 +481,59 @@ namespace LetterHunter.UI.Skills
         {
             if (_consumableSlots == null || _consumableSlots.Length != Mathf.Max(1, maxSlots))
                 Array.Resize(ref _consumableSlots, Mathf.Max(1, maxSlots));
+        }
+
+        private bool HasAssignedSkill(int index)
+        {
+            if (_runtimeSlots != null && index >= 0 && index < _runtimeSlots.Count)
+            {
+                if (_runtimeSlots[index]?.Skill != null)
+                    return true;
+            }
+            if (loadout == null)
+                return false;
+
+            foreach (var binding in loadout.Slots)
+                if (binding != null && binding.SlotIndex == index && binding.Skill != null)
+                    return true;
+            return false;
+        }
+
+        private void ResolveConsumableSkillConflicts()
+        {
+            EnsureConsumableSlots();
+            if (_runtimeSlots == null || loadout == null)
+                return;
+
+            var consumablesChanged = false;
+            for (var sourceIndex = 0; sourceIndex < _runtimeSlots.Count; sourceIndex++)
+            {
+                var skill = _runtimeSlots[sourceIndex]?.Skill;
+                if (skill == null || GetConsumableSlot(sourceIndex) == null)
+                    continue;
+
+                var targetIndex = FindEmptySlot(sourceIndex);
+                if (targetIndex >= 0 && loadout.TrySwapSlots(sourceIndex, targetIndex, skill, null, out _))
+                {
+                    _runtimeSlots = loadout.BuildRuntimeSlots(player, maxSlots);
+                    continue;
+                }
+
+                // Skills have priority. The consumable stays in inventory and can be assigned again later.
+                _consumableSlots[sourceIndex] = null;
+                consumablesChanged = true;
+            }
+
+            if (consumablesChanged)
+                ConsumableSlotsChanged?.Invoke();
+        }
+
+        private int FindEmptySlot(int excludedIndex)
+        {
+            for (var i = 0; i < _runtimeSlots.Count; i++)
+                if (i != excludedIndex && _runtimeSlots[i]?.Skill == null && GetConsumableSlot(i) == null)
+                    return i;
+            return -1;
         }
 
         private void UseConsumable(int slotIndex)
