@@ -12,8 +12,44 @@ namespace LetterHunter.Characters
         [SerializeField] private bool drawGizmo = true;
 
         public bool IsGrounded { get; private set; }
+        public float CheckRadius => checkRadius;
         public event Action Landed;
         public event Action LeftGround;
+
+        private Vector3 _groundedCheckPointLocalPosition;
+        private readonly RaycastHit2D[] _groundHits = new RaycastHit2D[16];
+
+        private void Awake()
+        {
+            if (checkPoint != null)
+                _groundedCheckPointLocalPosition = checkPoint.localPosition;
+        }
+
+        public bool TryGetGroundDistance(float maxDistance, out float distance)
+        {
+            distance = 0f;
+            if (checkPoint == null || maxDistance <= 0f) return false;
+
+            var parent = checkPoint.parent;
+            var origin = parent != null
+                ? parent.TransformPoint(_groundedCheckPointLocalPosition)
+                : _groundedCheckPointLocalPosition;
+            var hitCount = Physics2D.RaycastNonAlloc(origin, Vector2.down, _groundHits,
+                maxDistance, groundLayers);
+            var nearestDistance = float.PositiveInfinity;
+            for (var i = 0; i < hitCount; i++)
+            {
+                var hit = _groundHits[i];
+                if (hit.collider == null || hit.collider.isTrigger ||
+                    hit.transform.root == transform.root)
+                    continue;
+                nearestDistance = Mathf.Min(nearestDistance, hit.distance);
+            }
+
+            if (float.IsPositiveInfinity(nearestDistance)) return false;
+            distance = nearestDistance;
+            return true;
+        }
 
         private void FixedUpdate()
         {

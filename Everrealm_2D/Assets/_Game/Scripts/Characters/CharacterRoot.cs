@@ -43,6 +43,9 @@ namespace LetterHunter.Characters
         private bool _pendingSkillProjectile;
         private bool _ignoreGroundUntilDescending;
         private float _airbornePeakY;
+        private CapsuleCollider2D _playerCollider;
+        private Vector2 _groundedColliderSize;
+        private Vector2 _groundedColliderOffset;
 
         public CharacterRuntime Runtime { get; private set; }
         public CombatStats Stats => combatModule != null ? combatModule.Stats : null;
@@ -70,6 +73,13 @@ namespace LetterHunter.Characters
                 skillLoadout = GetComponent<PlayerSkillLoadout>();
             if (skillBar == null)
                 skillBar = FindFirstObjectByType<SkillBarPresenter>();
+
+            _playerCollider = GetComponent<CapsuleCollider2D>();
+            if (_playerCollider != null)
+            {
+                _groundedColliderSize = _playerCollider.size;
+                _groundedColliderOffset = _playerCollider.offset;
+            }
 
             Runtime = new CharacterRuntime();
             // Establish the initial airborne baseline as well. Some scenes place the
@@ -142,6 +152,36 @@ namespace LetterHunter.Characters
                 Runtime.AirborneDropDistance = Mathf.Max(0f, _airbornePeakY - transform.position.y);
             }
             Runtime.Grounded = grounded;
+            SetAirborneCollider(!grounded);
+        }
+
+        private void SetAirborneCollider(bool airborne)
+        {
+            if (_playerCollider == null)
+                return;
+
+            var airborneHeight = Mathf.Min(_groundedColliderSize.y,
+                Mathf.Max(_groundedColliderSize.x, _groundedColliderSize.y * .5f));
+            var lowerEdgeTravel = _groundedColliderSize.y - airborneHeight;
+            // Recover over a slightly shorter distance so the standing shape returns sooner.
+            var recoveryDistance = Mathf.Max(.01f,
+                lowerEdgeTravel * .85f + groundDetector.CheckRadius);
+            var recovery = 0f;
+
+            if (!airborne)
+            {
+                recovery = 1f;
+            }
+            else if (motor.Velocity.y <= 0f &&
+                     groundDetector.TryGetGroundDistance(recoveryDistance, out var distanceToGround))
+            {
+                recovery = 1f - Mathf.Clamp01(distanceToGround / recoveryDistance);
+            }
+
+            var currentHeight = Mathf.Lerp(airborneHeight, _groundedColliderSize.y, recovery);
+            _playerCollider.size = new Vector2(_groundedColliderSize.x, currentHeight);
+            _playerCollider.offset = _groundedColliderOffset +
+                Vector2.up * ((_groundedColliderSize.y - currentHeight) * .5f);
         }
 
         private void Update()
