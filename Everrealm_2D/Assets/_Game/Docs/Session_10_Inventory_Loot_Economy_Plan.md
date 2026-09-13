@@ -26,7 +26,7 @@ Current implementation status:
 To create the playable test scene inside Unity, run:
 
 ```text
-Letter Hunter/Build Inventory Loot Playtest Scene
+Everrealm/Build Inventory Loot Playtest Scene
 ```
 
 This creates:
@@ -42,7 +42,7 @@ This creates:
 If a scene already has a player and enemies, this command can instead be run on the current scene:
 
 ```text
-Letter Hunter/Setup Inventory Loot Economy
+Everrealm/Setup Inventory Loot Economy
 ```
 
 The system must support two different pickup paths:
@@ -407,8 +407,8 @@ Current implementation:
 - `PlayerSaveController.ResetProgress` deletes the old save, clears runtime progress, and writes a fresh save.
 - `ShopWindowPresenter` lists sellable inventory items, calls `ShopService.TrySell`, updates feedback/gold, and saves after successful sales.
 - `ShopItemRowView` owns the row text/buttons and is intended to be edited as a prefab.
-- `Letter Hunter/Setup Save Databases` creates and fills database assets from existing item and skill assets.
-- `Letter Hunter/Setup Shop UI` creates a starter shop window, scene wiring, and `Assets/_Game/Prefabs/UI/ShopItemRow.prefab` when missing.
+- `Everrealm/Setup Save Databases` creates and fills database assets from existing item and skill assets.
+- `Everrealm/Setup Shop UI` creates a starter shop window, scene wiring, and `Assets/_Game/Prefabs/UI/ShopItemRow.prefab` when missing.
 
 ## Testing Plan
 

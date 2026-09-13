@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace LetterHunter.Combat
 {
-    [CreateAssetMenu(menuName = "Letter Hunter/Combat/Auto Attack Combo")]
+    [CreateAssetMenu(menuName = "Everrealm/Combat/Auto Attack Combo")]
     public sealed class AutoAttackComboDefinition : ScriptableObject
     {
         [SerializeField] private string comboId = "basic_combo";

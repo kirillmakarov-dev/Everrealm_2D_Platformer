@@ -25,7 +25,7 @@ namespace LetterHunter.EditorTools
         private static readonly Color Muted = new(0.62f, 0.66f, 0.66f, 1f);
         private static Dictionary<string, Sprite> _sprites;
 
-        [MenuItem("Tools/Letter Hunter/UI/Build Pause Menu")]
+        [MenuItem("Tools/Everrealm/UI/Build Pause Menu")]
         public static void Build()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode)

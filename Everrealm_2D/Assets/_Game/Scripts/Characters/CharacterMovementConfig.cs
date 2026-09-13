@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace LetterHunter.Characters
 {
-    [CreateAssetMenu(menuName = "Letter Hunter/Characters/Movement Config")]
+    [CreateAssetMenu(menuName = "Everrealm/Characters/Movement Config")]
     public sealed class CharacterMovementConfig : ScriptableObject
     {
         [Min(0f), SerializeField] private float moveSpeed = 6f;

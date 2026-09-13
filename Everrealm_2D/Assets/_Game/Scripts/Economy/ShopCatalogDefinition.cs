@@ -14,7 +14,7 @@ namespace LetterHunter.Economy
         public int BuyPrice => Mathf.Max(1, buyPrice);
     }
 
-    [CreateAssetMenu(menuName = "Letter Hunter/Economy/Shop Catalog")]
+    [CreateAssetMenu(menuName = "Everrealm/Economy/Shop Catalog")]
     public sealed class ShopCatalogDefinition : ScriptableObject
     {
         [SerializeField] private List<ShopCatalogEntry> entries = new();

@@ -41,6 +41,20 @@ namespace LetterHunter.UI.Skills
         public event Action<int> Dropped;
         public event Action<int, InventorySlotView> ItemDropped;
 
+        public void DisableTemplateIconLayers()
+        {
+            foreach (var graphic in GetComponentsInChildren<Graphic>(true))
+            {
+                if (graphic == null || graphic == icon)
+                    continue;
+
+                var layerName = graphic.gameObject.name;
+                if (layerName.Equals("Icon", StringComparison.OrdinalIgnoreCase) ||
+                    layerName.Equals("IconGlow", StringComparison.OrdinalIgnoreCase))
+                    graphic.enabled = false;
+            }
+        }
+
         private void Awake()
         {
             if (button == null) button = GetComponent<Button>();

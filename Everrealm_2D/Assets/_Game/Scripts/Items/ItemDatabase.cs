@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace LetterHunter.Items
 {
-    [CreateAssetMenu(menuName = "Letter Hunter/Databases/Item Database")]
+    [CreateAssetMenu(menuName = "Everrealm/Databases/Item Database")]
     public sealed class ItemDatabase : ScriptableObject
     {
         [SerializeField] private List<ItemDefinition> items = new();

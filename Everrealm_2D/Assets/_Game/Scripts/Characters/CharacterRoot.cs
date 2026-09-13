@@ -272,6 +272,13 @@ namespace LetterHunter.Characters
             if (!skillState.IsReady)
                 return LetterHunter.Skills.SkillUseResult.Failed(LetterHunter.Skills.SkillUseFailure.OnCooldown);
 
+            if (skill.SkillType != SkillType.Empower)
+            {
+                var castValidation = combatModule.CanPrepareSkillProjectile(skill.SkillId);
+                if (!castValidation.Success)
+                    return castValidation;
+            }
+
             _pendingBasicShot = false;
             if (skill.SkillType == SkillType.Empower)
             {

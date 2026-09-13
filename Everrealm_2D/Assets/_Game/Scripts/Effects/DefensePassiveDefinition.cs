@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace LetterHunter.Effects
 {
-    [CreateAssetMenu(menuName = "Letter Hunter/Effects/Passives/Defense")]
+    [CreateAssetMenu(menuName = "Everrealm/Effects/Passives/Defense")]
     public sealed class DefensePassiveDefinition : PassiveSkillEffectDefinition
     {
         [Min(0f), SerializeField] private float defenseBonus = 5f;

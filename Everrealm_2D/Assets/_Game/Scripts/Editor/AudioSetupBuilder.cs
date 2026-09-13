@@ -16,12 +16,12 @@ namespace LetterHunter.EditorTools
     {
         private const string ScenePath = "Assets/_Game/Scenes/Game level 1.unity";
         private const string AudioFolder = "Assets/_Game/Audio";
-        private const string MixerPath = AudioFolder + "/LetterHunterAudio.mixer";
+        private const string MixerPath = AudioFolder + "/EverrealmAudio.mixer";
         private const string MusicPath = "Assets/2D Dungeon Tilemap/Musics & Sounds CC0/Music 1.wav";
         private const string ShotPath = AudioFolder + "/LetterHunter_LaserShot_CC0.wav";
         private const string SoundFolder = "Assets/SoftKitty/InventoryEngine/Resources/Sounds/";
 
-        [MenuItem("Tools/Letter Hunter/Audio/Build Scene Audio")]
+        [MenuItem("Tools/Everrealm/Audio/Build Scene Audio")]
         public static void Build()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode)
@@ -38,7 +38,7 @@ namespace LetterHunter.EditorTools
             EditorSceneManager.MarkSceneDirty(scene);
             AssetDatabase.SaveAssets();
             EditorSceneManager.SaveScene(scene);
-            Debug.Log("Letter Hunter scene music, mixer groups, combat SFX and UI audio are connected.");
+            Debug.Log("Everrealm scene music, mixer groups, combat SFX and UI audio are connected.");
         }
 
         private static MixerBundle BuildMixer()
@@ -55,7 +55,7 @@ namespace LetterHunter.EditorTools
                 controller = create?.Invoke(null, new object[] { MixerPath }) as UnityEngine.Object;
             }
             if (controller == null)
-                throw new InvalidOperationException("Could not create the Letter Hunter AudioMixer.");
+                throw new InvalidOperationException("Could not create the Everrealm AudioMixer.");
 
             var masterProperty = controllerType.GetProperty("masterGroup",
                 BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);

@@ -177,6 +177,7 @@ namespace LetterHunter.UI.Skills
         {
             if (view == null)
                 return;
+            view.DisableTemplateIconLayers();
             view.Clicked -= OnSlotClicked;
             view.PointerEntered -= OnSlotPointerEntered;
             view.PointerExited -= OnSlotPointerExited;

@@ -78,7 +78,7 @@ Added:
 Menu:
 
 ```text
-Letter Hunter/Setup Skill Bar UI
+Everrealm/Setup Skill Bar UI
 ```
 
 The command:
@@ -98,7 +98,7 @@ The command:
 3. Run:
 
 ```text
-Letter Hunter/Setup Skill Bar UI
+Everrealm/Setup Skill Bar UI
 ```
 
 4. Press Play.

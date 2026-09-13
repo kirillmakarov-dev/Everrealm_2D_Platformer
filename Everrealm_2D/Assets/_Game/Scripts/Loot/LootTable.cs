@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace LetterHunter.Loot
 {
-    [CreateAssetMenu(menuName = "Letter Hunter/Loot/Loot Table")]
+    [CreateAssetMenu(menuName = "Everrealm/Loot/Loot Table")]
     public sealed class LootTable : ScriptableObject
     {
         [SerializeField] private string lootTableId;

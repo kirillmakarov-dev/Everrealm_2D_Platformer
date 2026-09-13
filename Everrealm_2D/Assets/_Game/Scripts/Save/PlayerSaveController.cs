@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using LetterHunter.Core;
 using LetterHunter.Economy;
 using LetterHunter.Items;
 using LetterHunter.SkillTree;
@@ -366,6 +367,10 @@ namespace LetterHunter.Save
                 if (string.IsNullOrWhiteSpace(savedSlot.skillId))
                     continue;
                 if (skillDatabase == null || !skillDatabase.TryGetSkill(savedSlot.skillId, out var skill))
+                    continue;
+                if (skill.SkillType is SkillType.Passive or SkillType.AutoAttackUpgrade)
+                    continue;
+                if (skillTree != null && !skillTree.IsSkillUnlocked(skill))
                     continue;
 
                 bindings.Add(new SkillSlotBinding(savedSlot.slotIndex, skill, string.Empty));

@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace LetterHunter.Skills
 {
-    [CreateAssetMenu(menuName = "Letter Hunter/Databases/Skill Database")]
+    [CreateAssetMenu(menuName = "Everrealm/Databases/Skill Database")]
     public sealed class SkillDatabase : ScriptableObject
     {
         [SerializeField] private List<SkillDefinition> skills = new();

@@ -47,25 +47,25 @@ This document tracks the first playable skill-tree slice: unlock nodes, spend go
 Create or update skill-tree wiring in the current scene:
 
 ```text
-Letter Hunter/Setup Skill Tree
+Everrealm/Setup Skill Tree
 ```
 
 Create a dedicated playtest scene:
 
 ```text
-Letter Hunter/Build Skill Tree Playtest Scene
+Everrealm/Build Skill Tree Playtest Scene
 ```
 
 Validate every skill-tree asset:
 
 ```text
-Letter Hunter/Validate Skill Trees
+Everrealm/Validate Skill Trees
 ```
 
 Explicitly replace the demo Warrior tree data with the eleven-node example:
 
 ```text
-Letter Hunter/Rebuild Demo Warrior Skill Tree Data
+Everrealm/Rebuild Demo Warrior Skill Tree Data
 ```
 
 The normal `Setup Skill Tree` command preserves an existing node array. Only the explicitly named rebuild command overwrites demo tree content.
@@ -168,7 +168,7 @@ Rules:
 - `SkillTreeDefinition.refundMaterials` controls whether that rank's material costs are returned. Material respec is rejected before mutation when inventory has insufficient capacity.
 - Reducing a node from rank N to N-1 is allowed while N-1 remains above zero. Removing the last rank is rejected while any unlocked node directly depends on it.
 - Removing the last rank of an unlock-skill node unregisters the learned skill and removes its explicit skill-bar binding before the final commit event.
-- Default UI prefabs can be rebuilt explicitly through `Letter Hunter/Rebuild Default Skill Tree UI Prefabs`; scene wiring is refreshed through `Letter Hunter/Setup Skill Tree`.
+- Default UI prefabs can be rebuilt explicitly through `Everrealm/Rebuild Default Skill Tree UI Prefabs`; scene wiring is refreshed through `Everrealm/Setup Skill Tree`.
 
 ## Next Steps
 

@@ -21,7 +21,7 @@ namespace LetterHunter.Editor
         public static void SetupPhysicsLayers()
         {
             ConfigureCollisionMatrix();
-            Debug.Log("Letter Hunter physics layers configured. Player does not physically collide with EnemyBody.");
+            Debug.Log("Everrealm physics layers configured. Player does not physically collide with EnemyBody.");
         }
 
         [InitializeOnLoadMethod]

@@ -1,6 +1,6 @@
-﻿# Letter Hunter Test Coverage
+﻿# Everrealm Test Coverage
 
-This folder contains EditMode tests for the main gameplay systems in Letter Hunter.
+This folder contains EditMode tests for the main gameplay systems in Everrealm.
 
 ## Test Assembly
 
@@ -31,7 +31,7 @@ Open Unity Test Runner:
 Or run from command line:
 
 ```powershell
-"C:\Program Files\Unity\Hub\Editor\6000.3.3f1\Editor\Unity.exe" -batchmode -nographics -projectPath "C:\English Room\Letter-Hunter-New\Letter_Hunter" -runTests -testPlatform editmode
+"C:\Program Files\Unity\Hub\Editor\6000.3.3f1\Editor\Unity.exe" -batchmode -nographics -projectPath "<path-to-Everrealm_2D>" -runTests -testPlatform editmode
 ```
 
 ## Expected Result

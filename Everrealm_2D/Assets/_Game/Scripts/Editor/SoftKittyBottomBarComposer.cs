@@ -15,7 +15,7 @@ namespace LetterHunter.EditorTools
 {
     /// <summary>
     /// Authors only the bottom skill bar from the local SoftKitty ActionBar prefab.
-    /// The resulting prefab instance and all Letter Hunter references are saved in the scene.
+    /// The resulting prefab instance and all Everrealm references are saved in the scene.
     /// </summary>
     public static class SoftKittyBottomBarComposer
     {
@@ -54,7 +54,7 @@ namespace LetterHunter.EditorTools
                 Build();
         }
 
-        [MenuItem("Letter Hunter/Build SoftKitty Bottom Bar", priority = 1)]
+        [MenuItem("Everrealm/Build SoftKitty Bottom Bar", priority = 1)]
         public static void Build()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode)
@@ -74,7 +74,7 @@ namespace LetterHunter.EditorTools
             var presenter = UnityEngine.Object.FindFirstObjectByType<SkillBarPresenter>(FindObjectsInactive.Include);
             if (actionBarPrefab == null || presenter == null)
             {
-                Debug.LogError("SoftKitty ActionBar prefab or Letter Hunter SkillBarPresenter is missing.");
+                Debug.LogError("SoftKitty ActionBar prefab or Everrealm SkillBarPresenter is missing.");
                 return;
             }
 
@@ -358,7 +358,7 @@ namespace LetterHunter.EditorTools
 
         private static void DisablePackageIconLayers(Transform slot)
         {
-            foreach (var image in slot.GetComponentsInChildren<Image>(true))
+            foreach (var image in slot.GetComponentsInChildren<Graphic>(true))
             {
                 if (image == null)
                     continue;

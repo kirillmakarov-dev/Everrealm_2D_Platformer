@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace LetterHunter.Effects
 {
-    [CreateAssetMenu(menuName = "Letter Hunter/Effects/Area Damage")]
+    [CreateAssetMenu(menuName = "Everrealm/Effects/Area Damage")]
     public sealed class DamageSkillEffectDefinition : SkillEffectDefinition
     {
         [SerializeField] private AttackShape attackShape;

@@ -66,6 +66,24 @@ namespace LetterHunter.Skills
             Vector2 position, out PreparedSkillCast cast)
         {
             cast = null;
+            var validation = CanPrepareProjectile(skillId);
+            if (!validation.Success)
+                return validation;
+
+            var definition = _definitions[skillId];
+            var state = _states[skillId];
+            var values = GetRuntimeValues(definition);
+            if (!_owner.Stats.TrySpendMana(values.ManaCost))
+                return SkillUseResult.Failed(SkillUseFailure.NotEnoughMana);
+
+            state.StartCooldown(values.Cooldown);
+            cast = new PreparedSkillCast(definition, values, position,
+                direction.sqrMagnitude > 0f ? direction.normalized : Vector2.right);
+            return SkillUseResult.Succeeded();
+        }
+
+        public SkillUseResult CanPrepareProjectile(string skillId)
+        {
             if (!_definitions.TryGetValue(skillId, out var definition))
                 return SkillUseResult.Failed(SkillUseFailure.NotRegistered);
             if (definition.SkillType == SkillType.Empower)
@@ -75,16 +93,11 @@ namespace LetterHunter.Skills
             if (!_owner.IsAlive)
                 return SkillUseResult.Failed(SkillUseFailure.CasterDead);
 
-            var state = _states[skillId];
-            var values = GetRuntimeValues(definition);
-            if (!state.IsReady)
+            if (!_states[skillId].IsReady)
                 return SkillUseResult.Failed(SkillUseFailure.OnCooldown);
-            if (!_owner.Stats.TrySpendMana(values.ManaCost))
+            if (_owner.Stats.CurrentMana < GetRuntimeValues(definition).ManaCost)
                 return SkillUseResult.Failed(SkillUseFailure.NotEnoughMana);
 
-            state.StartCooldown(values.Cooldown);
-            cast = new PreparedSkillCast(definition, values, position,
-                direction.sqrMagnitude > 0f ? direction.normalized : Vector2.right);
             return SkillUseResult.Succeeded();
         }
 

@@ -13,7 +13,7 @@ Add a Diablo-style player vitals display with circular health and mana orbs.
 
 ## Setup
 
-Run `Letter Hunter/Setup Skill Bar UI`.
+Run `Everrealm/Setup Skill Bar UI`.
 
 The setup creates or refreshes:
 

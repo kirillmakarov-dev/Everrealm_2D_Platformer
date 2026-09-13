@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace LetterHunter.Effects
 {
-    [CreateAssetMenu(menuName = "Letter Hunter/Effects/Stat Buff")]
+    [CreateAssetMenu(menuName = "Everrealm/Effects/Stat Buff")]
     public sealed class BuffEffectDefinition : SkillEffectDefinition
     {
         [SerializeField] private BuffStat stat;

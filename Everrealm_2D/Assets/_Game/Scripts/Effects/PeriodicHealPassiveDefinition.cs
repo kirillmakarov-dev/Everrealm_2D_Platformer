@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace LetterHunter.Effects
 {
-    [CreateAssetMenu(menuName = "Letter Hunter/Effects/Passives/Periodic Heal")]
+    [CreateAssetMenu(menuName = "Everrealm/Effects/Passives/Periodic Heal")]
     public sealed class PeriodicHealPassiveDefinition : PassiveSkillEffectDefinition
     {
         [Min(0.01f), SerializeField] private float interval = 5f;

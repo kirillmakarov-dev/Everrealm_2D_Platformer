@@ -150,6 +150,8 @@ namespace LetterHunter.Tests.EditMode
                 Assert.That(tree.TryGrantNodeForDebug(node, out _), Is.True);
                 Assert.That(player.IsSkillAvailable(skill), Is.True);
                 Assert.That(loadout.ResolveSkill(player, 0, out _), Is.SameAs(skill));
+                Assert.That(loadout.ResolveSkill(player, 1, out _), Is.Null,
+                    "A learned skill must not appear in an unassigned skill bar slot.");
                 tree.RestoreProgress(profession.ProfessionId, System.Array.Empty<PurchasedSkillNode>());
                 Assert.That(player.IsSkillAvailable(skill), Is.False);
                 Assert.That(loadout.ResolveSkill(player, 0, out _), Is.Null);

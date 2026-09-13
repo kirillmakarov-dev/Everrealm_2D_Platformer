@@ -45,8 +45,8 @@ The panel is visible by default for playtesting and toggles with `P`. Its labels
 ## Unity Commands
 
 ```text
-Letter Hunter/Rebuild Default Player Stats UI Prefab
-Letter Hunter/Setup Player Stats UI
+Everrealm/Rebuild Default Player Stats UI Prefab
+Everrealm/Setup Player Stats UI
 ```
 
 These commands own only the Player Stats prefab, canvas, panel, and player references. They do not rebuild Inventory, Skill Tree, Currency HUD, Shop UI, or Skill Bar.

@@ -89,7 +89,7 @@ The editor builder creates:
 Manual menu:
 
 ```text
-Letter Hunter/Build Combat Foundation Sample
+Everrealm/Build Combat Foundation Sample
 ```
 
 The operation is intended to be idempotent: existing assets are updated instead of duplicated.

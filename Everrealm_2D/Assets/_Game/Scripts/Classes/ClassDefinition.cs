@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace LetterHunter.Classes
 {
-    [CreateAssetMenu(menuName = "Letter Hunter/Classes/Class Definition")]
+    [CreateAssetMenu(menuName = "Everrealm/Classes/Class Definition")]
     public sealed class ClassDefinition : ScriptableObject
     {
         [SerializeField] private CharacterClassType classType;

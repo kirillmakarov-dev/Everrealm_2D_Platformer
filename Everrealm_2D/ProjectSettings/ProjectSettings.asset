@@ -13,7 +13,7 @@ PlayerSettings:
   useOnDemandResources: 0
   accelerometerFrequency: 60
   companyName: DefaultCompany
-  productName: Letter_Hunter
+  productName: Everrealm
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b: 0.1254902, a: 1}
@@ -698,14 +698,14 @@ PlayerSettings:
   editorAssembliesCompatibilityLevel: 1
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
-  metroPackageName: Letter_Hunter
+  metroPackageName: Everrealm
   metroPackageVersion: 
   metroCertificatePath: 
   metroCertificatePassword: 
   metroCertificateSubject: 
   metroCertificateIssuer: 
   metroCertificateNotAfter: 0000000000000000
-  metroApplicationDescription: Letter_Hunter
+  metroApplicationDescription: Everrealm
   wsaImages: {}
   metroTileShortName: 
   metroTileShowName: 0
@@ -779,7 +779,7 @@ PlayerSettings:
   cloudProjectId: be6b94f9-9b70-4780-9f69-fb04c1126ad3
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: Letter_Hunter
+  projectName: Everrealm
   organizationId: unity_i23ceeziddvswa
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0

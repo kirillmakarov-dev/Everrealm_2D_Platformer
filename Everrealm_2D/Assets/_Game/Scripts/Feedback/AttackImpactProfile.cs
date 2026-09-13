@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace LetterHunter.Feedback
 {
-    [CreateAssetMenu(menuName = "Letter Hunter/Feedback/Attack Impact Profile")]
+    [CreateAssetMenu(menuName = "Everrealm/Feedback/Attack Impact Profile")]
     public sealed class AttackImpactProfile : ScriptableObject
     {
         [Header("Identity")]

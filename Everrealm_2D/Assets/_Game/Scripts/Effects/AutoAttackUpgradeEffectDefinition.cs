@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace LetterHunter.Effects
 {
-    [CreateAssetMenu(menuName = "Letter Hunter/Effects/Auto Attack Upgrade")]
+    [CreateAssetMenu(menuName = "Everrealm/Effects/Auto Attack Upgrade")]
     public sealed class AutoAttackUpgradeEffectDefinition : SkillEffectDefinition
     {
         [Min(0f), SerializeField] private float damageMultiplier = 1f;

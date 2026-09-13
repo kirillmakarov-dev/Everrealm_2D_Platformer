@@ -24,7 +24,7 @@ namespace LetterHunter.Editor
             new(.85f, 1f, .25f), new(1f, .25f, .25f), new(.65f, .45f, 1f)
         };
 
-        [MenuItem("Tools/Letter Hunter/Combat/Build Individual Skill Projectiles")]
+        [MenuItem("Tools/Everrealm/Combat/Build Individual Skill Projectiles")]
         public static void Build()
         {
             EnsureFolder(ProjectileFolder);

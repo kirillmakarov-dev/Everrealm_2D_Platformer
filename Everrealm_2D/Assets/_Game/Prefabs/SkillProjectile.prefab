@@ -140,7 +140,7 @@ MonoBehaviour:
   hitLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  launchSound: {fileID: 0}
+  launchSound: {fileID: 8300000, guid: 1054c0f89917a384a9232cd48c440cf8, type: 3}
   impactSound: {fileID: 0}
   createFallbackVisual: 1
   useSkillIconVisual: 1

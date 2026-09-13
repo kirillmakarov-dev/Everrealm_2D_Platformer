@@ -5,7 +5,7 @@ namespace LetterHunter.Items
     public enum ItemType { Material, Consumable, Weapon, Equipment, QuestItem }
     public enum ItemRarity { Common, Uncommon, Rare, Epic, Legendary }
 
-    [CreateAssetMenu(menuName = "Letter Hunter/Items/Item Definition")]
+    [CreateAssetMenu(menuName = "Everrealm/Items/Item Definition")]
     public sealed class ItemDefinition : ScriptableObject
     {
         [SerializeField] private string itemId;

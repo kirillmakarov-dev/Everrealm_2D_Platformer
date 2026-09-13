@@ -74,7 +74,7 @@ namespace LetterHunter.EditorTools
             Debug.Log("SoftKitty UI built from package sprites. Scene objects and project UI prefabs are Inspector-editable.");
         }
 
-        [MenuItem("Tools/Letter Hunter/UI/Build SoftKitty Inventory")]
+        [MenuItem("Tools/Everrealm/UI/Build SoftKitty Inventory")]
         public static void BuildInventoryOnly()
         {
             var scene = SceneManager.GetActiveScene();
@@ -96,7 +96,7 @@ namespace LetterHunter.EditorTools
             Debug.Log("SoftKitty inventory visuals built. Runtime inventory logic was preserved.");
         }
 
-        [MenuItem("Tools/Letter Hunter/UI/Build SoftKitty Player Stats")]
+        [MenuItem("Tools/Everrealm/UI/Build SoftKitty Player Stats")]
         public static void BuildPlayerStatsOnly()
         {
             var scene = SceneManager.GetActiveScene();
@@ -134,7 +134,7 @@ namespace LetterHunter.EditorTools
             BuildInventoryOnly();
         }
 
-        [MenuItem("Tools/Letter Hunter/UI/Build SoftKitty Shop")]
+        [MenuItem("Tools/Everrealm/UI/Build SoftKitty Shop")]
         public static void BuildShopOnly()
         {
             var scene = SceneManager.GetActiveScene();
@@ -172,7 +172,7 @@ namespace LetterHunter.EditorTools
             BuildShopOnly();
         }
 
-        [MenuItem("Tools/Letter Hunter/UI/Create Editable Inventory And Shop Prefabs")]
+        [MenuItem("Tools/Everrealm/UI/Create Editable Inventory And Shop Prefabs")]
         public static void CreateEditableWindowPrefabs()
         {
             var scene = SceneManager.GetActiveScene();

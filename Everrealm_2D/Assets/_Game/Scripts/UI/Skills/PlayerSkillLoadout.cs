@@ -113,11 +113,8 @@ namespace LetterHunter.UI.Skills
                 return player != null && player.IsSkillAvailable(explicitBinding.Skill) ? explicitBinding.Skill : null;
             }
 
-            var skill = player != null && slotIndex >= 0 && slotIndex < player.UsableSkills.Count
-                ? player.UsableSkills[slotIndex]
-                : null;
             inputLabel = ResolveSlotLabel(slotIndex);
-            return player != null && player.IsSkillAvailable(skill) ? skill : null;
+            return null;
         }
 
         private bool CanAssign(SkillDefinition skill) => skill != null &&

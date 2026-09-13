@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace LetterHunter.Effects
 {
-    [CreateAssetMenu(menuName = "Letter Hunter/Effects/Empower")]
+    [CreateAssetMenu(menuName = "Everrealm/Effects/Empower")]
     public sealed class EmpowerEffectDefinition : SkillEffectDefinition, IEmpowerModifier
     {
         [Min(0f), SerializeField] private float damageMultiplier = 1f;

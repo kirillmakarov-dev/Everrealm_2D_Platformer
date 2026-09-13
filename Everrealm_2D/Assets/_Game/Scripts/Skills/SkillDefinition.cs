@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace LetterHunter.Skills
 {
-    [CreateAssetMenu(menuName = "Letter Hunter/Skills/Skill Definition")]
+    [CreateAssetMenu(menuName = "Everrealm/Skills/Skill Definition")]
     public sealed class SkillDefinition : ScriptableObject
     {
         [SerializeField] private string skillId;

@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace LetterHunter.Stats
 {
-    [CreateAssetMenu(menuName = "Letter Hunter/Stats/Level Progression")]
+    [CreateAssetMenu(menuName = "Everrealm/Stats/Level Progression")]
     public sealed class LevelProgressionDefinition : ScriptableObject
     {
         [Tooltip("Cumulative XP required for each level. Index 0 is level 1.")]

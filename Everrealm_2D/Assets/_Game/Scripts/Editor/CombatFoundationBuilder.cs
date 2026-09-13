@@ -33,7 +33,7 @@ namespace LetterHunter.Editor
             BuildScene(warrior);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-            Debug.Log("Letter Hunter combat sample assets and scene created.");
+            Debug.Log("Everrealm combat sample assets and scene created.");
         }
 
         private static ClassDefinition BuildWarrior()

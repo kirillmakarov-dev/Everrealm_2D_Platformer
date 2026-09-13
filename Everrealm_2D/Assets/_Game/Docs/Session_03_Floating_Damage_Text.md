@@ -2,7 +2,7 @@
 
 ## Goal
 
-This session added a custom floating damage text system for Letter Hunter.
+This session added a custom floating damage text system for Everrealm.
 
 `FloatingTextEngineLite` was used only as a design reference for the idea of:
 
@@ -31,7 +31,7 @@ The new game scripts do not depend on the package namespace or API, so the packa
   Style settings for color, font size, lifetime, velocity, scale curve, and fade curve.
 
 - `Assets/_Game/Scripts/Editor/FloatingDamageTextSetupBuilder.cs`  
-  Unity menu setup: `Letter Hunter/Setup Floating Damage Text`.
+  Unity menu setup: `Everrealm/Setup Floating Damage Text`.
 
 ## Damage integration
 
@@ -54,7 +54,7 @@ Assets/_Game/Scenes/CharacterFrameworkDebug.unity
 4. Run:
 
 ```text
-Letter Hunter/Setup Floating Damage Text
+Everrealm/Setup Floating Damage Text
 ```
 
 5. Press Play.
@@ -100,7 +100,7 @@ In a future multiplayer version, the server can calculate damage and replicate c
 
 Before removing `FloatingTextEngineLite`, make sure no scene still contains the old package object `FloatingTextEngine`.
 
-Keep the Letter Hunter files:
+Keep the Everrealm files:
 
 - `Assets/_Game/Scripts/Feedback/*`;
 - `Assets/_Game/Scripts/Editor/FloatingDamageTextSetupBuilder.cs`;

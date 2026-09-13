@@ -22,7 +22,7 @@ Add the first playable enemy behavior without depending on final player animatio
 - `EnemyPatrolAI2D` owns patrol, detection, chase movement, facing, and debug gizmos.
 - `EnemyAttackController2D` still owns attack range checks and damage application.
 - `DummyEnemy2D` owns enemy stats and death handling.
-- `PhysicsLayerSetupBuilder` keeps the intended physics layer setup reproducible from `Letter Hunter/Setup Physics Layers`.
+- `PhysicsLayerSetupBuilder` keeps the intended physics layer setup reproducible from `Everrealm/Setup Physics Layers`.
 
 ## Physics layers
 

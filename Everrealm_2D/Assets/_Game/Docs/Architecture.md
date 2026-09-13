@@ -1,6 +1,6 @@
-# Letter Hunter - High-Level Architecture
+# Everrealm - High-Level Architecture
 
-This document is the primary architecture reference for Letter Hunter. Future code changes should follow these standards unless a more specific architecture document explicitly extends or overrides them for a focused system.
+This document is the primary architecture reference for Everrealm. Future code changes should follow these standards unless a more specific architecture document explicitly extends or overrides them for a focused system.
 
 The project uses a data-driven Unity architecture built around small MonoBehaviour adapters, plain C# runtime services, ScriptableObject definitions, explicit dependencies, and clear separation between gameplay logic, presentation, physics, UI, and editor tooling.
 
@@ -72,7 +72,7 @@ The last authored threshold is the level cap; excess XP is retained and the bar 
 ### Audio presentation
 
 `Audio/SoundManager` is a scene-level presentation adapter with explicit music,
-combat SFX and UI sources routed through the authored `LetterHunterAudio` mixer.
+combat SFX and UI sources routed through the authored `EverrealmAudio` mixer.
 Player combat reports successful projectile launches and hits to this adapter without
 changing damage resolution. `UiButtonSound` handles pointer and submit feedback for
 authored buttons. Pause Settings changes the exposed Master, Music and SFX mixer

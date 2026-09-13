@@ -74,6 +74,38 @@ namespace LetterHunter.Tests.EditMode
         }
 
         [Test]
+        public void CanPrepareProjectile_RejectsInsufficientManaWithoutConsumingResources()
+        {
+            var ownerObject = new GameObject("Owner");
+            var effect = ScriptableObject.CreateInstance<DamageSkillEffectDefinition>();
+            var skill = CreateSkill("expensive_projectile", SkillType.Active, effect, 1f, 0f);
+            var skillData = new SerializedObject(skill);
+            skillData.FindProperty("manaCost").floatValue = 999f;
+            skillData.ApplyModifiedPropertiesWithoutUndo();
+
+            try
+            {
+                var owner = ownerObject.AddComponent<TestActor>();
+                owner.Initialize();
+                var service = CreateService(owner);
+                service.Register(skill);
+                var startingMana = owner.Stats.CurrentMana;
+
+                Assert.That(service.CanPrepareProjectile(skill.SkillId).Failure,
+                    Is.EqualTo(SkillUseFailure.NotEnoughMana));
+                Assert.That(owner.Stats.CurrentMana, Is.EqualTo(startingMana));
+                Assert.That(service.TryGetRuntimeState(skill.SkillId, out var state), Is.True);
+                Assert.That(state.IsReady, Is.True);
+            }
+            finally
+            {
+                Object.DestroyImmediate(skill);
+                Object.DestroyImmediate(effect);
+                Object.DestroyImmediate(ownerObject);
+            }
+        }
+
+        [Test]
         public void DamageProjectile_AppliesItsDamageEffectOnlyOnce()
         {
             var ownerObject = new GameObject("Owner");

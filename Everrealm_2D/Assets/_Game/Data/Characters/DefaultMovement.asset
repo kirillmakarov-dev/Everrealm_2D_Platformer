@@ -15,7 +15,7 @@ MonoBehaviour:
   moveSpeed: 6
   acceleration: 45
   deceleration: 55
-  jumpForce: 12
+  jumpForce: 13
   gravityScale: 3
   airControl: 0.65
   minimumFallDistance: 1

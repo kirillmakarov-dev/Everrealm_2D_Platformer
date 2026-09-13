@@ -93,7 +93,7 @@ Finisher:
 Run:
 
 ```text
-Letter Hunter/Setup Auto Attack Combo
+Everrealm/Setup Auto Attack Combo
 ```
 
 The command:

@@ -214,8 +214,8 @@ MonoBehaviour:
     m_Bits: 8
   requirePlayerTarget: 1
   attackRange: 1.5
-  attackOffset: {x: 0, y: 0}
-  autoAttack: 1
+  attackOffset: {x: 0, y: 1.72}
+  autoAttack: 0
   logAttacks: 0
 --- !u!114 &1586543224514949597
 MonoBehaviour:

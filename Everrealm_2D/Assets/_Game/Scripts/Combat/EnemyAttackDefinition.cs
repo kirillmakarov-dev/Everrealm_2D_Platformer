@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace LetterHunter.Combat
 {
-    [CreateAssetMenu(menuName = "Letter Hunter/Combat/Enemy Attack Definition")]
+    [CreateAssetMenu(menuName = "Everrealm/Combat/Enemy Attack Definition")]
     public sealed class EnemyAttackDefinition : ScriptableObject
     {
         [SerializeField] private string attackId = "enemy_attack";

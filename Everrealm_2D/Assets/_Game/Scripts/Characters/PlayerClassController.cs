@@ -156,6 +156,18 @@ namespace LetterHunter.Characters
             return _skillService.TryUse(skillId, null, facingDirection);
         }
 
+        public SkillUseResult CanPrepareSkillProjectile(string skillId)
+        {
+            if (_skillService == null || string.IsNullOrWhiteSpace(skillId))
+                return SkillUseResult.Failed(SkillUseFailure.NotRegistered);
+
+            var skill = _usableSkills.Find(candidate => candidate != null && candidate.SkillId == skillId);
+            if (!IsSkillAvailable(skill))
+                return SkillUseResult.Failed(SkillUseFailure.NotRegistered);
+
+            return _skillService.CanPrepareProjectile(skillId);
+        }
+
         public SkillUseResult TryLaunchSkillProjectile(string skillId, Vector2 position, float speed,
             float lifetime, GameObject fallbackPrefab, out SkillProjectile2D projectile)
         {

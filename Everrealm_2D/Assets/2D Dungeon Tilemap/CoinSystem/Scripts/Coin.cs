@@ -8,7 +8,7 @@ namespace CoinSystem
         public static Coin instance; // Singleton instance so other scripts can access the coin manager easily
 
         public int playerCoins; // Current number of coins the player has
-        private UnityEvent<int> OnCoinsChanged; // Event triggered when the number of coins changes
+        [SerializeField] private UnityEvent<int> OnCoinsChanged = new UnityEvent<int>(); // Event triggered when the number of coins changes
 
         private void Awake()
         {

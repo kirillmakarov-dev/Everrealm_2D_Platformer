@@ -88,7 +88,7 @@ The scene contains a platform, a Warrior player, and dummy enemies.
 If assets were not created automatically, use:
 
 ```text
-Letter Hunter/Build Character Framework Sample
+Everrealm/Build Character Framework Sample
 ```
 
 ## Presentation setup

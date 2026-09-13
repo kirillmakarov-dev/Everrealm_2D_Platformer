@@ -81,7 +81,7 @@ Attack / Skill / EnemyAttack
 ### Editor
 
 - `Assets/_Game/Scripts/Editor/AttackImpactSetupBuilder.cs`  
-  Menu: `Letter Hunter/Setup Attack Impact Feedback`.
+  Menu: `Everrealm/Setup Attack Impact Feedback`.
 
 The command creates default impact profiles:
 
@@ -100,7 +100,7 @@ If `VFXPACK_IMPACT_WALLCOEUR_FreeVersion` exists, the setup tries to assign VFX 
 1. Run:
 
 ```text
-Letter Hunter/Setup Attack Impact Feedback
+Everrealm/Setup Attack Impact Feedback
 ```
 
 2. Open:
@@ -180,7 +180,7 @@ The setup command adds this controller to dummy enemies, but leaves `Auto Attack
 
 ### Player hits enemy
 
-1. Run `Letter Hunter/Setup Attack Impact Feedback`.
+1. Run `Everrealm/Setup Attack Impact Feedback`.
 2. Press Play.
 3. Hit an enemy with `J`.
 4. The enemy should show floating text and the VFX from the attack impact profile.

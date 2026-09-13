@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace LetterHunter.Effects
 {
-    [CreateAssetMenu(menuName = "Letter Hunter/Effects/Passives/Extra Damage Line")]
+    [CreateAssetMenu(menuName = "Everrealm/Effects/Passives/Extra Damage Line")]
     public sealed class ExtraDamageLinePassiveDefinition : PassiveSkillEffectDefinition
     {
         [Range(0f, 1f), SerializeField] private float chance = 0.2f;
