@@ -79,6 +79,7 @@ namespace LetterHunter.Characters
             {
                 _groundedColliderSize = _playerCollider.size;
                 _groundedColliderOffset = _playerCollider.offset;
+                UpdateGroundCheckPosition();
             }
 
             Runtime = new CharacterRuntime();
@@ -182,6 +183,13 @@ namespace LetterHunter.Characters
             _playerCollider.size = new Vector2(_groundedColliderSize.x, currentHeight);
             _playerCollider.offset = _groundedColliderOffset +
                 Vector2.up * ((_groundedColliderSize.y - currentHeight) * .5f);
+            UpdateGroundCheckPosition();
+        }
+
+        private void UpdateGroundCheckPosition()
+        {
+            var localBottom = _playerCollider.offset + Vector2.down * (_playerCollider.size.y * .5f);
+            groundDetector.SetCheckPointWorldPosition(_playerCollider.transform.TransformPoint(localBottom));
         }
 
         private void Update()

@@ -25,6 +25,12 @@ namespace LetterHunter.Characters
                 _groundedCheckPointLocalPosition = checkPoint.localPosition;
         }
 
+        public void SetCheckPointWorldPosition(Vector3 worldPosition)
+        {
+            if (checkPoint != null)
+                checkPoint.position = worldPosition;
+        }
+
         public bool TryGetGroundDistance(float maxDistance, out float distance)
         {
             distance = 0f;
