@@ -42,6 +42,7 @@ namespace LetterHunter.Debugging
         public bool IsAlive => !_defeated && Stats != null && Stats.CurrentHealth > 0f;
 
         private Rigidbody2D _body;
+        private EnemyPatrolAI2D _patrolAI;
         private bool _defeated;
 
         private void Awake()
@@ -49,6 +50,7 @@ namespace LetterHunter.Debugging
             Stats = new CombatStats(stats.maxHealth > 0f ? stats : CombatStatsData.Default);
             _body = GetComponent<Rigidbody2D>();
             _body.freezeRotation = true;
+            _patrolAI = GetComponent<EnemyPatrolAI2D>();
 
             if (damageTextController == null)
                 damageTextController = GetComponent<FloatingDamageTextController>();
@@ -83,6 +85,9 @@ namespace LetterHunter.Debugging
                 BeginDeath();
                 return;
             }
+
+            if (result.Attacker is PlayerClassController player)
+                _patrolAI?.ProvokeTarget(player);
 
             hitReaction?.ApplyKnockback(result.AttackDirection, hitKnockbackHorizontal,
                 hitKnockbackVertical, hitMovementLockDuration);

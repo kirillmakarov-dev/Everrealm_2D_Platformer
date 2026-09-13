@@ -25,7 +25,7 @@ namespace LetterHunter.Skills
         private float _speed;
         private float _remainingLifetime;
         private ICombatActor _owner;
-        private Action<IDamageable> _hit;
+        private Action<IDamageable, Vector2> _hit;
         private Sprite _skillIcon;
         private SpriteRenderer[] _visualRenderers;
         private Sprite[] _defaultVisualSprites;
@@ -42,6 +42,13 @@ namespace LetterHunter.Skills
         public void Launch(ICombatActor owner, PreparedSkillCast cast, float speed, float lifetime,
             Action<IDamageable> hit)
         {
+            Launch(owner, cast, speed, lifetime,
+                hit != null ? (target, _) => hit(target) : null);
+        }
+
+        public void Launch(ICombatActor owner, PreparedSkillCast cast, float speed, float lifetime,
+            Action<IDamageable, Vector2> hit)
+        {
             _owner = owner;
             _direction = cast.Direction;
             _speed = Mathf.Max(0f, speed);
@@ -56,11 +63,19 @@ namespace LetterHunter.Skills
         public void Launch(ICombatActor owner, Vector2 direction, float speed, float lifetime,
             Action<IDamageable> hit)
         {
-            Launch(owner, direction, speed, lifetime, hit, null);
+            Launch(owner, direction, speed, lifetime,
+                hit != null ? (target, _) => hit(target) : null, null);
         }
 
         public void Launch(ICombatActor owner, Vector2 direction, float speed, float lifetime,
             Action<IDamageable> hit, Sprite visualOverride)
+        {
+            Launch(owner, direction, speed, lifetime,
+                hit != null ? (target, _) => hit(target) : null, visualOverride);
+        }
+
+        public void Launch(ICombatActor owner, Vector2 direction, float speed, float lifetime,
+            Action<IDamageable, Vector2> hit, Sprite visualOverride)
         {
             _owner = owner;
             _direction = direction.sqrMagnitude > 0f ? direction.normalized : Vector2.right;
@@ -165,24 +180,24 @@ namespace LetterHunter.Skills
             {
                 foreach (var hit in Physics2D.CircleCastAll(start, hitRadius, _direction, distance, hitLayers))
                 {
-                    if (TryResolveHit(hit.collider))
+                    if (TryResolveHit(hit.collider, hit.point))
                         return;
                 }
             }
 
             transform.position = start + travel;
             foreach (var collider in Physics2D.OverlapCircleAll(transform.position, hitRadius, hitLayers))
-                if (TryResolveHit(collider))
+                if (TryResolveHit(collider, collider.ClosestPoint(transform.position)))
                     return;
         }
 
-        private bool TryResolveHit(Collider2D collider)
+        private bool TryResolveHit(Collider2D collider, Vector2 impactPosition)
         {
             var target = FindDamageable(collider);
             if (target == null || ReferenceEquals(target, _owner) || !target.IsAlive)
                 return false;
 
-            _hit?.Invoke(target);
+            _hit?.Invoke(target, impactPosition);
             Destroy(gameObject);
             return true;
         }

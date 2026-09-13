@@ -240,7 +240,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   requirePlayerTarget: 1
-  attackRange: 1.5
+  attackRange: 2
   attackOffset: {x: 0, y: 0}
   autoAttack: 1
   logAttacks: 0
@@ -283,8 +283,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ad79f0d13d04740a9a0c03e8d317e6b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LetterHunter.Characters.EnemyPatrolAI2D
-  leftDistance: 2
-  rightDistance: 2
+  leftDistance: 3
+  rightDistance: 3
   patrolSpeed: 1.5
   returnToPatrolSpeed: 2.25
   edgeWaitTime: 0.35
@@ -292,11 +292,11 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   requirePlayerTarget: 1
-  detectionRange: 5
+  detectionRange: 5.75
   loseTargetDistance: 7
   maxTargetVerticalGap: 1.25
   chaseSpeed: 2.25
-  attackStopDistance: 1.2
+  attackStopDistance: 1
   targetRefreshInterval: 0.2
   visualRoot: {fileID: 4960097684448076293}
   useSpriteFlip: 1

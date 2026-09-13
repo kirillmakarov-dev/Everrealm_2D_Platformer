@@ -41,7 +41,9 @@ namespace LetterHunter.UI.Skills
         private ItemDefinition[] _consumableSlots = Array.Empty<ItemDefinition>();
 
         public event Action<string> AssignmentFeedbackChanged;
+        public event Action ConsumableSlotsChanged;
         public bool IsAssigningSkill => _pendingAssignment != null;
+        public int ConsumableSlotCount => _consumableSlots != null ? _consumableSlots.Length : Mathf.Max(1, maxSlots);
 
         private void Awake()
         {
@@ -413,8 +415,52 @@ namespace LetterHunter.UI.Skills
                 targetIndex < 0 || targetIndex >= _consumableSlots.Length)
                 return;
 
-            _consumableSlots[targetIndex] = source.Item;
+            SetConsumableSlot(targetIndex, source.Item);
             Render();
+        }
+
+        public ItemDefinition GetConsumableSlot(int index)
+        {
+            EnsureConsumableSlots();
+            return index >= 0 && index < _consumableSlots.Length ? _consumableSlots[index] : null;
+        }
+
+        public bool SetConsumableSlot(int index, ItemDefinition item, bool notify = true)
+        {
+            EnsureConsumableSlots();
+            if (index < 0 || index >= _consumableSlots.Length ||
+                (item != null && item.ItemType != ItemType.Consumable))
+                return false;
+
+            if (_consumableSlots[index] == item)
+                return true;
+
+            _consumableSlots[index] = item;
+            if (notify)
+                ConsumableSlotsChanged?.Invoke();
+            Render();
+            return true;
+        }
+
+        public void ClearConsumableSlots(bool notify = true)
+        {
+            EnsureConsumableSlots();
+            var changed = false;
+            for (var i = 0; i < _consumableSlots.Length; i++)
+            {
+                changed |= _consumableSlots[i] != null;
+                _consumableSlots[i] = null;
+            }
+
+            if (changed && notify)
+                ConsumableSlotsChanged?.Invoke();
+            Render();
+        }
+
+        private void EnsureConsumableSlots()
+        {
+            if (_consumableSlots == null || _consumableSlots.Length != Mathf.Max(1, maxSlots))
+                Array.Resize(ref _consumableSlots, Mathf.Max(1, maxSlots));
         }
 
         private void UseConsumable(int slotIndex)
@@ -427,7 +473,7 @@ namespace LetterHunter.UI.Skills
 
             inventory.TryRemove(item, 1);
             if (inventory.RuntimeInventory.Count(item) <= 0)
-                _consumableSlots[slotIndex] = null;
+                SetConsumableSlot(slotIndex, null);
             Render();
         }
 

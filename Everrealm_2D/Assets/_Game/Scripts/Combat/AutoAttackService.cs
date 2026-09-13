@@ -148,7 +148,8 @@ namespace LetterHunter.Combat
             return results;
         }
 
-        public DamageResult ExecuteOnTarget(UnityEngine.Vector2 direction, IDamageable target)
+        public DamageResult ExecuteOnTarget(UnityEngine.Vector2 direction, IDamageable target,
+            UnityEngine.Vector2? impactPosition = null)
         {
             if (!_owner.IsAlive || target == null || !target.IsAlive)
                 return DamageResult.Failed(DamageFailureReason.InvalidTarget);
@@ -179,7 +180,7 @@ namespace LetterHunter.Combat
             for (var i = 0; i < lines.Length; i++) lines[i] = new DamageLine(spec.DamageMultiplier, spec.Tags);
             var result = _combat.ApplyDamage(new DamageRequest(_owner, target, _owner.Stats.AttackPower,
                 lines, spec.SourceSkillId, spec.Tags, spec.ImpactProfile, direction,
-                spec.CriticalChance, spec.CriticalDamageMultiplier));
+                spec.CriticalChance, spec.CriticalDamageMultiplier, impactPosition));
             if (_empower.IsActive) _empower.Clear();
             return result;
         }

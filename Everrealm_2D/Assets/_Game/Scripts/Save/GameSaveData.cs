@@ -16,6 +16,7 @@ namespace LetterHunter.Save
         public List<string> unlockedSkillTreeNodeIds = new();
         public List<SkillTreeNodeRankSaveData> skillTreeNodeRanks = new();
         public List<SkillSlotSaveData> skillBarSlots = new();
+        public List<ConsumableSlotSaveData> consumableBarSlots = new();
     }
 
     [Serializable]
@@ -54,5 +55,12 @@ namespace LetterHunter.Save
         public int slotIndex;
         public string skillId;
         public bool isExplicitEmpty;
+    }
+
+    [Serializable]
+    public sealed class ConsumableSlotSaveData
+    {
+        public int slotIndex;
+        public string itemId;
     }
 }

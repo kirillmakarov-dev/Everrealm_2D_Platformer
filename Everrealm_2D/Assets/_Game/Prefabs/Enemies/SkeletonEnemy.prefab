@@ -126,7 +126,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.Feedback.FloatingDamageTextController
   damageTextType: 0
-  spawnPoint: {fileID: 0}
+  spawnPoint: {fileID: 5212501896440509447}
   localOffset: {x: 0, y: 1.25}
   roundDamage: 1
   showZeroDamageAsBlocked: 1
@@ -213,7 +213,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   requirePlayerTarget: 1
-  attackRange: 1.5
+  attackRange: 2
   attackOffset: {x: 0, y: 1.72}
   autoAttack: 0
   logAttacks: 0
@@ -238,11 +238,11 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   requirePlayerTarget: 1
-  detectionRange: 5
-  loseTargetDistance: 7
+  detectionRange: 8
+  loseTargetDistance: 16
   maxTargetVerticalGap: 1.25
-  chaseSpeed: 2.25
-  attackStopDistance: 1.2
+  chaseSpeed: 2.75
+  attackStopDistance: 0.65
   targetRefreshInterval: 0.2
   visualRoot: {fileID: 1562830507628515326}
   useSpriteFlip: 0
@@ -2068,5 +2068,10 @@ MonoBehaviour:
 --- !u!95 &4850489797223552388 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: b4ad35682015aa8458a65c731423ac28, type: 3}
+  m_PrefabInstance: {fileID: 1313629888626436117}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &5212501896440509447 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6515712193588681746, guid: b4ad35682015aa8458a65c731423ac28, type: 3}
   m_PrefabInstance: {fileID: 1313629888626436117}
   m_PrefabAsset: {fileID: 0}

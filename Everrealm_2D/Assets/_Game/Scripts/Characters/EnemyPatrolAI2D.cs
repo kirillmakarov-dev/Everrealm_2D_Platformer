@@ -190,6 +190,29 @@ namespace LetterHunter.Characters
             MoveTowardAttackStopDistance(direction, horizontalDistance);
         }
 
+        public bool ProvokeTarget(ICombatActor attacker, Collider2D targetCollider = null)
+        {
+            if (attacker == null || !attacker.IsAlive || attacker.Transform == null)
+                return false;
+
+            var attackerComponent = attacker as Component;
+            if (targetCollider == null && attackerComponent != null)
+            {
+                targetCollider = attackerComponent.GetComponent<Collider2D>();
+                if (targetCollider == null)
+                    targetCollider = attackerComponent.GetComponentInChildren<Collider2D>();
+            }
+
+            if (!IsWithinTargetVerticalRange(attacker.Transform, targetCollider))
+                return false;
+
+            _target = attacker;
+            _targetTransform = attacker.Transform;
+            _targetCollider = targetCollider;
+            _targetRefreshRemaining = targetRefreshInterval;
+            return true;
+        }
+
         private void MoveTowardAttackStopDistance(float direction, float horizontalDistance)
         {
             var remainingDistance = horizontalDistance - attackStopDistance;

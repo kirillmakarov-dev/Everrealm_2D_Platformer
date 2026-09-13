@@ -38,7 +38,8 @@ namespace LetterHunter.Combat
         public DamageRequest(ICombatActor attacker, IDamageable target, float baseDamage,
             IReadOnlyList<DamageLine> lines, string sourceSkillId, DamageTag tags,
             AttackImpactProfile impactProfile = null, Vector2 attackDirection = default,
-            float criticalChance = 0f, float criticalDamageMultiplier = 1.5f)
+            float criticalChance = 0f, float criticalDamageMultiplier = 1.5f,
+            Vector2? impactPosition = null)
         {
             Attacker = attacker;
             Target = target;
@@ -50,6 +51,7 @@ namespace LetterHunter.Combat
             AttackDirection = attackDirection.sqrMagnitude > 0f ? attackDirection.normalized : Vector2.right;
             CriticalChance = Mathf.Clamp01(criticalChance);
             CriticalDamageMultiplier = Math.Max(1f, criticalDamageMultiplier);
+            ImpactPosition = impactPosition;
         }
 
         public ICombatActor Attacker { get; }
@@ -63,6 +65,7 @@ namespace LetterHunter.Combat
         public Vector2 AttackDirection { get; }
         public float CriticalChance { get; }
         public float CriticalDamageMultiplier { get; }
+        public Vector2? ImpactPosition { get; }
     }
 
     public enum DamageFailureReason { None, InvalidAttacker, InvalidTarget, TargetDead, NoDamageLines }
@@ -70,7 +73,8 @@ namespace LetterHunter.Combat
     public readonly struct DamageResult
     {
         private DamageResult(bool applied, float finalDamage, int linesCount, bool wasCritical, DamageFailureReason reason,
-            string sourceSkillId, DamageTag tags, AttackImpactProfile impactProfile, Vector2 attackDirection)
+            string sourceSkillId, DamageTag tags, AttackImpactProfile impactProfile, Vector2 attackDirection,
+            Vector2? impactPosition, ICombatActor attacker)
         {
             AppliedSuccessfully = applied;
             FinalDamage = finalDamage;
@@ -81,6 +85,8 @@ namespace LetterHunter.Combat
             Tags = tags;
             ImpactProfile = impactProfile;
             AttackDirection = attackDirection.sqrMagnitude > 0f ? attackDirection.normalized : Vector2.right;
+            ImpactPosition = impactPosition;
+            Attacker = attacker;
         }
 
         public bool AppliedSuccessfully { get; }
@@ -92,13 +98,17 @@ namespace LetterHunter.Combat
         public DamageTag Tags { get; }
         public AttackImpactProfile ImpactProfile { get; }
         public Vector2 AttackDirection { get; }
+        public Vector2? ImpactPosition { get; }
+        public bool HasImpactPosition => ImpactPosition.HasValue;
+        public ICombatActor Attacker { get; }
 
         public static DamageResult Success(float damage, int lines, bool critical = false,
             string sourceSkillId = "", DamageTag tags = DamageTag.None, AttackImpactProfile impactProfile = null,
-            Vector2 attackDirection = default) =>
-            new(true, damage, lines, critical, DamageFailureReason.None, sourceSkillId, tags, impactProfile, attackDirection);
+            Vector2 attackDirection = default, Vector2? impactPosition = null, ICombatActor attacker = null) =>
+            new(true, damage, lines, critical, DamageFailureReason.None, sourceSkillId, tags, impactProfile,
+                attackDirection, impactPosition, attacker);
 
         public static DamageResult Failed(DamageFailureReason reason) =>
-            new(false, 0f, 0, false, reason, string.Empty, DamageTag.None, null, Vector2.right);
+            new(false, 0f, 0, false, reason, string.Empty, DamageTag.None, null, Vector2.right, null, null);
     }
 }

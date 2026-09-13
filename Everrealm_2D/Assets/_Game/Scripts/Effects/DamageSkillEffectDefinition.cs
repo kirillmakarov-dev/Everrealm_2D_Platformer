@@ -39,7 +39,7 @@ namespace LetterHunter.Effects
             context.CombatService.ApplyDamage(new DamageRequest(context.Caster, target,
                 context.Caster.Stats.AttackPower, lines, definition.SkillId, damageTags,
                 definition.ImpactProfile != null ? definition.ImpactProfile : impactProfile,
-                context.Direction));
+                context.Direction, impactPosition: context.ImpactPosition));
         }
     }
 }

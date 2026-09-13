@@ -404,7 +404,6 @@ MonoBehaviour:
   saveFileName: letter-hunter-save.json
   loadOnStart: 1
   autoSaveProgress: 1
-  debugGoldAmount: 100
 --- !u!114 &8410342960815434796
 MonoBehaviour:
   m_ObjectHideFlags: 0

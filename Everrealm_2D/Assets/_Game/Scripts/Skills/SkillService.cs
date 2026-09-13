@@ -101,21 +101,23 @@ namespace LetterHunter.Skills
             return SkillUseResult.Succeeded();
         }
 
-        public SkillUseResult ResolveProjectileHit(PreparedSkillCast cast, IDamageable target)
+        public SkillUseResult ResolveProjectileHit(PreparedSkillCast cast, IDamageable target,
+            Vector2? impactPosition = null)
         {
             if (cast == null || cast.Consumed || target == null || !target.IsAlive)
                 return SkillUseResult.Failed(SkillUseFailure.NoEffect);
 
             cast.Consumed = true;
-            var context = CreateContext(cast.Definition, target, cast.Direction, cast.Position, cast.RuntimeValues);
+            var context = CreateContext(cast.Definition, target, cast.Direction, cast.Position,
+                cast.RuntimeValues, impactPosition);
             if (cast.Definition.Effect is not DamageSkillEffectDefinition)
-                ApplyProjectileDamage(cast, target);
+                ApplyProjectileDamage(cast, target, impactPosition);
             cast.Definition.Effect.Apply(context);
             _states[cast.Definition.SkillId].StartDuration(cast.Definition.Duration);
             return SkillUseResult.Succeeded();
         }
 
-        private void ApplyProjectileDamage(PreparedSkillCast cast, IDamageable target)
+        private void ApplyProjectileDamage(PreparedSkillCast cast, IDamageable target, Vector2? impactPosition)
         {
             var values = cast.RuntimeValues;
             var tags = cast.Definition.ProjectileDamageTags;
@@ -125,7 +127,7 @@ namespace LetterHunter.Skills
 
             _combat.ApplyDamage(new DamageRequest(_owner, target, _owner.Stats.AttackPower,
                 lines, cast.Definition.SkillId, tags, cast.Definition.ImpactProfile,
-                cast.Direction));
+                cast.Direction, impactPosition: impactPosition));
         }
 
         public void Tick(float deltaTime)
@@ -158,9 +160,9 @@ namespace LetterHunter.Skills
             CreateContext(definition, target, direction, _owner.Transform.position, GetRuntimeValues(definition));
 
         private SkillContext CreateContext(SkillDefinition definition, IDamageable target, Vector2 direction,
-            Vector2 position, SkillRuntimeValues runtimeValues) =>
+            Vector2 position, SkillRuntimeValues runtimeValues, Vector2? impactPosition = null) =>
             new(_owner, target, definition, _combat, _buffs, _empower, _autoAttack, _targets,
-                runtimeValues, position, direction);
+                runtimeValues, position, direction, impactPosition);
     }
 
     public sealed class PreparedSkillCast

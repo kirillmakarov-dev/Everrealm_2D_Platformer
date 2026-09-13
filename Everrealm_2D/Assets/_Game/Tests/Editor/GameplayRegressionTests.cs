@@ -107,6 +107,7 @@ namespace LetterHunter.Tests
 
             Assert.That(result.AppliedSuccessfully, Is.True);
             Assert.That(result.WasCritical, Is.True);
+            Assert.That(result.Attacker, Is.SameAs(attacker));
             Assert.That(result.FinalDamage, Is.EqualTo(18f).Within(0.001f));
             Assert.That(result.LinesCount, Is.EqualTo(2));
             Assert.That(result.SourceSkillId, Is.EqualTo("fire_spin"));
@@ -559,6 +560,35 @@ namespace LetterHunter.Tests
             targetObject.transform.position = new Vector3(2f, 0f, 0f);
             Physics2D.SyncTransforms();
             Assert.That((bool)InvokePrivate(patrol, "IsWithinTargetVerticalRange", targetObject.transform, targetCollider), Is.True);
+        }
+
+        [Test]
+        public void EnemyPatrol_ProvokeChasesAttackerAndStopsInsideApproachRange()
+        {
+            var enemyObject = new GameObject("Provoked enemy");
+            _objects.Add(enemyObject);
+            var body = enemyObject.AddComponent<Rigidbody2D>();
+            enemyObject.AddComponent<BoxCollider2D>();
+            var patrol = enemyObject.AddComponent<EnemyPatrolAI2D>();
+
+            var targetObject = new GameObject("Attacking player");
+            _objects.Add(targetObject);
+            targetObject.transform.position = new Vector2(4f, 0f);
+            var targetCollider = targetObject.AddComponent<BoxCollider2D>();
+            var attacker = new TestCombatActor(targetObject.transform,
+                new CombatStats(CombatStatsData.Default));
+
+            Physics2D.SyncTransforms();
+            Assert.That(patrol.ProvokeTarget(attacker, targetCollider), Is.True);
+            InvokePrivate(patrol, "FixedUpdate");
+            Assert.That(body.linearVelocity.x, Is.GreaterThan(0f),
+                "A hit should immediately make the enemy chase its attacker.");
+
+            targetObject.transform.position = new Vector2(0.4f, 0f);
+            Physics2D.SyncTransforms();
+            InvokePrivate(patrol, "FixedUpdate");
+            Assert.That(body.linearVelocity.x, Is.Zero,
+                "The enemy should stop once its collider reaches the configured attack approach distance.");
         }
 
         [Test]

@@ -21,4 +21,4 @@ MonoBehaviour:
   price: 18
   parentNodes:
   - {fileID: 11400000, guid: 071679cb849bcee44869dac308aa9ddd, type: 2}
-  uiPosition: {x: 0.39156094, y: 0.71742785}
+  uiPosition: {x: 0.38505685, y: 0.71742785}

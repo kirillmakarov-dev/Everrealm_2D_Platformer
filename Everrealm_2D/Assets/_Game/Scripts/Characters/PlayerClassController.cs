@@ -193,9 +193,9 @@ namespace LetterHunter.Characters
             var resolvedLifetime = skill.ProjectileLifetime > 0f ? skill.ProjectileLifetime : lifetime;
             var launchedProjectile = projectile;
             projectile.Launch(this, cast, resolvedSpeed, resolvedLifetime,
-                target =>
+                (target, impactPosition) =>
                 {
-                    var hitResult = _skillService.ResolveProjectileHit(cast, target);
+                    var hitResult = _skillService.ResolveProjectileHit(cast, target, impactPosition);
                     if (hitResult.Success)
                         soundManager?.PlayImpact(skill.ProjectileImpactSound != null
                             ? skill.ProjectileImpactSound
@@ -219,9 +219,9 @@ namespace LetterHunter.Characters
             projectile = instance.GetComponent<SkillProjectile2D>() ?? instance.AddComponent<SkillProjectile2D>();
             var launchedProjectile = projectile;
             projectile.Launch(this, FacingDirection, speed, lifetime,
-                target =>
+                (target, impactPosition) =>
                 {
-                    var result = _autoAttackService.ExecuteOnTarget(FacingDirection, target);
+                    var result = _autoAttackService.ExecuteOnTarget(FacingDirection, target, impactPosition);
                     if (result.AppliedSuccessfully)
                         soundManager?.PlayImpact(launchedProjectile.ImpactSound);
                 },

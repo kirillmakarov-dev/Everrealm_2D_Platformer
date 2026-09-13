@@ -120,16 +120,49 @@ namespace LetterHunter.Tests.EditMode
             var service = CreateService(owner);
             service.Register(skill);
 
+            var impactPosition = new Vector2(3.5f, 1.25f);
             Assert.That(service.TryPrepareProjectile(skill.SkillId, Vector2.right, Vector2.zero, out var cast).Success,
                 Is.True);
-            Assert.That(service.ResolveProjectileHit(cast, target).Success, Is.True);
+            Assert.That(service.ResolveProjectileHit(cast, target, impactPosition).Success, Is.True);
 
             Assert.That(target.Stats.CurrentHealth, Is.EqualTo(92f).Within(.001f));
+            Assert.That(target.LastDamageResult.HasImpactPosition, Is.True);
+            Assert.That(target.LastDamageResult.ImpactPosition, Is.EqualTo(impactPosition));
 
             Object.DestroyImmediate(skill);
             Object.DestroyImmediate(effect);
             Object.DestroyImmediate(ownerObject);
             Object.DestroyImmediate(targetObject);
+        }
+
+        [Test]
+        public void BasicProjectileHit_PreservesImpactPosition()
+        {
+            var ownerObject = new GameObject("Owner");
+            var targetObject = new GameObject("Target");
+            try
+            {
+                var owner = ownerObject.AddComponent<TestActor>();
+                var target = targetObject.AddComponent<TestActor>();
+                owner.Initialize();
+                target.Initialize();
+
+                var combat = new CombatService();
+                var buffs = new BuffService();
+                var autoAttack = new AutoAttackService(owner, combat, new EmptyTargetProvider(),
+                    new EmpowerState(), buffs, new PassiveService(owner));
+                var impactPosition = new Vector2(2.75f, 1.4f);
+
+                var result = autoAttack.ExecuteOnTarget(Vector2.right, target, impactPosition);
+
+                Assert.That(result.ImpactPosition, Is.EqualTo(impactPosition));
+                Assert.That(target.LastDamageResult.ImpactPosition, Is.EqualTo(impactPosition));
+            }
+            finally
+            {
+                Object.DestroyImmediate(ownerObject);
+                Object.DestroyImmediate(targetObject);
+            }
         }
 
         private static SkillService CreateService(TestActor owner)
@@ -169,10 +202,15 @@ namespace LetterHunter.Tests.EditMode
         {
             public Transform Transform => transform;
             public CombatStats Stats { get; private set; }
+            public DamageResult LastDamageResult { get; private set; }
             public CharacterClassType ClassType => CharacterClassType.Warrior;
             public bool IsAlive => Stats != null && Stats.CurrentHealth > 0f;
             public void Initialize() => Stats = new CombatStats(CombatStatsData.Default);
-            public void ReceiveDamage(DamageResult result) => Stats.TakeDamage(result.FinalDamage);
+            public void ReceiveDamage(DamageResult result)
+            {
+                LastDamageResult = result;
+                Stats.TakeDamage(result.FinalDamage);
+            }
         }
     }
 }

@@ -13,5 +13,7 @@ MonoBehaviour:
   m_Name: ItemDatabase
   m_EditorClassIdentifier: LetterHunter.Runtime::LetterHunter.Items.ItemDatabase
   items:
+  - {fileID: 11400000, guid: 4a6d3e3c2f4a4bc99d3e9f2a6a3c4b53, type: 2}
+  - {fileID: 11400000, guid: 4b7e4d4d3f5b4cdaae4fa3b7b4d5c64f, type: 2}
   - {fileID: 11400000, guid: 6f6fe7d1ed233c040930e6c0808fcf45, type: 2}
   - {fileID: 11400000, guid: d0cf508e098ccda4b9ba91270d384417, type: 2}

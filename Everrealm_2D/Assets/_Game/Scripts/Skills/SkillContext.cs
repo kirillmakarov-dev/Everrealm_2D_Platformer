@@ -9,12 +9,13 @@ namespace LetterHunter.Skills
         public SkillContext(ICombatActor caster, IDamageable target, SkillDefinition definition,
             ICombatService combatService, BuffService buffService, EmpowerState empowerState,
             AutoAttackService autoAttackService, ITargetProvider targetProvider, SkillRuntimeValues runtimeValues,
-            Vector2 position, Vector2 direction)
+            Vector2 position, Vector2 direction, Vector2? impactPosition = null)
         {
             Caster = caster; Target = target; SkillDefinition = definition; CombatService = combatService;
             BuffService = buffService; EmpowerState = empowerState; AutoAttackService = autoAttackService;
             TargetProvider = targetProvider; Position = position; Direction = direction;
             RuntimeValues = runtimeValues;
+            ImpactPosition = impactPosition;
         }
 
         public ICombatActor Caster { get; }
@@ -28,6 +29,7 @@ namespace LetterHunter.Skills
         public SkillRuntimeValues RuntimeValues { get; }
         public Vector2 Position { get; }
         public Vector2 Direction { get; }
+        public Vector2? ImpactPosition { get; }
     }
 
     public interface ISkillEffect { void Apply(SkillContext context); }

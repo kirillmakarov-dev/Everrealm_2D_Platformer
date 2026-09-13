@@ -94,6 +94,62 @@ namespace LetterHunter.Tests.EditMode
         }
 
         [Test]
+        public void ShopPurchaseAndConsumableBarAssignment_PersistAcrossRestart()
+        {
+            var healthPotion = CreateItem("health_potion", 20, itemType: ItemType.Consumable);
+            var energyPotion = CreateItem("mana_potion", 20, itemType: ItemType.Consumable);
+            var itemDatabase = CreateItemDatabase(healthPotion, energyPotion);
+            var unusedSkill = CreateSkill("unused_skill", "Unused");
+            var skillDatabase = CreateSkillDatabase(unusedSkill);
+            var catalog = ScriptableObject.CreateInstance<ShopCatalogDefinition>();
+            var catalogSo = new SerializedObject(catalog);
+            var entries = catalogSo.FindProperty("entries");
+            entries.arraySize = 2;
+            entries.GetArrayElementAtIndex(0).FindPropertyRelative("item").objectReferenceValue = healthPotion;
+            entries.GetArrayElementAtIndex(0).FindPropertyRelative("buyPrice").intValue = 20;
+            entries.GetArrayElementAtIndex(1).FindPropertyRelative("item").objectReferenceValue = energyPotion;
+            entries.GetArrayElementAtIndex(1).FindPropertyRelative("buyPrice").intValue = 18;
+            catalogSo.ApplyModifiedPropertiesWithoutUndo();
+
+            var saveFileName = $"letter-hunter-potion-save-test-{System.Guid.NewGuid():N}.json";
+            var savePath = Path.Combine(Application.persistentDataPath, saveFileName);
+            var source = CreatePlayerSaveObject(itemDatabase, skillDatabase, out var sourceWallet,
+                out var sourceInventory, out _, saveFileName);
+            sourceWallet.SetGold(100);
+            var sourceBar = CreateSkillBar(sourceInventory);
+            AssignSkillBar(source, sourceBar);
+            InvokeStart(source);
+
+            var shop = new ShopService(sourceInventory.RuntimeInventory, sourceWallet, catalog);
+            Assert.That(shop.TryBuy(healthPotion, 2).Success, Is.True);
+            Assert.That(shop.TryBuy(energyPotion, 3).Success, Is.True);
+            Assert.That(sourceBar.SetConsumableSlot(3, healthPotion), Is.True);
+
+            var restarted = CreatePlayerSaveObject(itemDatabase, skillDatabase, out _,
+                out var restoredInventory, out _, saveFileName);
+            var restoredBar = CreateSkillBar(restoredInventory);
+            AssignSkillBar(restarted, restoredBar);
+            InvokeStart(restarted);
+
+            Assert.That(restoredInventory.RuntimeInventory.Count(healthPotion), Is.EqualTo(2));
+            Assert.That(restoredInventory.RuntimeInventory.Count(energyPotion), Is.EqualTo(3));
+            Assert.That(restoredBar.GetConsumableSlot(3), Is.EqualTo(healthPotion));
+
+            if (File.Exists(savePath))
+                File.Delete(savePath);
+            Object.DestroyImmediate(source.gameObject);
+            Object.DestroyImmediate(sourceBar.gameObject);
+            Object.DestroyImmediate(restarted.gameObject);
+            Object.DestroyImmediate(restoredBar.gameObject);
+            Object.DestroyImmediate(catalog);
+            Object.DestroyImmediate(itemDatabase);
+            Object.DestroyImmediate(skillDatabase);
+            Object.DestroyImmediate(unusedSkill);
+            Object.DestroyImmediate(healthPotion);
+            Object.DestroyImmediate(energyPotion);
+        }
+
+        [Test]
         public void ResetProgress_ClearsRuntimeStateAndWritesFreshSave()
         {
             var shard = CreateItem("training_shard", 20);
@@ -318,36 +374,6 @@ namespace LetterHunter.Tests.EditMode
             Object.DestroyImmediate(skill);
         }
 
-        [Test]
-        public void AddDebugGold_UsesInspectorAmountAndPersistsIt()
-        {
-            var item = CreateItem("unused", 1);
-            var skill = CreateSkill("unused_skill", "Unused Skill");
-            var itemDatabase = CreateItemDatabase(item);
-            var skillDatabase = CreateSkillDatabase(skill);
-            var saveFileName = $"letter-hunter-debug-gold-test-{System.Guid.NewGuid():N}.json";
-            var savePath = Path.Combine(Application.persistentDataPath, saveFileName);
-            var save = CreatePlayerSaveObject(itemDatabase, skillDatabase, out var wallet, out _, out _, saveFileName);
-            var saveSo = new SerializedObject(save);
-            saveSo.FindProperty("debugGoldAmount").intValue = 275;
-            saveSo.ApplyModifiedPropertiesWithoutUndo();
-
-            InvokeStart(save);
-            save.AddDebugGold();
-
-            Assert.That(wallet.Gold, Is.EqualTo(275));
-            var savedData = JsonUtility.FromJson<GameSaveData>(File.ReadAllText(savePath));
-            Assert.That(savedData.gold, Is.EqualTo(275));
-
-            if (File.Exists(savePath))
-                File.Delete(savePath);
-            Object.DestroyImmediate(save.gameObject);
-            Object.DestroyImmediate(itemDatabase);
-            Object.DestroyImmediate(skillDatabase);
-            Object.DestroyImmediate(item);
-            Object.DestroyImmediate(skill);
-        }
-
         private static PlayerSkillTreeController AttachSkillTree(PlayerSaveController save,
             ProfessionDefinitionSO profession)
         {
@@ -424,13 +450,31 @@ namespace LetterHunter.Tests.EditMode
             return save;
         }
 
-        private static ItemDatabase CreateItemDatabase(ItemDefinition item)
+        private static SkillBarPresenter CreateSkillBar(PlayerInventory inventory)
+        {
+            var barObject = new GameObject("TestSkillBar");
+            var bar = barObject.AddComponent<SkillBarPresenter>();
+            var so = new SerializedObject(bar);
+            so.FindProperty("inventory").objectReferenceValue = inventory;
+            so.ApplyModifiedPropertiesWithoutUndo();
+            return bar;
+        }
+
+        private static void AssignSkillBar(PlayerSaveController save, SkillBarPresenter bar)
+        {
+            var so = new SerializedObject(save);
+            so.FindProperty("skillBar").objectReferenceValue = bar;
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static ItemDatabase CreateItemDatabase(params ItemDefinition[] sourceItems)
         {
             var database = ScriptableObject.CreateInstance<ItemDatabase>();
             var so = new SerializedObject(database);
             var items = so.FindProperty("items");
-            items.arraySize = 1;
-            items.GetArrayElementAtIndex(0).objectReferenceValue = item;
+            items.arraySize = sourceItems.Length;
+            for (var i = 0; i < sourceItems.Length; i++)
+                items.GetArrayElementAtIndex(i).objectReferenceValue = sourceItems[i];
             so.ApplyModifiedPropertiesWithoutUndo();
             return database;
         }
@@ -446,13 +490,15 @@ namespace LetterHunter.Tests.EditMode
             return database;
         }
 
-        private static ItemDefinition CreateItem(string itemId, int maxStack, int sellPrice = 0)
+        private static ItemDefinition CreateItem(string itemId, int maxStack, int sellPrice = 0,
+            ItemType itemType = ItemType.Material)
         {
             var item = ScriptableObject.CreateInstance<ItemDefinition>();
             var so = new SerializedObject(item);
             so.FindProperty("itemId").stringValue = itemId;
             so.FindProperty("displayName").stringValue = itemId;
             so.FindProperty("maxStack").intValue = maxStack;
+            so.FindProperty("itemType").enumValueIndex = (int)itemType;
             so.FindProperty("sellPrice").intValue = sellPrice;
             so.FindProperty("canSell").boolValue = sellPrice > 0;
             so.ApplyModifiedPropertiesWithoutUndo();

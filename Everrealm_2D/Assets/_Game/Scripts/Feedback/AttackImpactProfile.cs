@@ -15,6 +15,7 @@ namespace LetterHunter.Feedback
 
         [Header("Hit VFX")]
         [SerializeField] private GameObject hitEffectPrefab;
+        [Tooltip("Fallback offset from the target pivot when the attack has no collision point.")]
         [SerializeField] private Vector2 hitEffectOffset = new(0f, 0.75f);
         [SerializeField] private bool flipEffectByAttackerDirection = true;
         [Min(0.05f), SerializeField] private float effectLifetime = 1.25f;

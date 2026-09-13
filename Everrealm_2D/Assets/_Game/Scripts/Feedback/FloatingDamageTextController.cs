@@ -41,7 +41,9 @@ namespace LetterHunter.Feedback
 
             if (profile != null)
             {
-                var effectPosition = transform.TransformPoint(profile.HitEffectOffset);
+                var effectPosition = result.ImpactPosition.HasValue
+                    ? (Vector3)result.ImpactPosition.Value
+                    : transform.TransformPoint(profile.HitEffectOffset);
                 ImpactEffectPool.Play(profile, effectPosition, result.AttackDirection);
 
                 if (profile.LogFeedback)

@@ -30,9 +30,6 @@ namespace LetterHunter.Save
         [SerializeField] private bool loadOnStart = true;
         [SerializeField] private bool autoSaveProgress = true;
 
-        [Header("Inspector Debug Tools")]
-        [Min(1), SerializeField] private int debugGoldAmount = 100;
-
         private bool _started;
         private bool _subscribed;
         private bool _isApplyingSave;
@@ -136,6 +133,7 @@ namespace LetterHunter.Save
             CaptureInventory(data);
             CaptureSkillTree(data);
             CaptureSkillLoadout(data);
+            CaptureConsumableSlots(data);
             return data;
         }
 
@@ -158,6 +156,7 @@ namespace LetterHunter.Save
                 RestoreInventory(data);
                 RestoreSkillTree(data);
                 RestoreSkillLoadout(data);
+                RestoreConsumableSlots(data);
                 skillBar?.Rebuild();
             }
             finally
@@ -166,7 +165,6 @@ namespace LetterHunter.Save
             }
         }
 
-        [ContextMenu("Save Game")]
         public void SaveToDisk()
         {
             var json = JsonUtility.ToJson(Capture(), true);
@@ -177,13 +175,11 @@ namespace LetterHunter.Save
             Debug.Log($"Saved game to {SavePath}", this);
         }
 
-        [ContextMenu("Load Game")]
         public void LoadFromDisk()
         {
             LoadFromDisk(true);
         }
 
-        [ContextMenu("Reset Progress")]
         public void ResetProgress()
         {
             if (File.Exists(SavePath))
@@ -200,31 +196,22 @@ namespace LetterHunter.Save
             Debug.Log($"Reset progress and saved fresh state to {SavePath}", this);
         }
 
-        [ContextMenu("Reset Skills Only")]
         public void ResetSkills()
         {
             ApplyWithoutAutoSave(ResetSkillsRuntime);
             SaveToDisk();
         }
 
-        [ContextMenu("Reset Inventory Only")]
         public void ResetInventory()
         {
             ApplyWithoutAutoSave(() => inventory?.ResetToStartingItems());
             SaveToDisk();
         }
 
-        [ContextMenu("Reset Gold Only")]
         public void ResetGold()
         {
             ApplyWithoutAutoSave(() => wallet?.ResetToStartingGold());
             SaveToDisk();
-        }
-
-        [ContextMenu("Add Debug Gold")]
-        public void AddDebugGold()
-        {
-            AddDebugGold(Mathf.Max(1, debugGoldAmount));
         }
 
         private void LoadFromDisk(bool logMissingFile)
@@ -298,6 +285,25 @@ namespace LetterHunter.Save
                     slotIndex = slot.SlotIndex,
                     skillId = slot.Skill != null ? slot.Skill.SkillId : string.Empty,
                     isExplicitEmpty = slot.Skill == null
+                });
+            }
+        }
+
+        private void CaptureConsumableSlots(GameSaveData data)
+        {
+            if (skillBar == null)
+                return;
+
+            for (var i = 0; i < skillBar.ConsumableSlotCount; i++)
+            {
+                var item = skillBar.GetConsumableSlot(i);
+                if (item == null)
+                    continue;
+
+                data.consumableBarSlots.Add(new ConsumableSlotSaveData
+                {
+                    slotIndex = i,
+                    itemId = item.ItemId
                 });
             }
         }
@@ -379,6 +385,24 @@ namespace LetterHunter.Save
             skillLoadout.SetSlots(bindings);
         }
 
+        private void RestoreConsumableSlots(GameSaveData data)
+        {
+            if (skillBar == null)
+                return;
+
+            skillBar.ClearConsumableSlots(false);
+            foreach (var savedSlot in data.consumableBarSlots ?? new List<ConsumableSlotSaveData>())
+            {
+                if (savedSlot == null || string.IsNullOrWhiteSpace(savedSlot.itemId) ||
+                    itemDatabase == null || !itemDatabase.TryGetItem(savedSlot.itemId, out var item) ||
+                    item.ItemType != ItemType.Consumable || inventory == null ||
+                    inventory.RuntimeInventory.Count(item) <= 0)
+                    continue;
+
+                skillBar.SetConsumableSlot(savedSlot.slotIndex, item, false);
+            }
+        }
+
         private void SubscribeAutoSave()
         {
             if (_subscribed || !autoSaveProgress)
@@ -392,6 +416,8 @@ namespace LetterHunter.Save
                 skillTree.ProgressionCommitted += OnProgressionCommitted;
             if (skillLoadout != null)
                 skillLoadout.LoadoutChanged += OnProgressionCommitted;
+            if (skillBar != null)
+                skillBar.ConsumableSlotsChanged += OnProgressionCommitted;
             _subscribed = true;
         }
 
@@ -408,6 +434,8 @@ namespace LetterHunter.Save
                 skillTree.ProgressionCommitted -= OnProgressionCommitted;
             if (skillLoadout != null)
                 skillLoadout.LoadoutChanged -= OnProgressionCommitted;
+            if (skillBar != null)
+                skillBar.ConsumableSlotsChanged -= OnProgressionCommitted;
             _subscribed = false;
         }
 

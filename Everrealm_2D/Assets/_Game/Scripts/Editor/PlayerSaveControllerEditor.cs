@@ -6,20 +6,6 @@ using UnityEngine;
 
 namespace LetterHunter.Editor
 {
-    [CustomEditor(typeof(PlayerSaveController))]
-    public sealed class PlayerSaveControllerEditor : UnityEditor.Editor
-    {
-        private int _gold = 100;
-        private int _level = 1;
-        private string _status;
-        public override bool RequiresConstantRepaint() => Application.isPlaying;
-        public override void OnInspectorGUI()
-        {
-            DrawDefaultInspector();
-            PlayerSaveTools.Draw((PlayerSaveController)target, ref _gold, ref _level, ref _status);
-        }
-    }
-
     public sealed class PlayerSaveInspectorWindow : EditorWindow
     {
         private PlayerSaveController _player;
